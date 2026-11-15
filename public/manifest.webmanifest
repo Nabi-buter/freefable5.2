@@ -1,0 +1,11 @@
+{
+  "name": "CINDERWAKE",
+  "short_name": "Cinderwake",
+  "description": "Light the beacons. Wake the dawn. A 3D action roguelite.",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#070914",
+  "theme_color": "#0a0d1c",
+  "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
