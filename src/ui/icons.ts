@@ -1,0 +1,89 @@
+/** Hand-drawn 24x24 line icons. `F` parts are filled, the rest stroked with currentColor. */
+const F = 'fill="currentColor" stroke="none"';
+const N = 'fill="none"';
+
+const I: Record<string, string> = {
+  // ---------------------------------------------------------------- weapons
+  ember: `<path ${F} d="M12 2c1 4 5.5 6 5.5 11.5a5.5 5.5 0 0 1-11 0c0-2.2 1-3.6 2-5.5.6 2 1.4 3 2.5 3.2C11.6 8 10.8 5 12 2z"/><path fill="#0b0f22" fill-opacity=".45" stroke="none" d="M12 12.5c.8 1.6 2.2 2.4 2.2 4.3a2.2 2.2 0 0 1-4.4 0c0-1.7 1.4-2.6 2.2-4.3z"/>`,
+  wisps: `<circle ${N} cx="12" cy="12" r="7.5" stroke-dasharray="1.5 3.2"/><circle ${F} cx="12" cy="4.5" r="2.6"/><circle ${F} cx="18.5" cy="15.8" r="2.6"/><circle ${F} cx="5.5" cy="15.8" r="2.6"/>`,
+  nova: `<circle ${F} cx="12" cy="12" r="3.2"/><path ${N} d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.8 2.8M16.2 16.2 19 19M19 5l-2.8 2.8M7.8 16.2 5 19"/>`,
+  arc: `<path ${F} d="M13.5 1.5 4.5 13.5h5.2L8.2 22.5l10-12.8h-5.4z"/>`,
+  starfall: `<path ${F} d="m9 11 1.5 3.4 3.7.4-2.8 2.5.8 3.7L9 19.1 5.8 21l.8-3.7-2.8-2.5 3.7-.4z"/><path ${N} d="M13 9l7-7M16.5 12.5 21 8M12 5l3-3"/>`,
+  lance: `<path ${N} stroke-width="3.2" d="M4 20 16.5 7.5"/><path ${F} d="M21.5 2.5 13 5l6 6z"/><path ${N} d="M3 14l2 2M8 19l-2-2"/>`,
+  frost: `<path ${N} d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M12 5.5 9.8 3.6M12 5.5l2.2-1.9M12 18.5l-2.2 1.9M12 18.5l2.2 1.9M6.3 8.7 3.6 9.5M6.3 8.7 5.6 6M17.7 15.3l2.7-.8M17.7 15.3l.7 2.7M6.3 15.3l-2.7-.8M6.3 15.3 5.6 18M17.7 8.7l2.7.8M17.7 8.7l.7-2.7"/>`,
+  darts: `<path ${F} d="M21.5 2.5 15 4.6l1.8 1.8-4 4 1.8 1.8 4-4 1.8 1.8z"/><path ${F} d="M13 11 8.4 12.4l1.3 1.3-3 3 1.4 1.4 3-3 1.3 1.3z" opacity=".75"/><path ${N} d="M3 21l2.5-2.5" opacity=".6"/>`,
+  trail: `<path ${F} d="M6 21c-2.2 0-3.5-1.6-3.5-3.4 0-2.4 2-3.2 2.4-5.6 1.6 1.2 2.4 2.4 2.4 3.8.8-.8 1-1.8 1-2.8 1.6 1.4 2.2 3 2.2 4.6C10.5 19.6 9 21 6 21z"/><path ${F} d="M16 21c-2 0-3.2-1.5-3.2-3.2 0-3 3-4.4 3-8.3 2.8 2.2 4.7 4.8 4.7 8 0 2-1.6 3.5-4.5 3.5z" opacity=".8"/>`,
+  aura: `<circle ${F} cx="12" cy="12" r="2.8"/><circle ${N} cx="12" cy="12" r="6.2"/><circle ${N} cx="12" cy="12" r="10" opacity=".5" stroke-dasharray="3 2.5"/>`,
+  glaive: `<path ${F} d="M12 1 14.600 9.400 23 12l-8.400 2.600L12 23l-2.600-8.400L1 12l8.400-2.600z"/><path ${F} d="m5 5 5.500 3.500L7 12zM19 5l-3.500 5.500L12 7zM19 19l-5.500-3.500L17 12zM5 19l3.500-5.500L12 17z" opacity=".55"/><circle fill="#0b0f22" fill-opacity=".55" stroke="none" cx="12" cy="12" r="2.200"/>`,
+  // ---------------------------------------------------------------- passives
+  vigor: `<path ${F} d="M12 21S3 15.2 3 8.8A4.8 4.8 0 0 1 12 6.300 4.800 4.800 0 0 1 21 8.800C21 15.200 12 21 12 21z"/>`,
+  mending: `<circle ${N} cx="12" cy="12" r="9.5"/><path ${F} d="M10.300 6h3.400v4.300H18v3.400h-4.300V18h-3.400v-4.300H6v-3.400h4.300z"/>`,
+  plating: `<path ${F} d="M12 2 4 5v6.500c0 5 3.400 8.600 8 10.500 4.600-1.900 8-5.500 8-10.500V5z"/><path fill="#0b0f22" fill-opacity=".4" stroke="none" d="M12 4.800v14.400c3-1.600 5.200-4.200 5.200-7.700V6.800z"/>`,
+  swift: `<path ${N} stroke-width="2.6" d="m4 6 6 6-6 6M12 6l6 6-6 6"/>`,
+  might: `<path ${F} d="M14.500 2 22 2l0 7.500-9.500 9.500-2-2-3 3-2.500-.5L4.500 17l3-3-2-2z"/><path ${N} d="M3 21l3.200-3.200"/>`,
+  haste: `<path ${F} d="M6 2h12v3.500L13.800 12 18 18.500V22H6v-3.500L10.200 12 6 5.500z"/><path fill="#0b0f22" fill-opacity=".45" stroke="none" d="M8.500 4.500h7L12 9.800z"/>`,
+  reach: `<path ${N} stroke-width="2.200" d="M9 9 3 3m0 5V3h5M15 9l6-6m-5 0h5v5M9 15l-6 6m5 0H3v-5M15 15l6 6m0-5v5h-5"/><circle ${F} cx="12" cy="12" r="2"/>`,
+  multishot: `<path ${N} stroke-width="2.200" d="M3 6h13M3 12h16M3 18h13"/><path ${F} d="m15 2.500 6 3.500-6 3.500zM18 8.500l5 3.500-5 3.500zM15 14.500l6 3.500-6 3.500z"/>`,
+  focus: `<circle ${N} cx="12" cy="12" r="7.500"/><path ${N} d="M12 1.500v5M12 17.500v5M1.500 12h5M17.500 12h5"/><circle ${F} cx="12" cy="12" r="2"/>`,
+  magnet: `<path ${N} stroke-width="4.200" stroke-linecap="butt" d="M6 3v9a6 6 0 0 0 12 0V3"/><path stroke="#0b0f22" stroke-opacity=".55" ${N} stroke-width="4.200" stroke-linecap="butt" d="M6 3v3.200M18 3v3.200"/>`,
+  wisdom: `<path ${N} d="M1.500 12S5.500 5 12 5s10.500 7 10.500 7S18.500 19 12 19 1.500 12 1.500 12z"/><circle ${F} cx="12" cy="12" r="3.400"/>`,
+  velocity: `<path ${F} d="M22 12 12 4.500v4.800H9v5.400h3v4.800z"/><path ${N} d="M2 8h4M1 12h5M2 16h4"/>`,
+  fortune: `<circle ${F} cx="8.200" cy="8.200" r="4.200"/><circle ${F} cx="15.800" cy="8.200" r="4.200"/><circle ${F} cx="8.200" cy="15.800" r="4.200"/><circle ${F} cx="15.800" cy="15.800" r="4.200"/><path ${N} d="M12 13l3.500 9" stroke-width="1.800"/>`,
+  // ---------------------------------------------------------------- relics
+  phoenix: `<path ${F} d="M12 22c0-5 .5-7.500 2.500-10C17 9 20.500 8 22 3c-3 1.500-5.500 1.500-8 3C12.500 7 12 8.500 12 10c0-1.500-.5-3-2-4-2.500-1.500-5-1.500-8-3 1.500 5 5 6 7.500 9C11.500 14.500 12 17 12 22z"/>`,
+  twinflame: `<path ${F} d="M8 3c.7 3 3.500 4.500 3.500 8.200A3.600 3.600 0 0 1 8 15a3.600 3.600 0 0 1-3.500-3.800C4.500 9 6.800 7 8 3z"/><path ${F} d="M16 9c.7 3 3.500 4.500 3.500 8.200A3.600 3.600 0 0 1 16 21a3.600 3.600 0 0 1-3.500-3.800C12.500 15 14.800 13 16 9z"/>`,
+  bloodember: `<path ${F} d="M12 2c3 5 7 8 7 12.500a7 7 0 0 1-14 0C5 10 9 7 12 2z"/><circle fill="#0b0f22" fill-opacity=".4" stroke="none" cx="10" cy="15" r="2.200"/>`,
+  stormheart: `<path ${N} d="M12 21S3 15.200 3 8.800A4.800 4.800 0 0 1 12 6.300 4.800 4.800 0 0 1 21 8.800C21 15.200 12 21 12 21z"/><path ${F} d="M13 7 8.500 13h3l-1 5 5-6.500h-3z"/>`,
+  glasslantern: `<path ${N} d="M9 4h6M12 2v2M8 7h8l1.500 3v8L16 21H8l-1.500-3v-8z"/><path ${F} d="M12 10c.5 1.500 2 2.200 2 4a2 2 0 0 1-4 0c0-1.800 1.500-2.500 2-4z"/>`,
+  secondwind: `<path ${N} stroke-width="2.200" d="M2 8h11a3 3 0 1 0-3-3M2 12h16a3 3 0 1 1-3 3M2 16h8a2.500 2.500 0 1 1-2.500 2.500"/>`,
+  emberbloom: `<circle ${F} cx="12" cy="12" r="2.800"/><ellipse ${F} cx="12" cy="5" rx="2.600" ry="3.600"/><ellipse ${F} cx="12" cy="19" rx="2.600" ry="3.600"/><ellipse ${F} cx="5" cy="12" rx="3.600" ry="2.600"/><ellipse ${F} cx="19" cy="12" rx="3.600" ry="2.600"/>`,
+  frozencore: `<path ${N} d="M12 2 20.700 7v10L12 22 3.300 17V7z"/><path ${F} d="M12 6.500 16.800 9.300v5.400L12 17.500 7.200 14.700V9.300z"/>`,
+  gildedwick: `<path ${F} d="M8 12h8v9.500H8z"/><path ${N} d="M12 12V9.500"/><path ${F} d="M12 2c.6 2 2.400 3 2.400 5.200a2.400 2.400 0 0 1-4.800 0C9.600 5 11.400 4 12 2z"/><path ${N} d="M6 21.500h12"/>`,
+  wideglow: `<circle ${F} cx="12" cy="12" r="4.200"/><path ${N} stroke-width="2.200" d="M12 1.500v3M12 19.500v3M1.500 12h3M19.500 12h3M4.600 4.600l2.100 2.100M17.300 17.300l2.100 2.100M19.400 4.600l-2.100 2.100M6.700 17.300l-2.100 2.100"/>`,
+  quickening: `<path ${N} stroke-width="2.800" d="m5 12 7-7 7 7M5 19l7-7 7 7"/>`,
+  beaconbond: `<path ${F} d="M9.500 10h5l1.500 11.500H8z"/><path ${F} d="M7.500 7.500h9l-1 2.500h-7z"/><path ${F} d="M12 1c.5 1.500 1.800 2.200 1.800 3.800a1.800 1.800 0 0 1-3.600 0C10.200 3.200 11.500 2.500 12 1z"/><path ${N} d="M4 5.500 2 4M20 5.500 22 4M4.500 9H2M19.500 9H22"/>`,
+  titanash: `<path ${F} d="M2 20 9 6l3.500 6L15 8.500 22 20z"/><path fill="#0b0f22" fill-opacity=".4" stroke="none" d="M9 6l1.800 3-1.800 2-1.600-1.800z"/>`,
+  huntersmark: `<circle ${N} cx="12" cy="12" r="9"/><circle ${N} cx="12" cy="12" r="5"/><circle ${F} cx="12" cy="12" r="1.800"/><path ${N} d="M12 1v4M12 19v4M1 12h4M19 12h4"/>`,
+  afterimage: `<circle ${F} cx="15.500" cy="12" r="6" /><circle ${N} cx="10" cy="12" r="6" opacity=".7"/><circle ${N} cx="5.500" cy="12" r="4.500" opacity=".4"/>`,
+  starmoss: `<path ${F} d="M20.500 3.500C10 3.500 4 9 4 17c0 1 .200 2 .500 3 2-8 6.500-11.500 12-13-4.500 2.500-8 6.500-9.500 13.500 8.500.500 13.500-6 13.500-17z"/>`,
+  // ---------------------------------------------------------------- characters
+  kindler: `<path ${F} d="M12 2c1 4 5.500 6 5.500 11.500a5.500 5.500 0 0 1-11 0c0-2.200 1-3.600 2-5.500.6 2 1.400 3 2.500 3.200C11.600 8 10.800 5 12 2z"/>`,
+  stormcaller: `<path ${F} d="M13.500 1.500 4.500 13.500h5.200L8.200 22.500l10-12.800h-5.400z"/>`,
+  warden: `<path ${F} d="M12 2 4 5v6.500c0 5 3.400 8.600 8 10.500 4.600-1.900 8-5.500 8-10.500V5z"/>`,
+  frostweaver: `<path ${N} stroke-width="2.200" d="M12 2v20M3.300 7l17.400 10M3.300 17 20.700 7"/>`,
+  ashwalker: `<path ${F} d="M8.500 2.500c2 0 3.300 1.700 3.300 4.200 0 2.200-1 3.800-1 5.300 0 1.400.700 2.300.700 3.600 0 1.600-1.200 2.900-3 2.900s-3-1.300-3-2.900c0-1.300.700-2.200.700-3.600 0-1.500-1-3.100-1-5.300 0-2.500 1.300-4.200 3.300-4.200z" transform="rotate(-14 12 12)"/><circle ${F} cx="17.500" cy="9" r="1.700"/><circle ${F} cx="20" cy="13.500" r="1.400"/><circle ${F} cx="17.800" cy="17.800" r="1.200"/>`,
+  // ---------------------------------------------------------------- ui
+  heart: `<path ${F} d="M12 21S3 15.200 3 8.800A4.800 4.800 0 0 1 12 6.300 4.800 4.800 0 0 1 21 8.800C21 15.200 12 21 12 21z"/>`,
+  clock: `<circle ${N} cx="12" cy="12" r="9.500"/><path ${N} d="M12 6.500V12l3.500 2.500"/>`,
+  skull: `<path ${F} d="M12 2a8.500 8.500 0 0 0-8.500 8.500c0 3 1.500 5.200 3.500 6.500v3.500h10V17c2-1.300 3.500-3.500 3.500-6.500A8.500 8.500 0 0 0 12 2zM8.500 9a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" fill-rule="evenodd"/>`,
+  cinder: `<path ${F} d="M12 2 20 9l-3 11H7L4 9z"/><path fill="#0b0f22" fill-opacity=".35" stroke="none" d="M12 2 20 9h-8z"/><path fill="#fff" fill-opacity=".35" stroke="none" d="M12 9H4l8-7z"/>`,
+  beacon: `<path ${F} d="M9.500 10h5l1.500 11.500H8z"/><path ${F} d="M7.500 7.500h9l-1 2.500h-7z"/><path ${F} d="M12 1c.5 1.500 1.800 2.200 1.800 3.800a1.800 1.800 0 0 1-3.600 0C10.200 3.200 11.500 2.500 12 1z"/>`,
+  lock: `<rect ${F} x="5" y="10.500" width="14" height="11" rx="2"/><path ${N} stroke-width="2.200" d="M8 10.500V7.500a4 4 0 0 1 8 0v3"/>`,
+  gear: `<circle ${N} cx="12" cy="12" r="3.200"/><path ${N} stroke-width="2.400" d="M12 2v3M12 19v3M2 12h3M19 12h3M4.900 4.900 7 7M17 17l2.100 2.100M19.100 4.900 17 7M7 17l-2.100 2.100"/>`,
+  pause: `<rect ${F} x="5.500" y="4" width="4.500" height="16" rx="1"/><rect ${F} x="14" y="4" width="4.500" height="16" rx="1"/>`,
+  play: `<path ${F} d="M7 3.500 20 12 7 20.500z"/>`,
+  reroll: `<path ${N} stroke-width="2.200" d="M20 12a8 8 0 0 1-14.500 4.600M4 12A8 8 0 0 1 18.500 7.400"/><path ${F} d="M20.500 3v6h-6zM3.500 21v-6h6z"/>`,
+  banish: `<circle ${N} cx="12" cy="12" r="9" stroke-width="2.200"/><path ${N} stroke-width="2.200" d="M5.700 5.700 18.300 18.300"/>`,
+  skip: `<path ${F} d="M3 4.500 11 12l-8 7.500zM12 4.500 20 12l-8 7.500z"/><path ${N} d="M21.500 4.500v15" stroke-width="2.200"/>`,
+  check: `<path ${N} stroke-width="3" d="m4 12.500 5.500 5.500L20 6.500"/>`,
+  crown: `<path ${F} d="M3 18.500 2 7l5.500 4.500L12 4l4.500 7.500L22 7l-1 11.500z"/><path ${N} d="M4 21.500h16"/>`,
+  star: `<path ${F} d="m12 2 3 6.500 7 .800-5.200 4.800 1.400 7L12 17.600 5.800 21.100l1.400-7L2 9.300l7-.800z"/>`,
+  trophy: `<path ${F} d="M7 3h10v6a5 5 0 0 1-10 0z"/><path ${N} d="M7 5H3.500c0 3 1.500 5 3.800 5.200M17 5h3.500c0 3-1.500 5-3.800 5.200M12 14v4"/><path ${F} d="M8 18.500h8v2.500H8z"/>`,
+  book: `<path ${F} d="M3 4.500c3-1 6-1 9 1v15c-3-2-6-2-9-1z"/><path ${F} d="M21 4.500c-3-1-6-1-9 1v15c3-2 6-2 9-1z" opacity=".7"/>`,
+  dash: `<path ${F} d="M13 3 22 12l-9 9v-5.500H9v-7h4z"/><path ${N} stroke-width="2.200" d="M2 8.500h3.500M1 12h4.500M2 15.500h3.500"/>`,
+  chest: `<path ${F} d="M3 10.500h18V20H3z"/><path ${F} d="M3 9a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5z" opacity=".8"/><rect fill="#0b0f22" fill-opacity=".5" stroke="none" x="10.300" y="9" width="3.400" height="4.500" rx="1"/>`,
+  up: `<path ${N} stroke-width="2.600" d="M12 20V5M5.500 11.500 12 5l6.500 6.500"/>`,
+  fullscreen: `<path ${N} stroke-width="2.200" d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/>`,
+  globe: `<circle ${N} cx="12" cy="12" r="9.500"/><path ${N} d="M2.500 12h19M12 2.500c3 3 3 16 0 19M12 2.500c-3 3-3 16 0 19"/>`,
+  sword: `<path ${F} d="M14.500 2 22 2l0 7.500-9.500 9.500-2-2-3 3-2.500-.5L4.500 17l3-3-2-2z"/>`,
+  info: `<circle ${N} cx="12" cy="12" r="9.500"/><path ${N} stroke-width="2.400" d="M12 11v6"/><circle ${F} cx="12" cy="7.500" r="1.400"/>`,
+};
+
+export function icon(id: string, size = 24, cls = ''): string {
+  const body = I[id] ?? I.star;
+  return `<svg class="ic ${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+}
+
+export function hasIcon(id: string): boolean {
+  return id in I;
+}

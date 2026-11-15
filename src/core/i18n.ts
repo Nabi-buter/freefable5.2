@@ -1,0 +1,481 @@
+import type { Lang } from './save';
+import { EVOLVED_LEVEL, MAX_WEAPON_LEVEL, PASSIVES, WEAPONS, type PassiveId, type WeaponId } from '../sim/defs';
+
+type Pair = [ko: string, en: string];
+
+const S: Record<string, Pair> = {
+  // ------------------------------------------------------------ title / menu
+  'title.sub': ['봉화를 밝혀, 새벽을 깨워라', 'Light the beacons. Wake the dawn.'],
+  'menu.play': ['원정 시작', 'Begin Vigil'],
+  'menu.upgrades': ['등불 강화', 'Lantern Upgrades'],
+  'menu.records': ['기록', 'Records'],
+  'menu.settings': ['설정', 'Settings'],
+  'menu.how': ['플레이 방법', 'How to Play'],
+  'menu.click': ['아무 곳이나 눌러 시작', 'Click anywhere to begin'],
+  'common.back': ['뒤로', 'Back'],
+  'common.start': ['출발', 'Embark'],
+  'common.locked': ['잠김', 'Locked'],
+  'common.close': ['닫기', 'Close'],
+  'common.continue': ['계속', 'Continue'],
+  'common.yes': ['예', 'Yes'],
+  'common.no': ['아니오', 'No'],
+  'common.on': ['켜짐', 'On'],
+  'common.off': ['꺼짐', 'Off'],
+  'common.max': ['최대', 'MAX'],
+  'common.new': ['신규', 'NEW'],
+  // ------------------------------------------------------------ run setup
+  'setup.title': ['원정 준비', 'Prepare the Vigil'],
+  'setup.char': ['등불지기', 'Lightbearer'],
+  'setup.stage': ['지역', 'Region'],
+  'setup.diff': ['난이도', 'Difficulty'],
+  'setup.weapon': ['시작 무기', 'Starting weapon'],
+  'setup.hp': ['체력', 'Health'],
+  'setup.speed': ['속도', 'Speed'],
+  'setup.trait': ['특성', 'Trait'],
+  // ------------------------------------------------------------ hud
+  'hud.level': ['Lv {0}', 'Lv {0}'],
+  'hud.kills': ['처치', 'Kills'],
+  'hud.combo': ['연속 처치', 'Combo'],
+  'hud.dash': ['대시', 'Dash'],
+  'obj.light': ['봉화를 찾아 불을 밝혀라  {0}/{1}', 'Find and light the beacons  {0}/{1}'],
+  'obj.channel': ['점화 중… 원 안에 머물러라  {0}%', 'Kindling… stay inside the ring  {0}%'],
+  'obj.herald': ['밤의 전령을 쓰러뜨려라', 'Defeat the Herald of Night'],
+  'obj.bosswait': ['어둠이 한곳으로 모여든다…', 'The dark is gathering…'],
+  'obj.boss': ['일식을 쓰러뜨려라', 'Defeat the Eclipse'],
+  'obj.dawn': ['새벽이 밝아온다', 'Dawn is breaking'],
+  'ann.channel': ['점화 시작 — 원 안을 지켜라!', 'Kindling begun — hold the ring!'],
+  'ann.herald': ['밤의 전령이 깨어났다!', 'A Herald of Night awakens!'],
+  'ann.eclipse': ['모든 봉화가 타오른다… 일식이 온다', 'All beacons burn… the Eclipse comes'],
+  'ann.lit': ['봉화가 타오른다!', 'The beacon burns!'],
+  'ann.elite': ['정예가 나타났다', 'An elite approaches'],
+  'ann.swarm': ['무리가 몰려온다!', 'The swarm closes in!'],
+  'ann.phase2': ['일식이 분노한다', 'The Eclipse rages'],
+  'ann.phase3': ['일식이 무너져 내린다', 'The Eclipse is breaking'],
+  'boss.herald': ['밤의 전령', 'Herald of Night'],
+  'boss.eclipse': ['일식', 'The Eclipse'],
+  'tip.move': ['WASD 이동 · 마우스 조준 · Space 대시', 'WASD to move · Mouse to aim · Space to dash'],
+  'tip.move.touch': ['왼쪽 화면을 끌어 이동 · 공격은 자동', 'Drag the left side to move · attacks are automatic'],
+  'tip.move.pad': ['왼쪽 스틱 이동 · 오른쪽 스틱 조준 · A 대시', 'Left stick to move · Right stick to aim · A to dash'],
+  'tip.beacon': ['화살표를 따라 봉화로 가서, 원 안에 머물러 불을 밝히세요', 'Follow the arrows to a beacon and stand in its ring to light it'],
+  'tip.xp': ['적이 떨어뜨린 불씨를 모으면 레벨이 오릅니다', 'Collect the embers enemies drop to level up'],
+  // ------------------------------------------------------------ choices
+  'levelup.title': ['레벨 업!', 'Level Up!'],
+  'levelup.sub': ['강화를 하나 선택하세요', 'Choose one upgrade'],
+  'levelup.reroll': ['다시 뽑기', 'Reroll'],
+  'levelup.banish': ['봉인', 'Banish'],
+  'levelup.banish.hint': ['봉인할 카드를 선택하세요', 'Pick a card to banish'],
+  'levelup.skip': ['건너뛰기', 'Skip'],
+  'tag.weapon': ['무기', 'Weapon'],
+  'tag.passive': ['패시브', 'Passive'],
+  'tag.relic': ['유물', 'Relic'],
+  'tag.evo': ['진화', 'EVOLUTION'],
+  'tag.bonus': ['보너스', 'Bonus'],
+  'relic.title': ['봉화의 유물', 'Beacon Relic'],
+  'relic.sub': ['밝힌 봉화가 유물을 내어줍니다', 'The kindled beacon offers a relic'],
+  'chest.title': ['보물 상자', 'Treasure Chest'],
+  'chest.open': ['열기', 'Open'],
+  'choice.heal': ['숨 고르기', 'Catch Your Breath'],
+  'choice.heal.d': ['체력을 30% 회복합니다', 'Restore 30% health'],
+  'choice.cinder': ['재 한 줌', 'Handful of Cinders'],
+  'choice.cinder.d': ['재 25개를 얻습니다', 'Gain 25 cinders'],
+  'evo.hint': ['진화: {0} Lv{1} + {2}', 'Evolves: {0} Lv{1} + {2}'],
+  // ------------------------------------------------------------ pause / results
+  'pause.title': ['일시정지', 'Paused'],
+  'pause.resume': ['계속하기', 'Resume'],
+  'pause.quit': ['원정 포기', 'Abandon Vigil'],
+  'pause.confirm': ['정말 포기하시겠습니까? 지금까지 모은 재는 유지됩니다.', 'Abandon this vigil? Cinders collected so far are kept.'],
+  'pause.build': ['현재 빌드', 'Current Build'],
+  'pause.relics': ['유물', 'Relics'],
+  'pause.none': ['없음', 'None'],
+  'result.win': ['새벽이 밝았다', 'Dawn Has Broken'],
+  'result.win.sub': ['긴 밤이 끝나고 섬에 빛이 돌아왔습니다', 'The long night ends and light returns to the isle'],
+  'result.lose': ['등불이 꺼졌다', 'The Lantern Fades'],
+  'result.lose.sub': ['하지만 재는 남았습니다. 다시 불을 붙이세요', 'But the cinders remain. Kindle the flame again'],
+  'result.time': ['생존 시간', 'Time'],
+  'result.level': ['레벨', 'Level'],
+  'result.kills': ['처치', 'Kills'],
+  'result.beacons': ['봉화', 'Beacons'],
+  'result.combo': ['최대 연속 처치', 'Best combo'],
+  'result.dmg': ['가한 피해', 'Damage dealt'],
+  'result.cinders': ['획득한 재', 'Cinders earned'],
+  'result.weapons': ['무기별 피해', 'Damage by weapon'],
+  'result.retry': ['다시 도전', 'Try Again'],
+  'result.menu': ['메인 메뉴', 'Main Menu'],
+  'result.unlock': ['해금', 'Unlocked'],
+  'result.best': ['신기록!', 'New best!'],
+  'result.ach': ['업적 달성', 'Achievement'],
+  // ------------------------------------------------------------ settings
+  'set.lang': ['언어', 'Language'],
+  'set.quality': ['그래픽 품질', 'Graphics quality'],
+  'set.q.low': ['낮음', 'Low'],
+  'set.q.medium': ['보통', 'Medium'],
+  'set.q.high': ['높음', 'High'],
+  'set.q.ultra': ['최고', 'Ultra'],
+  'set.master': ['전체 음량', 'Master volume'],
+  'set.music': ['음악', 'Music'],
+  'set.sfx': ['효과음', 'Sound effects'],
+  'set.shake': ['화면 흔들림', 'Screen shake'],
+  'set.dmg': ['피해 수치 표시', 'Damage numbers'],
+  'set.aim': ['조준 방식', 'Aiming'],
+  'set.aim.manual': ['수동 (마우스/스틱)', 'Manual (mouse/stick)'],
+  'set.aim.auto': ['자동', 'Automatic'],
+  'set.zoom': ['카메라 거리', 'Camera distance'],
+  'set.fps': ['FPS 표시', 'Show FPS'],
+  'set.full': ['전체 화면', 'Fullscreen'],
+  'set.reset': ['저장 데이터 초기화', 'Reset save data'],
+  'set.reset.confirm': ['모든 진행 상황이 삭제됩니다. 계속할까요?', 'All progress will be erased. Continue?'],
+  'set.export': ['세이브 내보내기', 'Export save'],
+  'set.import': ['세이브 불러오기', 'Import save'],
+  'set.copied': ['클립보드에 복사했습니다', 'Copied to clipboard'],
+  'set.import.prompt': ['세이브 코드를 붙여넣으세요', 'Paste your save code'],
+  'set.import.ok': ['세이브를 불러왔습니다', 'Save imported'],
+  'set.import.bad': ['올바르지 않은 코드입니다', 'That code is not valid'],
+  'set.sec.game': ['게임', 'Game'],
+  'set.sec.video': ['화면', 'Video'],
+  'set.sec.audio': ['소리', 'Audio'],
+  'set.sec.data': ['데이터', 'Data'],
+  // ------------------------------------------------------------ shop / records
+  'shop.title': ['등불 강화', 'Lantern Upgrades'],
+  'shop.sub': ['원정에서 모은 재로 등불을 영구히 강화합니다', 'Spend cinders from your vigils on permanent upgrades'],
+  'shop.cinders': ['재', 'Cinders'],
+  'shop.refund': ['전부 환불', 'Refund all'],
+  'rec.title': ['기록', 'Records'],
+  'rec.ach': ['업적', 'Achievements'],
+  'rec.stats': ['통계', 'Statistics'],
+  'rec.codex': ['도감', 'Codex'],
+  'rec.runs': ['원정 횟수', 'Vigils'],
+  'rec.wins': ['맞이한 새벽', 'Dawns reached'],
+  'rec.kills': ['총 처치', 'Total kills'],
+  'rec.elites': ['정예 처치', 'Elites slain'],
+  'rec.beacons': ['밝힌 봉화', 'Beacons lit'],
+  'rec.time': ['총 플레이 시간', 'Time played'],
+  'rec.maxlevel': ['최고 레벨', 'Highest level'],
+  'rec.maxcombo': ['최대 연속 처치', 'Best combo'],
+  'rec.cinders': ['누적 획득 재', 'Cinders earned'],
+  'rec.best': ['최단 클리어 ({0})', 'Fastest dawn ({0})'],
+  'rec.reward': ['보상', 'Reward'],
+  // ------------------------------------------------------------ how to play
+  'how.title': ['플레이 방법', 'How to Play'],
+  'how.1.t': ['밤의 섬', 'The Isle of Night'],
+  'how.1.d': ['섬은 끝나지 않는 밤에 잠겼습니다. 당신은 마지막 등불지기. 그림자들은 등불의 빛을 노리고 끝없이 몰려옵니다.', 'The isle is drowned in endless night. You are the last lightbearer, and the shadows come for your lantern without end.'],
+  'how.2.t': ['다섯 봉화', 'Five Beacons'],
+  'how.2.d': ['화살표가 가리키는 봉화로 가서 원 안에 머무르면 불이 붙습니다. 봉화를 밝힐 때마다 유물을 얻고, 봉화는 주변의 적을 태우는 안전지대가 됩니다.', 'Follow the arrows to a beacon and hold its ring to light it. Each beacon grants a relic and becomes a haven that scorches nearby foes.'],
+  'how.3.t': ['성장', 'Growing Stronger'],
+  'how.3.d': ['적이 떨어뜨린 불씨를 모아 레벨을 올리고, 무기 5종과 패시브 5종으로 빌드를 완성하세요. 최고 레벨 무기는 짝이 되는 패시브와 함께 진화합니다.', 'Gather embers to level up and build a kit of five weapons and five passives. A maxed weapon evolves when you hold its partner passive.'],
+  'how.4.t': ['일식', 'The Eclipse'],
+  'how.4.d': ['다섯 봉화가 모두 타오르면 밤의 주인 일식이 나타납니다. 쓰러뜨리면 새벽이 옵니다. 봉화를 서두를수록 밤은 깊어지니, 준비된 만큼만 나아가세요.', 'When all five burn, the Eclipse arrives. Defeat it and dawn returns. Every beacon deepens the night, so advance only as fast as you are ready.'],
+  'how.controls': ['조작', 'Controls'],
+  'how.c.kbm': ['키보드·마우스 — WASD 이동, 마우스 조준, Space/우클릭 대시, Esc 일시정지', 'Keyboard & mouse — WASD move, mouse aim, Space / right-click dash, Esc pause'],
+  'how.c.pad': ['게임패드 — 왼쪽 스틱 이동, 오른쪽 스틱 조준, A/RB 대시, Start 일시정지', 'Gamepad — left stick move, right stick aim, A / RB dash, Start pause'],
+  'how.c.touch': ['터치 — 화면 왼쪽을 끌어 이동, 대시 버튼, 공격·조준은 자동', 'Touch — drag the left side to move, dash button, attacks aim themselves'],
+  // ------------------------------------------------------------ stat labels
+  'stat.dmg': ['피해', 'Damage'],
+  'stat.cd': ['재사용', 'Cooldown'],
+  'stat.count': ['개수', 'Count'],
+  'stat.pierce': ['관통', 'Pierce'],
+  'stat.area': ['범위', 'Area'],
+  'stat.dur': ['지속', 'Duration'],
+  'stat.speed': ['속도', 'Speed'],
+  'stat.chains': ['연쇄', 'Chains'],
+  // ------------------------------------------------------------ weapons
+  'w.ember': ['불씨 화살', 'Ember Bolt'],
+  'w.ember.d': ['조준한 방향으로 불타는 화살을 쏩니다.', 'Fires burning bolts where you aim.'],
+  'w.ember.e': ['태양 섬광', 'Solar Flare'],
+  'w.ember.ed': ['화살이 명중할 때마다 폭발합니다.', 'Every bolt bursts on impact.'],
+  'w.wisps': ['도깨비불', 'Orbiting Wisps'],
+  'w.wisps.d': ['주위를 도는 불빛이 닿는 적을 벱니다.', 'Lights circle you and sear whatever they touch.'],
+  'w.wisps.e': ['태양의 고리', 'Halo of Suns'],
+  'w.wisps.ed': ['더 크고 많은 태양이 닿은 적을 불태웁니다.', 'More and larger suns that set foes ablaze.'],
+  'w.nova': ['잿불 폭발', 'Cinder Nova'],
+  'w.nova.d': ['주기적으로 주변을 폭발시켜 적을 밀쳐냅니다.', 'A periodic blast that hurls enemies back.'],
+  'w.nova.e': ['초신성', 'Supernova'],
+  'w.nova.ed': ['폭발 직후 더 큰 여진이 뒤따릅니다.', 'Each blast is followed by a larger echo.'],
+  'w.arc': ['폭풍 사슬', 'Storm Arc'],
+  'w.arc.d': ['가까운 적에게 번개가 꽂히고 주변으로 연쇄합니다.', 'Lightning strikes the nearest foe and leaps onward.'],
+  'w.arc.e': ['폭풍우', 'Tempest'],
+  'w.arc.ed': ['끝없이 이어지는 번개가 적을 얼어붙게 합니다.', 'A relentless chain that can stun what it strikes.'],
+  'w.starfall': ['별똥별', 'Starfall'],
+  'w.starfall.d': ['주변의 적 위로 별이 떨어져 폭발합니다.', 'Stars fall on nearby enemies and explode.'],
+  'w.starfall.e': ['대격변', 'Cataclysm'],
+  'w.starfall.ed': ['별이 떨어진 자리가 계속 불탑니다.', 'Every crater keeps burning.'],
+  'w.lance': ['태양창', 'Sun Lance'],
+  'w.lance.d': ['조준 방향의 모든 것을 꿰뚫는 광선입니다.', 'A beam that pierces everything along your aim.'],
+  'w.lance.e': ['새벽을 가르는 창', 'Dawnbreaker'],
+  'w.lance.ed': ['앞뒤 양쪽으로 거대한 광선을 쏩니다.', 'A massive beam fired both ahead and behind.'],
+  'w.frost': ['서리 파편', 'Frost Shards'],
+  'w.frost.d': ['부채꼴로 얼음 조각을 뿌려 적을 둔화시킵니다.', 'A fan of ice that chills and slows.'],
+  'w.frost.e': ['빙하 폭풍', 'Glacial Storm'],
+  'w.frost.ed': ['사방으로 파편을 뿌리고 적을 얼립니다.', 'Shards in every direction that freeze solid.'],
+  'w.darts': ['혼령 화살', 'Spirit Darts'],
+  'w.darts.d': ['적을 끝까지 추적하는 혼령을 날립니다.', 'Spirits that hunt down their targets.'],
+  'w.darts.e': ['유령 군집', 'Phantom Swarm'],
+  'w.darts.ed': ['관통하는 혼령 떼가 적 사이를 누빕니다.', 'A piercing swarm that weaves between foes.'],
+  'w.trail': ['불타는 발자취', 'Burning Path'],
+  'w.trail.d': ['지나간 자리에 불길을 남깁니다.', 'Leaves fire wherever you walk.'],
+  'w.trail.e': ['들불', 'Wildfire'],
+  'w.trail.ed': ['불길이 사그라질 때 폭발합니다.', 'Each flame bursts as it dies.'],
+  'w.aura': ['빛무리', 'Radiant Aura'],
+  'w.aura.d': ['주변의 모든 적에게 지속 피해를 줍니다.', 'Constant damage to everything near you.'],
+  'w.aura.e': ['성역', 'Sanctum'],
+  'w.aura.ed': ['적을 둔화시키고 등불지기를 치유합니다.', 'Slows foes and mends the bearer.'],
+  'w.glaive': ['달빛 글레이브', 'Moon Glaive'],
+  'w.glaive.d': ['던지면 모든 적을 베고 돌아옵니다.', 'A thrown blade that cuts through and returns.'],
+  'w.glaive.e': ['월식의 칼날', 'Eclipse Glaive'],
+  'w.glaive.ed': ['거대한 칼날이 불씨까지 끌어옵니다.', 'A huge blade that drags embers back to you.'],
+  // ------------------------------------------------------------ passives
+  'p.vigor': ['활력', 'Vigor'],
+  'p.vigor.d': ['최대 체력 +{0}%', 'Max health +{0}%'],
+  'p.mending': ['재생', 'Mending'],
+  'p.mending.d': ['초당 체력 재생 +{0}', 'Health regen +{0}/s'],
+  'p.plating': ['철갑', 'Plating'],
+  'p.plating.d': ['받는 피해 -{0}', 'Damage taken -{0}'],
+  'p.swift': ['신속', 'Swiftness'],
+  'p.swift.d': ['이동 속도 +{0}%', 'Move speed +{0}%'],
+  'p.might': ['완력', 'Might'],
+  'p.might.d': ['모든 피해 +{0}%', 'All damage +{0}%'],
+  'p.haste': ['가속', 'Haste'],
+  'p.haste.d': ['공격 속도 +{0}%', 'Attack speed +{0}%'],
+  'p.reach': ['확장', 'Reach'],
+  'p.reach.d': ['공격 범위 +{0}%', 'Area +{0}%'],
+  'p.multishot': ['분열', 'Multishot'],
+  'p.multishot.d': ['투사체 +{0}', 'Projectiles +{0}'],
+  'p.focus': ['집중', 'Focus'],
+  'p.focus.d': ['치명타 확률 +{0}%', 'Critical chance +{0}%'],
+  'p.magnet': ['인력', 'Attraction'],
+  'p.magnet.d': ['획득 범위 +{0}%', 'Pickup range +{0}%'],
+  'p.wisdom': ['지혜', 'Wisdom'],
+  'p.wisdom.d': ['경험치 +{0}%', 'Experience +{0}%'],
+  'p.velocity': ['탄속', 'Velocity'],
+  'p.velocity.d': ['투사체 속도·지속 +{0}%', 'Projectile speed & duration +{0}%'],
+  'p.fortune': ['행운', 'Fortune'],
+  'p.fortune.d': ['행운 +{0}% (드롭·상자·재)', 'Luck +{0}% (drops, chests, cinders)'],
+  // ------------------------------------------------------------ relics
+  'r.phoenix': ['불사조의 깃털', 'Phoenix Feather'],
+  'r.phoenix.d': ['쓰러질 때 한 번, 체력 50%로 되살아납니다.', 'Once per vigil, rise again at 50% health.'],
+  'r.twinflame': ['쌍둥이 불꽃', 'Twin Flame'],
+  'r.twinflame.d': ['모든 무기의 투사체 +1', 'All weapons fire +1 projectile.'],
+  'r.bloodember': ['핏빛 불씨', 'Blood Ember'],
+  'r.bloodember.d': ['적 처치 시 일정 확률로 체력을 회복합니다.', 'Kills sometimes restore health.'],
+  'r.stormheart': ['폭풍의 심장', 'Stormheart'],
+  'r.stormheart.d': ['14번째 타격마다 번개가 연쇄합니다.', 'Every 14th hit unleashes chain lightning.'],
+  'r.glasslantern': ['유리 등불', 'Glass Lantern'],
+  'r.glasslantern.d': ['피해 +40%, 최대 체력 -25%', 'Damage +40%, max health -25%.'],
+  'r.secondwind': ['두 번째 바람', 'Second Wind'],
+  'r.secondwind.d': ['대시 횟수 +1, 대시 재충전 20% 단축', 'Dash charges +1, dash recharges 20% faster.'],
+  'r.emberbloom': ['불씨꽃', 'Emberbloom'],
+  'r.emberbloom.d': ['불타는 적이 죽으면 폭발합니다.', 'Burning enemies explode when they die.'],
+  'r.frozencore': ['얼어붙은 핵', 'Frozen Core'],
+  'r.frozencore.d': ['둔화·빙결된 적이 받는 피해 +30%', 'Chilled and frozen enemies take +30% damage.'],
+  'r.gildedwick': ['금빛 심지', 'Gilded Wick'],
+  'r.gildedwick.d': ['획득하는 재 +50%', 'Cinders gained +50%.'],
+  'r.wideglow': ['너른 빛', 'Wide Glow'],
+  'r.wideglow.d': ['공격 범위 +25%', 'Area +25%.'],
+  'r.quickening': ['고동', 'Quickening'],
+  'r.quickening.d': ['공격 속도 +15%', 'Attack speed +15%.'],
+  'r.beaconbond': ['봉화의 유대', 'Beacon Bond'],
+  'r.beaconbond.d': ['밝힌 봉화의 범위와 위력이 커지고, 그 안에서 체력을 회복합니다.', 'Lit beacons reach further, hit harder and heal you inside.'],
+  'r.titanash': ['거인의 재', "Titan's Ash"],
+  'r.titanash.d': ['최대 체력 +60, 방어 +2, 이동 속도 -7%', 'Max health +60, armor +2, move speed -7%.'],
+  'r.huntersmark': ['사냥꾼의 표식', "Hunter's Mark"],
+  'r.huntersmark.d': ['정예와 우두머리에게 주는 피해 +35%', 'Elites and bosses take +35% damage.'],
+  'r.afterimage': ['잔상', 'Afterimage'],
+  'r.afterimage.d': ['대시가 끝나는 자리에서 폭발이 일어납니다.', 'Your dash ends in an explosion.'],
+  'r.starmoss': ['별이끼', 'Starmoss'],
+  'r.starmoss.d': ['체력 재생 +1.2, 회복 구슬 효과 증가', 'Health regen +1.2/s and stronger healing orbs.'],
+  // ------------------------------------------------------------ characters
+  'c.kindler': ['불씨지기', 'Kindler'],
+  'c.kindler.d': ['균형 잡힌 등불지기. 무엇이든 빨리 배웁니다.', 'A balanced lightbearer and a quick study.'],
+  'c.kindler.t': ['경험치 +10%', 'Experience +10%'],
+  'c.stormcaller': ['폭풍술사', 'Stormcaller'],
+  'c.stormcaller.d': ['빠르고 날카롭지만 연약합니다.', 'Fast and sharp, but fragile.'],
+  'c.stormcaller.t': ['공격 속도 +12%, 이동 속도 증가', 'Attack speed +12%, faster movement'],
+  'c.stormcaller.u': ['한 번의 원정에서 봉화 3개 밝히기', 'Light 3 beacons in one vigil'],
+  'c.warden': ['수호자', 'Warden'],
+  'c.warden.d': ['두꺼운 갑옷으로 적 한가운데를 버팁니다.', 'Heavy armor that holds the middle of the horde.'],
+  'c.warden.t': ['방어 +1, 체력 140', 'Armor +1, 140 health'],
+  'c.warden.u': ['레벨 20 도달', 'Reach level 20'],
+  'c.frostweaver': ['서리직조사', 'Frostweaver'],
+  'c.frostweaver.d': ['넓은 범위로 전장을 얼립니다.', 'Freezes the field with wide-reaching magic.'],
+  'c.frostweaver.t': ['공격 범위 +18%', 'Area +18%'],
+  'c.frostweaver.u': ['일식을 쓰러뜨리기', 'Defeat the Eclipse'],
+  'c.ashwalker': ['재걸음꾼', 'Ashwalker'],
+  'c.ashwalker.d': ['불길 속을 달리는 방랑자.', 'A wanderer who runs through the fire.'],
+  'c.ashwalker.t': ['대시 2회, 피해 +10%', 'Two dashes, damage +10%'],
+  'c.ashwalker.u': ['한밤 난이도에서 새벽 맞이하기', 'Reach dawn on Midnight'],
+  // ------------------------------------------------------------ biomes / difficulty
+  'b.ashwood': ['잿빛 숲', 'Ashen Woods'],
+  'b.ashwood.d': ['반딧불이 떠도는 오래된 숲.', 'An old forest adrift with fireflies.'],
+  'b.frostmere': ['서리 호수', 'Frostmere'],
+  'b.frostmere.d': ['오로라 아래 얼어붙은 설원.', 'A frozen expanse beneath the aurora.'],
+  'b.frostmere.u': ['잿빛 숲에서 새벽 맞이하기', 'Reach dawn in the Ashen Woods'],
+  'b.emberwaste': ['불씨 황무지', 'Ember Wastes'],
+  'b.emberwaste.d': ['재가 날리는 붉은 사막.', 'A red desert where ash still drifts.'],
+  'b.emberwaste.u': ['서리 호수에서 새벽 맞이하기', 'Reach dawn in Frostmere'],
+  'd.0': ['황혼', 'Dusk'],
+  'd.0.d': ['기본 난이도.', 'The standard vigil.'],
+  'd.1': ['한밤', 'Midnight'],
+  'd.1.d': ['적이 더 강하고 많습니다. 재 +60%', 'Stronger, denser foes. Cinders +60%.'],
+  'd.1.u': ['황혼에서 새벽 맞이하기', 'Reach dawn on Dusk'],
+  'd.2': ['일식', 'Eclipse'],
+  'd.2.d': ['가장 깊은 밤. 재 +140%', 'The deepest night. Cinders +140%.'],
+  'd.2.u': ['한밤에서 새벽 맞이하기', 'Reach dawn on Midnight'],
+  // ------------------------------------------------------------ enemies
+  'e.shade': ['그림자', 'Shade'],
+  'e.shade.d': ['밤이 낳은 가장 흔한 것. 끈질기게 따라옵니다.', 'The commonest child of the night. It simply follows.'],
+  'e.skitter': ['잰발이', 'Skitter'],
+  'e.skitter.d': ['작고 빠릅니다. 늘 떼로 몰려옵니다.', 'Small, fast, and never alone.'],
+  'e.brute': ['덩치', 'Brute'],
+  'e.brute.d': ['느리지만 튼튼하고, 잘 밀려나지 않습니다.', 'Slow, tough, and hard to push back.'],
+  'e.spitter': ['침뱉이', 'Spitter'],
+  'e.spitter.d': ['거리를 두고 독을 뱉습니다.', 'Keeps its distance and spits venom.'],
+  'e.wraith': ['망령', 'Wraith'],
+  'e.wraith.d': ['잠시 멈춘 뒤 일직선으로 돌진합니다.', 'Pauses, then lunges in a straight line.'],
+  'e.bomber': ['폭탄벌레', 'Blightbomb'],
+  'e.bomber.d': ['다가와 부풀어 오르다 터집니다. 먼저 잡으세요.', 'Runs up, swells and bursts. Kill it first.'],
+  'e.husk': ['껍데기', 'Husk'],
+  'e.husk.d': ['쓰러지면 잰발이가 쏟아져 나옵니다.', 'Splits into skitters when it falls.'],
+  'e.herald': ['밤의 전령', 'Herald of Night'],
+  'e.herald.d': ['봉화를 지키는 수문장. 내려찍기를 피하세요.', 'A beacon guardian. Step out of its slams.'],
+  'e.eclipse': ['일식', 'The Eclipse'],
+  'e.eclipse.d': ['밤의 주인. 쓰러뜨리면 새벽이 옵니다.', 'Master of the night. Its fall brings the dawn.'],
+  // ------------------------------------------------------------ meta
+  'm.m_hp': ['단단한 심지', 'Sturdy Wick'],
+  'm.m_hp.d': ['최대 체력 +{0}%', 'Max health +{0}%'],
+  'm.m_might': ['뜨거운 불꽃', 'Hotter Flame'],
+  'm.m_might.d': ['피해 +{0}%', 'Damage +{0}%'],
+  'm.m_haste': ['빠른 손놀림', 'Quick Hands'],
+  'm.m_haste.d': ['공격 속도 +{0}%', 'Attack speed +{0}%'],
+  'm.m_speed': ['가벼운 발걸음', 'Light Step'],
+  'm.m_speed.d': ['이동 속도 +{0}%', 'Move speed +{0}%'],
+  'm.m_regen': ['온기', 'Warmth'],
+  'm.m_regen.d': ['초당 체력 재생 +{0}', 'Health regen +{0}/s'],
+  'm.m_armor': ['등불 덮개', 'Lantern Guard'],
+  'm.m_armor.d': ['받는 피해 -{0}', 'Damage taken -{0}'],
+  'm.m_magnet': ['이끄는 빛', 'Beckoning Light'],
+  'm.m_magnet.d': ['획득 범위 +{0}%', 'Pickup range +{0}%'],
+  'm.m_xp': ['오랜 기억', 'Old Memories'],
+  'm.m_xp.d': ['경험치 +{0}%', 'Experience +{0}%'],
+  'm.m_cinder': ['재 주머니', 'Cinder Pouch'],
+  'm.m_cinder.d': ['획득하는 재 +{0}%', 'Cinders gained +{0}%'],
+  'm.m_luck': ['길한 별자리', 'Kind Stars'],
+  'm.m_luck.d': ['행운 +{0}%', 'Luck +{0}%'],
+  'm.m_reroll': ['다시 뽑기', 'Reroll'],
+  'm.m_reroll.d': ['원정마다 다시 뽑기 +{0}', 'Rerolls per vigil +{0}'],
+  'm.m_banish': ['봉인', 'Banish'],
+  'm.m_banish.d': ['원정마다 봉인 +{0}', 'Banishes per vigil +{0}'],
+  'm.m_revive': ['꺼지지 않는 불', 'Undying Flame'],
+  'm.m_revive.d': ['원정마다 한 번 되살아납니다', 'Revive once per vigil'],
+  // ------------------------------------------------------------ achievements
+  'a.first_light': ['첫 불빛', 'First Light'],
+  'a.first_light.d': ['봉화 하나 밝히기', 'Light a beacon'],
+  'a.dawn': ['새벽', 'Daybreak'],
+  'a.dawn.d': ['일식을 쓰러뜨리고 새벽 맞이하기', 'Defeat the Eclipse and reach dawn'],
+  'a.midnight': ['한밤의 승리', 'Midnight Sun'],
+  'a.midnight.d': ['한밤 난이도 클리어', 'Reach dawn on Midnight'],
+  'a.eclipse': ['일식을 삼킨 자', 'Eclipse Breaker'],
+  'a.eclipse.d': ['일식 난이도 클리어', 'Reach dawn on Eclipse'],
+  'a.kills1': ['그림자 사냥꾼', 'Shadow Hunter'],
+  'a.kills1.d': ['누적 1,000마리 처치', 'Slay 1,000 enemies in total'],
+  'a.kills2': ['밤의 재앙', 'Bane of Night'],
+  'a.kills2.d': ['누적 10,000마리 처치', 'Slay 10,000 enemies in total'],
+  'a.kills3': ['끝없는 불', 'Endless Fire'],
+  'a.kills3.d': ['누적 50,000마리 처치', 'Slay 50,000 enemies in total'],
+  'a.level30': ['타오르는 자', 'Burning Bright'],
+  'a.level30.d': ['한 원정에서 레벨 30 도달', 'Reach level 30 in one vigil'],
+  'a.evolve': ['진화', 'Metamorphosis'],
+  'a.evolve.d': ['무기를 진화시키기', 'Evolve a weapon'],
+  'a.evolve3': ['완성된 불꽃', 'Perfected Flame'],
+  'a.evolve3.d': ['한 원정에서 무기 3개 진화', 'Evolve 3 weapons in one vigil'],
+  'a.combo': ['멈추지 않는 손', 'Unbroken'],
+  'a.combo.d': ['연속 처치 300 달성', 'Reach a 300 kill combo'],
+  'a.swift': ['서두르는 새벽', 'Hasty Dawn'],
+  'a.swift.d': ['12분 안에 새벽 맞이하기', 'Reach dawn in under 12 minutes'],
+  'a.untouched': ['빛처럼', 'Like Light'],
+  'a.untouched.d': ['누적 피해 150 이하로 클리어', 'Reach dawn having taken 150 damage or less'],
+  'a.elites': ['정예 사냥', 'Trophy Taker'],
+  'a.elites.d': ['누적 정예 50마리 처치', 'Slay 50 elites in total'],
+  'a.allchars': ['모든 등불지기', 'Every Lantern'],
+  'a.allchars.d': ['모든 등불지기 해금', 'Unlock every lightbearer'],
+  'a.winall': ['다섯 개의 새벽', 'Five Dawns'],
+  'a.winall.d': ['모든 등불지기로 클리어', 'Reach dawn with every lightbearer'],
+  'a.allbiomes': ['섬의 끝까지', "To the Isle's Edge"],
+  'a.allbiomes.d': ['모든 지역에서 클리어', 'Reach dawn in every region'],
+  'a.rich': ['재의 왕', 'Cinder Baron'],
+  'a.rich.d': ['누적 재 5,000개 획득', 'Earn 5,000 cinders in total'],
+  'a.beacons25': ['등대지기', 'Keeper of Flames'],
+  'a.beacons25.d': ['누적 봉화 25개 밝히기', 'Light 25 beacons in total'],
+  'a.relics': ['수집가', 'Collector'],
+  'a.relics.d': ['한 원정에서 유물 5개 보유', 'Hold 5 relics in one vigil'],
+};
+
+let lang: Lang = 'en';
+export function setLang(l: Lang) {
+  lang = l;
+  document.documentElement.lang = l;
+}
+export function getLang(): Lang {
+  return lang;
+}
+
+export function t(key: string, ...args: (string | number)[]): string {
+  const p = S[key];
+  if (!p) return key;
+  let s = p[lang === 'ko' ? 0 : 1];
+  for (let i = 0; i < args.length; i++) s = s.replace('{' + i + '}', String(args[i]));
+  return s;
+}
+
+export function has(key: string): boolean {
+  return key in S;
+}
+
+const fmt = (v: number) => (Math.abs(v) >= 10 || Number.isInteger(v) ? String(Math.round(v * 10) / 10) : v.toFixed(2).replace(/0+$/, '').replace(/\.$/, ''));
+
+/** display name of a weapon at a given level (evolved form has its own name) */
+export function weaponName(id: WeaponId, level: number): string {
+  return t(level >= EVOLVED_LEVEL ? `w.${id}.e` : `w.${id}`);
+}
+
+/** Describe what the next level of a weapon changes, derived from the stat tables so it can never drift. */
+export function weaponLevelText(id: WeaponId, level: number): string {
+  if (level <= 1) return t(`w.${id}.d`);
+  if (level >= EVOLVED_LEVEL) return t(`w.${id}.ed`);
+  const a = WEAPONS[id].levels[level - 2], b = WEAPONS[id].levels[level - 1];
+  const parts: string[] = [];
+  const add = (key: string, d: number, unit = '', invert = false) => {
+    if (Math.abs(d) < 1e-6) return;
+    const sign = d > 0 ? '+' : '−';
+    void invert;
+    parts.push(`${t(key)} ${sign}${fmt(Math.abs(d))}${unit}`);
+  };
+  add('stat.dmg', b.dmg - a.dmg);
+  add(id === 'arc' ? 'stat.chains' : 'stat.count', b.count - a.count);
+  if (b.pierce < 50) add('stat.pierce', b.pierce - a.pierce);
+  add('stat.area', b.area - a.area);
+  add('stat.cd', b.cd - a.cd, lang === 'ko' ? '초' : 's', true);
+  add('stat.dur', b.dur - a.dur, lang === 'ko' ? '초' : 's');
+  if (id !== 'wisps' || b.speed !== a.speed) add('stat.speed', b.speed - a.speed);
+  return parts.join('  ·  ');
+}
+
+export function passiveText(id: PassiveId, level: number): string {
+  const per = PASSIVES[id].per;
+  return t(`p.${id}.d`, fmt(per * level));
+}
+
+export function evoHint(id: WeaponId): string {
+  return t('evo.hint', t(`w.${id}`), MAX_WEAPON_LEVEL, t(`p.${WEAPONS[id].evo}`));
+}
+
+export function fmtTime(sec: number): string {
+  const s = Math.max(0, Math.floor(sec));
+  const m = Math.floor(s / 60);
+  return `${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+}
+
+export function fmtNum(n: number): string {
+  const v = Math.round(n);
+  if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
+  if (v >= 1e4) return (v / 1e3).toFixed(1) + 'k';
+  return v.toLocaleString(lang === 'ko' ? 'ko-KR' : 'en-US');
+}

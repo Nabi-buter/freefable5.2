@@ -28,6 +28,8 @@ export class Input {
   private confirmQ = false;
   private navQ = 0;
   private numQ = 0;
+  private keyQ: string[] = [];
+  private backQ = false;
   private padPrev: boolean[] = [];
   private padNavT = 0;
   private stickId = -1;
@@ -81,9 +83,11 @@ export class Input {
       if (!this.keys.has(c)) {
         if (c === 'Space' || c === 'ShiftLeft' || c === 'ShiftRight') this.dashQ = true;
         if (c === 'Escape' || c === 'KeyP') this.pauseQ = true;
+        if (c === 'Escape' || c === 'Backspace') this.backQ = true;
         if (c === 'Enter' || c === 'Space') this.confirmQ = true;
-        if (c === 'ArrowLeft' || c === 'KeyA') this.navQ = -1;
-        if (c === 'ArrowRight' || c === 'KeyD') this.navQ = 1;
+        if (c === 'ArrowLeft' || c === 'KeyA' || c === 'ArrowUp' || c === 'KeyW') this.navQ = -1;
+        if (c === 'ArrowRight' || c === 'KeyD' || c === 'ArrowDown' || c === 'KeyS') this.navQ = 1;
+        if (this.keyQ.length < 8) this.keyQ.push(c);
         if (c.startsWith('Digit')) this.numQ = Number(c.slice(5));
       }
       this.keys.add(c);
@@ -174,9 +178,14 @@ export class Input {
         this.setDevice('gamepad');
       }
       if (edge(0)) this.confirmQ = true;
-      if (edge(9) || edge(8)) this.pauseQ = true;
+      if (edge(9) || edge(8)) {
+        this.pauseQ = true;
+        this.backQ = true;
+      }
       this.padNavT -= dt;
-      const navX = (b(15) ? 1 : 0) - (b(14) ? 1 : 0) + (Math.abs(lx) > 0.6 ? Math.sign(lx) : 0);
+      const navX = (b(15) ? 1 : 0) - (b(14) ? 1 : 0) + (b(13) ? 1 : 0) - (b(12) ? 1 : 0) + (Math.abs(lx) > 0.6 ? Math.sign(lx) : Math.abs(ly) > 0.6 ? Math.sign(ly) : 0);
+      if (edge(1)) this.backQ = true;
+      if (edge(2)) this.keyQ.push('KeyR');
       if (navX !== 0 && this.padNavT <= 0) {
         this.navQ = Math.sign(navX);
         this.padNavT = 0.22;
@@ -227,9 +236,21 @@ export class Input {
     this.numQ = 0;
     return v;
   }
+  takeBack(): boolean {
+    const v = this.backQ;
+    this.backQ = false;
+    return v;
+  }
+  takeKeys(): string[] {
+    if (this.keyQ.length === 0) return this.keyQ;
+    const k = this.keyQ;
+    this.keyQ = [];
+    return k;
+  }
   clearQueues() {
-    this.dashQ = this.pauseQ = this.confirmQ = false;
+    this.dashQ = this.pauseQ = this.confirmQ = this.backQ = false;
     this.navQ = 0;
     this.numQ = 0;
+    this.keyQ.length = 0;
   }
 }

@@ -504,7 +504,7 @@ export class GameView {
     best.light.color.setRGB(r, g, b);
     best.t = 0;
     best.dur = dur;
-    best.peak = peak;
+    best.peak = peak * 0.32;
   }
 
   private burst(x: number, y: number, z: number, n: number, speed: number, life: number, size: number, r: number, g: number, b: number, up = 0.5, grav = 6, drag = 2) {
@@ -1183,6 +1183,12 @@ export class GameView {
       if (this.camPos.y < gy) this.camPos.y = gy;
       cam.position.copy(this.camPos);
       this.lookAt.set(0, this.height(0, 0) + 4.2, 0);
+      if (cam.aspect > 1.25) {
+        // shift the look target sideways (camera-left) so the fire sits in the right third
+        const rx = -Math.sin(a), rz = Math.cos(a);
+        this.lookAt.x += rx * 7.5;
+        this.lookAt.z += rz * 7.5;
+      }
       cam.lookAt(this.lookAt);
       return;
     }

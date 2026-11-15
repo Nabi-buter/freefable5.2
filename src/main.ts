@@ -1,56 +1,373 @@
-import { GameView } from './render/view';
-import { Sim } from './sim/sim';
+import { AudioEngine } from './audio/audio';
+import { setLang } from './core/i18n';
 import { Input } from './core/input';
+import { finishRun } from './core/progress';
+import { SaveStore } from './core/save';
+import { GameView } from './render/view';
+import { banish, choose, reroll, skip } from './sim/choices';
 import { CHARS } from './sim/defs';
-import { choose } from './sim/choices';
+import { Sim } from './sim/sim';
 import type { InputState } from './sim/types';
+import { World } from './sim/worldgen';
+import { UI, type UIHost } from './ui/ui';
 
-const canvas = document.getElementById('game') as HTMLCanvasElement;
-const overlay = document.getElementById('overlay') as HTMLCanvasElement;
-const css = document.createElement('style');
-css.textContent = 'html,body{margin:0;height:100%;overflow:hidden;background:#05060f}canvas{position:fixed;inset:0;width:100%;height:100%;display:block}#overlay{pointer-events:none}';
-document.head.appendChild(css);
-const view = new GameView(canvas, overlay);
-const input = new Input(document.body);
-const qs = new URLSearchParams(location.search);
-view.resize(innerWidth, innerHeight);
-window.addEventListener('resize', () => view.resize(innerWidth, innerHeight));
-const sim = new Sim({ seed: Number(qs.get('seed') ?? 7), char: 'kindler', difficulty: 0, biome: (qs.get('biome') as any) ?? 'ashwood', meta: {} });
-view.loadWorld(sim.world, CHARS.kindler);
-if (qs.get('menu')) view.setMode('menu');
-else { view.setSim(sim); view.setMode('follow'); }
-(window as any).view = view; (window as any).sim = sim;
-const inp: InputState = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
-(window as any).warp = (secs: number, tx = 30, tz = 20, god = true) => {
-  const bi: InputState = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
-  for (let i = 0; i < secs * 60; i++) {
-    while (sim.pending.length) choose(sim, 0);
-    const dx = tx - sim.player.x, dz = tz - sim.player.z; const l = Math.hypot(dx, dz);
-    const ca = sim.time * 0.5;
-    bi.mx = l > 9 ? dx / l : Math.cos(ca); bi.mz = l > 9 ? dz / l : Math.sin(ca);
-    if (god) sim.player.hp = sim.player.st.maxHp;
-    sim.step(1 / 60, bi); sim.events.length = 0;
+declare const __APP_VERSION__: string;
+
+type State = 'boot' | 'menu' | 'loading' | 'playing' | 'choosing' | 'paused' | 'ending' | 'result';
+
+class App implements UIHost {
+  readonly save = new SaveStore();
+  readonly audio = new AudioEngine();
+  readonly input: Input;
+  readonly version = 'v' + __APP_VERSION__;
+  readonly view: GameView;
+  readonly ui: UI;
+  sim: Sim | null = null;
+  state: State = 'boot';
+  private inp: InputState = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
+  private last = performance.now();
+  private hitStopT = 0;
+  private endT = 0;
+  private chooseDelay = 0;
+  private gp = { x: 0, z: 0 };
+  private veil = document.getElementById('veil');
+  private fps = 60;
+  private menuBiome = '';
+
+  constructor() {
+    const canvas = document.getElementById('game') as HTMLCanvasElement;
+    const overlay = document.getElementById('overlay') as HTMLCanvasElement;
+    setLang(this.save.data.settings.lang);
+    this.input = new Input(document.body);
+    this.view = new GameView(canvas, overlay);
+    this.ui = new UI(document.getElementById('ui')!, this);
+    // ?q=low|medium|high|ultra overrides the saved quality for this session (handy for testing)
+    const q = new URLSearchParams(location.search).get('q');
+    if (q === 'low' || q === 'medium' || q === 'high' || q === 'ultra') this.save.data.settings.quality = q;
+    this.view.quality = this.save.data.settings.quality;
+    this.view.setQuality(this.save.data.settings.quality);
+    this.settingsChanged();
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    window.addEventListener('orientationchange', () => setTimeout(() => this.resize(), 200));
+    const unlock = () => this.audio.unlock();
+    window.addEventListener('pointerdown', unlock);
+    window.addEventListener('keydown', unlock);
+    window.addEventListener('touchend', unlock);
+    document.addEventListener('visibilitychange', () => this.audio.suspend(document.hidden));
+    window.addEventListener('wheel', (e) => {
+      if (this.state !== 'playing') return;
+      const s = this.save.data.settings;
+      s.zoom = Math.max(0.75, Math.min(1.3, s.zoom + Math.sign(e.deltaY) * 0.05));
+      this.view.zoom = s.zoom;
+    }, { passive: true });
+    window.addEventListener('beforeunload', () => this.save.save());
+    this.toMenu(true);
+    requestAnimationFrame((t) => this.loop(t));
   }
-  return { t: sim.time, lvl: sim.player.level, hp: sim.player.hp, en: sim.enemies.length, w: sim.player.weapons.map((w) => w.id + w.level) };
-};
-let last = performance.now();
-const gp = { x: 0, z: 0 };
-function loop(now: number) {
-  const dt = Math.min(0.05, (now - last) / 1000);
-  last = now;
-  input.poll(dt);
-  inp.mx = input.moveX; inp.mz = input.moveY; inp.dash = input.takeDash();
-  if (view.groundPoint(input.pointerX, input.pointerY, gp)) {
-    const dx = gp.x - sim.player.x, dz = gp.z - sim.player.z; const l = Math.hypot(dx, dz) || 1;
-    inp.aimX = dx / l; inp.aimZ = dz / l; inp.autoAim = false;
+
+  private resize() {
+    this.view.resize(window.innerWidth, window.innerHeight);
   }
-  if (!qs.get('menu')) {
-    while (sim.pending.length) choose(sim, 0);
-    sim.step(dt, inp);
-    view.handleEvents(sim.events);
-    sim.events.length = 0;
+
+  // ------------------------------------------------------------ UIHost
+  settingsChanged() {
+    const s = this.save.data.settings;
+    setLang(s.lang);
+    this.audio.setVolumes(s.master, s.music, s.sfx);
+    this.view.shakeMul = s.shake;
+    this.view.showDamage = s.damageNumbers;
+    this.view.overlay.enabled = true;
+    this.view.zoom = s.zoom;
+    if (this.view.quality !== s.quality) this.view.setQuality(s.quality);
   }
-  view.frame(dt, dt);
-  requestAnimationFrame(loop);
+
+  toggleFullscreen() {
+    const d = document as Document & { webkitFullscreenElement?: Element; webkitExitFullscreen?: () => void };
+    const el = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => void };
+    if (document.fullscreenElement || d.webkitFullscreenElement) {
+      if (document.exitFullscreen) void document.exitFullscreen();
+      else d.webkitExitFullscreen?.();
+    } else if (el.requestFullscreen) void el.requestFullscreen().catch(() => undefined);
+    else el.webkitRequestFullscreen?.();
+  }
+
+  private showVeil(on: boolean) {
+    this.veil?.classList.toggle('gone', !on);
+  }
+
+  toMenu(first = false) {
+    const last = this.save.data.last;
+    this.sim = null;
+    this.state = 'menu';
+    const build = () => {
+      if (this.menuBiome !== last.biome + last.char || !this.view.world) {
+        this.view.loadWorld(new World(20261115, last.biome), CHARS[last.char]);
+        this.menuBiome = last.biome + last.char;
+      }
+      this.view.setSim(null);
+      this.view.setMode('menu');
+      this.ui.hideHud();
+      this.ui.showTitle();
+      this.audio.music?.setMood('menu', 0);
+      this.audio.setDuck(1);
+      setTimeout(() => this.showVeil(false), first ? 250 : 60);
+    };
+    if (first) build();
+    else {
+      this.showVeil(true);
+      setTimeout(build, 420);
+    }
+  }
+
+  startRun() {
+    const last = this.save.data.last;
+    this.state = 'loading';
+    this.showVeil(true);
+    setTimeout(() => {
+      const seed = (Math.random() * 0xffffffff) >>> 0;
+      this.sim = new Sim({ seed, char: last.char, difficulty: last.difficulty, biome: last.biome, meta: this.save.data.meta });
+      this.view.loadWorld(this.sim.world, CHARS[last.char]);
+      this.menuBiome = '';
+      this.view.setSim(this.sim);
+      this.view.setMode('follow');
+      this.ui.showHud();
+      this.input.clearQueues();
+      this.hitStopT = 0;
+      this.audio.music?.setMood('run', 0);
+      this.audio.setDuck(1);
+      this.state = 'playing';
+      this.last = performance.now();
+      setTimeout(() => this.showVeil(false), 80);
+    }, 430);
+  }
+
+  retry() {
+    this.startRun();
+  }
+
+  pauseRequest() {
+    if (!this.sim || (this.state !== 'playing' && this.state !== 'paused')) return;
+    this.state = 'paused';
+    this.ui.showPause(this.sim);
+    this.audio.setDuck(0.35);
+  }
+
+  resume() {
+    if (this.state !== 'paused') return;
+    this.state = 'playing';
+    this.input.clearQueues();
+    this.audio.setDuck(1);
+    this.last = performance.now();
+  }
+
+  abandon() {
+    if (!this.sim) return;
+    this.audio.setDuck(1);
+    this.showResult();
+  }
+
+  choose(i: number) {
+    if (!this.sim) return;
+    choose(this.sim, i);
+    this.afterChoice();
+  }
+  reroll(): boolean {
+    if (!this.sim) return false;
+    const ok = reroll(this.sim);
+    if (ok) this.ui.showPending(this.sim);
+    return ok;
+  }
+  banish(i: number): boolean {
+    if (!this.sim) return false;
+    const ok = banish(this.sim, i);
+    this.ui.showPending(this.sim);
+    return ok;
+  }
+  skip() {
+    if (!this.sim) return;
+    skip(this.sim);
+    this.afterChoice();
+  }
+
+  private afterChoice() {
+    const sim = this.sim!;
+    if (sim.pending.length > 0) this.ui.showPending(sim);
+    else {
+      this.ui.closeModal();
+      this.state = 'playing';
+      this.input.clearQueues();
+      // a breath of safety after menus so nobody dies to a hit they could not see coming
+      sim.player.iframe = Math.max(sim.player.iframe, 0.6);
+      this.last = performance.now();
+    }
+  }
+
+  private showResult() {
+    const sim = this.sim!;
+    const sum = finishRun(this.save.data, sim);
+    this.save.save();
+    this.state = 'result';
+    this.ui.hideHud();
+    this.ui.showResult(sum);
+  }
+
+  // ------------------------------------------------------------ frame
+  private buildInput(sim: Sim) {
+    const inp = this.inp;
+    const input = this.input;
+    inp.mx = input.moveX;
+    inp.mz = input.moveY;
+    inp.dash = input.takeDash();
+    const auto = this.save.data.settings.autoAim;
+    const p = sim.player;
+    if (input.device === 'gamepad') {
+      const l = Math.hypot(input.stickAimX, input.stickAimY);
+      if (l > 0.35 && !auto) {
+        inp.aimX = input.stickAimX / l;
+        inp.aimZ = input.stickAimY / l;
+        inp.autoAim = false;
+      } else inp.autoAim = true;
+    } else if (input.device === 'touch' || auto) {
+      inp.autoAim = true;
+    } else if (this.view.groundPoint(input.pointerX, input.pointerY, this.gp)) {
+      const dx = this.gp.x - p.x, dz = this.gp.z - p.z;
+      const l = Math.hypot(dx, dz);
+      if (l > 0.3) {
+        inp.aimX = dx / l;
+        inp.aimZ = dz / l;
+      }
+      inp.autoAim = false;
+    }
+  }
+
+  private loop(now: number) {
+    requestAnimationFrame((t) => this.loop(t));
+    const real = Math.min(0.1, Math.max(0.0001, (now - this.last) / 1000));
+    this.last = now;
+    this.fps += (1 / real - this.fps) * 0.1;
+    const dt = Math.min(1 / 20, real);
+    this.input.poll(dt);
+    const sim = this.sim;
+    let simDt = 0;
+    let fxDt = dt;
+
+    switch (this.state) {
+      case 'playing': {
+        if (!sim) break;
+        if (this.input.takePause()) {
+          this.pauseRequest();
+          fxDt = 0;
+          break;
+        }
+        this.input.takeConfirm();
+        this.input.takeNav();
+        this.input.takeNumber();
+        this.input.takeBack();
+        this.input.takeKeys();
+        this.buildInput(sim);
+        simDt = dt;
+        if (this.view.hitStop > 0) {
+          this.hitStopT = Math.max(this.hitStopT, this.view.hitStop);
+          this.view.hitStop = 0;
+        }
+        if (this.hitStopT > 0) {
+          this.hitStopT -= real;
+          simDt *= 0.08;
+        }
+        sim.step(simDt, this.inp);
+        fxDt = simDt > 0 ? Math.max(simDt, dt * 0.35) : dt;
+        this.drainEvents(sim);
+        if (sim.pending.length > 0 && this.chooseDelay <= 0) this.chooseDelay = sim.pending[0].type === 'levelup' ? 0.28 : 0.6;
+        if (this.chooseDelay > 0) {
+          this.chooseDelay -= real;
+          if (this.chooseDelay <= 0 && sim.pending.length > 0) {
+            this.state = 'choosing';
+            this.ui.showPending(sim);
+          }
+        }
+        if (sim.state === 'dead') {
+          this.state = 'ending';
+          this.endT = 2.8;
+          this.view.setMode('death');
+          this.audio.music?.setMood('death', 0);
+        } else if (sim.state === 'victory') {
+          this.state = 'ending';
+          this.endT = 8.5;
+          this.view.setMode('victory');
+        }
+        // music follows the run
+        const m = this.audio.music;
+        if (m && sim.state === 'playing') {
+          if (sim.stats.bossKilled) m.setMood('victory', 1);
+          else if (sim.boss) m.setMood('boss', 4);
+          else {
+            const I = sim.intensity();
+            m.setMood('run', I < 2 ? 0 : I < 5 ? 1 : I < 9 ? 2 : 3);
+          }
+        }
+        this.ui.updateHud(sim, real, this.fps);
+        break;
+      }
+      case 'choosing':
+        this.ui.pollInput(this.input);
+        fxDt = dt * 0.25;
+        break;
+      case 'paused':
+        this.ui.pollInput(this.input);
+        fxDt = 0;
+        break;
+      case 'ending':
+        this.endT -= real;
+        this.input.clearQueues();
+        if (this.endT <= 0) this.showResult();
+        break;
+      case 'menu':
+      case 'result':
+        this.ui.pollInput(this.input);
+        break;
+      default:
+        break;
+    }
+    this.audio.music?.update();
+    this.view.frame(fxDt, this.state === 'paused' ? 0.0001 : real);
+  }
+
+  private drainEvents(sim: Sim) {
+    const ev = sim.events;
+    if (ev.length === 0) return;
+    this.view.handleEvents(ev);
+    this.audio.handle(ev, sim);
+    for (let i = 0; i < ev.length; i++) {
+      const e = ev[i];
+      if (e.t === 'announce') this.ui.announce(e.key, e.tone);
+    }
+    ev.length = 0;
+  }
 }
-requestAnimationFrame(loop);
+
+const app = new App();
+
+// ---- debugging hooks (only with ?debug in the URL)
+if (new URLSearchParams(location.search).has('debug')) {
+  const w = window as unknown as Record<string, unknown>;
+  w.app = app;
+  w.warp = (secs: number, god = true, tx?: number, tz?: number) => {
+    const sim = app.sim;
+    if (!sim) return null;
+    const bi: InputState = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
+    for (let i = 0; i < secs * 60; i++) {
+      while (sim.pending.length) choose(sim, 0);
+      const gx = tx ?? 30, gz = tz ?? 20;
+      const dx = gx - sim.player.x, dz = gz - sim.player.z;
+      const l = Math.hypot(dx, dz);
+      const ca = sim.time * 0.5;
+      bi.mx = l > 5 ? dx / l : Math.cos(ca);
+      bi.mz = l > 5 ? dz / l : Math.sin(ca);
+      if (god) sim.player.hp = sim.player.st.maxHp;
+      sim.step(1 / 60, bi);
+      sim.events.length = 0;
+    }
+    return { t: sim.time, lvl: sim.player.level, en: sim.enemies.length, beacons: sim.stats.beacons, w: sim.player.weapons.map((x) => x.id + x.level) };
+  };
+}

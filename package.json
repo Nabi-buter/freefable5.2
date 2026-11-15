@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/Nabi-buter/freefable5.2#readme",
   "dependencies": {
+    "@fontsource/cinzel": "^5.3.0",
     "three": "^0.187.0"
   },
   "devDependencies": {
