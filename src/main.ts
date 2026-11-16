@@ -483,6 +483,34 @@ if (new URLSearchParams(location.search).has('debug')) {
       sim.player.hp = 1;
       sim.hurtPlayer(9999, sim.player.x + 1, sim.player.z);
     },
+    /** replace the build with the given weapons at a level (7 = evolved) */
+    build(ids: string[], level = 7) {
+      const sim = app.sim;
+      if (!sim) return;
+      sim.player.weapons = ids.map((id) => ({ id, level, t: 0.2, a: 0, b: 0, dealt: 0 })) as typeof sim.player.weapons;
+      sim.recalc();
+    },
+    /** run the real step + event + render pipeline n times with a wandering god-mode player */
+    soak(n: number, dt = 1 / 30) {
+      const sim = app.sim;
+      if (!sim) return null;
+      const self = app as unknown as { drainEvents(s: Sim): void };
+      const bi: InputState = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
+      let events = 0;
+      for (let i = 0; i < n; i++) {
+        while (sim.pending.length) choose(sim, 0);
+        const a = sim.time * 0.4;
+        bi.mx = Math.cos(a);
+        bi.mz = Math.sin(a);
+        bi.dash = i % 90 === 0;
+        sim.player.hp = sim.player.st.maxHp;
+        sim.step(dt, bi);
+        events += sim.events.length;
+        self.drainEvents(sim);
+        app.view.frame(dt, dt);
+      }
+      return { t: sim.time, events, en: sim.enemies.length, zones: sim.zones.length, projs: sim.projs.length, state: sim.state };
+    },
     level(n: number) {
       const sim = app.sim;
       if (!sim) return;
