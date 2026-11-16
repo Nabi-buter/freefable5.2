@@ -142,7 +142,7 @@ class App implements UIHost {
       const d = dailyInfo();
       const cfg = daily
         ? { seed: d.seed, char: d.char, difficulty: 0, biome: d.biome, meta: this.save.data.meta }
-        : { seed: (Math.random() * 0xffffffff) >>> 0, char: last.char, difficulty: last.difficulty, biome: last.biome, meta: this.save.data.meta };
+        : { seed: (Math.random() * 0xffffffff) >>> 0, char: last.char, difficulty: last.difficulty, biome: last.biome, meta: this.save.data.meta, endless: last.endless && this.save.data.stats.wins > 0 };
       this.sim = new Sim(cfg);
       this.view.loadWorld(this.sim.world, CHARS[cfg.char]);
       this.menuBiome = '';

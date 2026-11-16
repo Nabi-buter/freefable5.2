@@ -729,6 +729,12 @@ export class GameView {
           this.hitStop = Math.max(this.hitStop, big ? 0.5 : 0.15);
           break;
         }
+        case 'loop': {
+          this.flash = Math.max(this.flash, 0.6);
+          this.addShake(0.7);
+          this.aberr = 0.02;
+          break;
+        }
         case 'bossPhase': {
           this.addShake(0.8);
           this.flash = Math.max(this.flash, 0.35);
@@ -859,7 +865,9 @@ export class GameView {
     // ---- environment / post
     let dawnTarget = 0;
     if (sim) {
-      dawnTarget = Math.min(0.3, sim.stats.beacons * 0.055);
+      let litN = 0;
+      for (const b of sim.beacons) if (b.lit) litN++;
+      dawnTarget = Math.min(0.3, litN * 0.055);
       if (sim.stats.bossKilled) dawnTarget = 1;
     } else dawnTarget = 0.06;
     this.dawn = damp(this.dawn, dawnTarget, sim?.stats.bossKilled ? 0.55 : 0.8, realDt);

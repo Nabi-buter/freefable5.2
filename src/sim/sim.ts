@@ -17,6 +17,8 @@ export interface RunConfig {
   difficulty: number;
   biome: BiomeId;
   meta: Partial<Record<MetaId, number>>;
+  /** endless night: the Eclipse returns stronger and the beacons go dark again */
+  endless?: boolean;
 }
 
 /** Uniform spatial hash for enemies. Rebuilt every step. */
@@ -29,7 +31,7 @@ class Grid {
   constructor(half: number, cap: number) {
     this.half = half;
     this.n = Math.ceil((half * 2) / this.cell);
-    this.head = new Int32Array(this.n * this.n);
+    this.head = new Int32Array(this.n * this.n).fill(-1);
     this.next = new Int32Array(cap);
   }
   private ci(v: number): number {
@@ -56,7 +58,7 @@ class Grid {
         let i = this.head[gz * this.n + gx];
         while (i >= 0) {
           const e = list[i];
-          if (e.alive && !e.buried) {
+          if (e && e.alive && !e.buried) {
             const dx = e.x - x, dz = e.z - z;
             const rr = r + e.r;
             if (dx * dx + dz * dz < rr * rr) out.push(e);
@@ -99,7 +101,7 @@ export class Sim {
   events: SimEvent[] = [];
   pending: Pending[] = [];
   blasts: Blast[] = [];
-  stats: RunStats = { kills: 0, eliteKills: 0, dmgDealt: 0, dmgTaken: 0, cinders: 0, beacons: 0, bossKilled: false, maxCombo: 0, healed: 0 };
+  stats: RunStats = { kills: 0, eliteKills: 0, dmgDealt: 0, dmgTaken: 0, cinders: 0, beacons: 0, bossKilled: false, loops: 0, maxCombo: 0, healed: 0 };
   boss: Enemy | null = null;
   dir: DirectorState;
   banished = new Set<string>();
@@ -108,6 +110,8 @@ export class Sim {
   hitCounter = 0;
   /** countdown after the final boss dies before the victory state */
   endT = -1;
+  /** endless mode: countdown until the beacons go dark again after a boss kill */
+  relightT = -1;
   /** countdown between last beacon and boss arrival */
   bossT = -1;
   private grid: Grid;
@@ -404,9 +408,14 @@ export class Sim {
       for (let i = 0; i < 6; i++) this.spawnPickup('cinder', e.x + this.rng.range(-2, 2), e.z + this.rng.range(-2, 2), 4);
     }
     if (e.kind === 'eclipse') {
-      this.stats.bossKilled = true;
       this.boss = null;
-      this.endT = 5.5;
+      if (this.cfg.endless) {
+        this.stats.loops++;
+        this.relightT = 5;
+      } else {
+        this.stats.bossKilled = true;
+        this.endT = 5.5;
+      }
       this.events.push({ t: 'bossDie', x: e.x, z: e.z, kind: e.kind });
       // the night breaks: everything else dies
       for (const o of this.enemies) if (o.alive) this.killQuiet(o);
@@ -492,7 +501,7 @@ export class Sim {
     const boss = kind === 'herald' || kind === 'eclipse';
     let hpMul = (1 + 0.11 * I + 0.011 * I * I) * this.diff.hp;
     // bosses scale with the clock only: rushing the beacons must not buy an easier fight
-    if (boss) hpMul = (1 + 0.045 * (this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1) * this.diff.hp;
+    if (boss) hpMul = (1 + 0.045 * (this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1 + 0.6 * this.stats.loops) * this.diff.hp;
     const biome = this.world.biome;
     if (!boss) hpMul *= biome.enemyHp;
     const scale = elite ? 1.45 : 1;
@@ -782,7 +791,7 @@ export class Sim {
           this.events.push({ t: 'announce', key: 'ann.channel', tone: 'info' });
         }
         // guardians appear at the 2nd and 4th beacon
-        const n = this.stats.beacons;
+        const n = this.stats.beacons % this.beacons.length;
         if (!b.guard && (n === 1 || n === 3) && b.progress > 0.2) {
           b.guard = true;
           const a = this.rng.angle();
@@ -797,6 +806,25 @@ export class Sim {
       } else if (b.progress > 0) {
         b.progress = Math.max(0, b.progress - dt * 0.015);
       }
+    }
+    if (this.relightT >= 0) {
+      this.relightT -= dt;
+      if (this.relightT < 0) {
+        // the night closes in again
+        for (const b of this.beacons) {
+          b.lit = false;
+          b.progress = 0;
+          b.guard = false;
+          b.channeling = false;
+          b.pulseT = 0;
+        }
+        this.heal(p.st.maxHp * 0.4);
+        this.events.push({ t: 'loop', n: this.stats.loops });
+        this.events.push({ t: 'announce', key: 'ann.loop', tone: 'warn' });
+        const pend = makeRelicPending(this);
+        if (pend) this.pending.push(pend);
+      }
+      return;
     }
     if (allLit && !this.boss && !this.stats.bossKilled && this.bossT < 0 && this.endT < 0) {
       this.bossT = 6;
@@ -843,7 +871,7 @@ export class Sim {
 
   /** cinders earned so far (shown on results; banked into the save) */
   cinderTotal(): number {
-    const base = this.stats.cinders + this.stats.kills / 30 + (this.stats.bossKilled ? 60 : 0);
+    const base = this.stats.cinders + this.stats.kills / 30 + (this.stats.bossKilled ? 60 : 0) + this.stats.loops * 60;
     return Math.round(base * this.diff.cinder * this.player.st.cinder);
   }
 }

@@ -30,6 +30,7 @@ export const ACHIEVEMENTS: AchDef[] = [
   { id: 'allchars', reward: 150 },
   { id: 'winall', reward: 400 },
   { id: 'allbiomes', reward: 250 },
+  { id: 'endless2', reward: 250 },
 ];
 
 export interface RunSummary {
@@ -49,6 +50,8 @@ export interface RunSummary {
   unlockedDiff: number;
   achievements: string[];
   newBest: boolean;
+  endless: boolean;
+  loops: number;
   daily: boolean;
   /** cinders for the first daily clear of the day (0 otherwise) */
   dailyBonus: number;
@@ -74,6 +77,13 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   st.maxCombo = Math.max(st.maxCombo, sim.stats.maxCombo);
   st.cindersEarned += cinders;
   st.evolutions += evolved;
+  const endless = !!sim.cfg.endless;
+  if (endless) {
+    if (sim.stats.loops > st.bestLoops || (sim.stats.loops === st.bestLoops && sim.time > st.bestEndlessTime)) {
+      st.bestLoops = sim.stats.loops;
+      st.bestEndlessTime = sim.time;
+    }
+  }
   let newBest = false;
   let unlockedDiff = -1;
   if (win) {
@@ -142,6 +152,7 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   ach('rich', st.cindersEarned >= 5000);
   ach('allchars', CHAR_IDS.every((c) => save.chars.includes(c)));
   ach('winall', CHAR_IDS.every((c) => (st.winsByChar[c] ?? 0) > 0));
+  ach('endless2', sim.stats.loops >= 2);
   ach('allbiomes', (['ashwood', 'frostmere', 'emberwaste'] as BiomeId[]).every((b) => (st.winsByBiome[b] ?? 0) > 0));
   save.cinders += bonus;
 
@@ -170,6 +181,6 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
     win, time: sim.time, level: p.level, kills: sim.stats.kills, beacons: sim.stats.beacons, maxCombo: sim.stats.maxCombo,
     dmgDealt: sim.stats.dmgDealt, cinders, bonus,
     weapons: p.weapons.map((w) => ({ id: w.id, level: w.level, dealt: w.dealt })).sort((a, b) => b.dealt - a.dealt),
-    unlockedChars, unlockedBiomes, unlockedDiff, achievements: got, newBest, daily, dailyBonus,
+    unlockedChars, unlockedBiomes, unlockedDiff, achievements: got, newBest, endless, loops: sim.stats.loops, daily, dailyBonus,
   };
 }

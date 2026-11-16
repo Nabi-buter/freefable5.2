@@ -263,6 +263,7 @@ export type SimEvent =
   | { t: 'revive'; x: number; z: number }
   | { t: 'death'; x: number; z: number }
   | { t: 'victory' }
+  | { t: 'loop'; n: number }
   | { t: 'spawnElite'; x: number; z: number }
   | { t: 'freeze'; x: number; z: number };
 
@@ -274,6 +275,8 @@ export interface RunStats {
   cinders: number;
   beacons: number;
   bossKilled: boolean;
+  /** endless mode: how many times the Eclipse has been defeated */
+  loops: number;
   maxCombo: number;
   healed: number;
 }

@@ -36,6 +36,9 @@ export interface LifetimeStats {
   winsByBiome: Partial<Record<BiomeId, number>>;
   /** highest difficulty beaten + 1 */
   cleared: number;
+  /** endless night records */
+  bestLoops: number;
+  bestEndlessTime: number;
 }
 
 export interface SaveData {
@@ -47,7 +50,7 @@ export interface SaveData {
   achievements: Record<string, number>;
   stats: LifetimeStats;
   settings: Settings;
-  last: { char: CharId; biome: BiomeId; difficulty: number };
+  last: { char: CharId; biome: BiomeId; difficulty: number; endless: boolean };
   tutorial: boolean;
   /** daily vigil record for `date` (UTC) */
   daily: { date: string; done: boolean; best: number; streak: number };
@@ -73,10 +76,10 @@ export function defaultSave(): SaveData {
     achievements: {},
     stats: {
       runs: 0, wins: 0, kills: 0, eliteKills: 0, beacons: 0, time: 0, maxLevel: 0, maxCombo: 0, cindersEarned: 0, evolutions: 0,
-      bestTime: [0, 0, 0], winsByChar: {}, winsByBiome: {}, cleared: 0,
+      bestTime: [0, 0, 0], winsByChar: {}, winsByBiome: {}, cleared: 0, bestLoops: 0, bestEndlessTime: 0,
     },
     settings: { lang: defaultLang(), quality: 'high', master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true },
-    last: { char: 'kindler', biome: 'ashwood', difficulty: 0 },
+    last: { char: 'kindler', biome: 'ashwood', difficulty: 0, endless: false },
     tutorial: false,
     daily: { date: '', done: false, best: 0, streak: 0 },
   };
@@ -123,6 +126,7 @@ export class SaveStore {
     if (!d.chars.includes(d.last.char)) d.last.char = 'kindler';
     if (!d.biomes.includes(d.last.biome)) d.last.biome = 'ashwood';
     d.last.difficulty = Math.max(0, Math.min(d.stats.cleared, 2, Math.floor(d.last.difficulty) || 0));
+    d.last.endless = !!d.last.endless && d.stats.wins > 0;
     const s = d.settings;
     const c01 = (v: number, def: number) => (Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : def);
     s.master = c01(s.master, 0.8);

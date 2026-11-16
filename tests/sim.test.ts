@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { runBot } from './simbot';
 import { World } from '../src/sim/worldgen';
+import { Sim } from '../src/sim/sim';
+import { choose } from '../src/sim/choices';
 
 describe('world generation', () => {
   it('is deterministic for a seed', () => {
@@ -29,6 +31,33 @@ describe('simulation', () => {
       const r = runBot(31, 0, 'kindler', 0.7, 120, false, b);
       expect(r.kills).toBeGreaterThan(20);
     }
+  }, 60000);
+  it('endless mode relights the island after the Eclipse falls', () => {
+    const sim = new Sim({ seed: 5, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {}, endless: true });
+    const input = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
+    const hack = sim as unknown as { lightBeacon(i: number): void };
+    for (let i = 0; i < sim.beacons.length; i++) hack.lightBeacon(i);
+    const drain = () => {
+      while (sim.pending.length) choose(sim, 0);
+    };
+    drain();
+    for (let i = 0; i < 60 * 8 && !sim.boss; i++) {
+      sim.player.hp = sim.player.st.maxHp;
+      sim.step(1 / 60, input);
+      drain();
+    }
+    expect(sim.boss).not.toBeNull();
+    sim.boss!.hp = 1;
+    sim.kill(sim.boss!);
+    for (let i = 0; i < 60 * 7; i++) {
+      sim.player.hp = sim.player.st.maxHp;
+      sim.step(1 / 60, input);
+      drain();
+    }
+    expect(sim.state).toBe('playing');
+    expect(sim.stats.loops).toBe(1);
+    expect(sim.stats.bossKilled).toBe(false);
+    expect(sim.beacons.every((b) => !b.lit)).toBe(true);
   }, 60000);
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker'] as const) {

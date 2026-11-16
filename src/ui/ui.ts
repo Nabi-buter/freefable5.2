@@ -284,13 +284,18 @@ export class UI {
         au.ui('click');
         this.showSetup();
         break;
+      case 'pick-mode':
+        sv.last.endless = arg === 'endless';
+        au.ui('click');
+        this.showSetup();
+        break;
       case 'pick-diff':
         sv.last.difficulty = Number(arg);
         au.ui('click');
         this.showSetup();
         break;
       case 'start': {
-        if (!sv.chars.includes(sv.last.char) || !sv.biomes.includes(sv.last.biome) || sv.last.difficulty > sv.stats.cleared) {
+        if (!sv.chars.includes(sv.last.char) || !sv.biomes.includes(sv.last.biome) || sv.last.difficulty > sv.stats.cleared || (sv.last.endless && sv.stats.wins < 1)) {
           au.ui('deny');
           break;
         }
@@ -456,6 +461,8 @@ export class UI {
     const charOk = sv.chars.includes(sv.last.char);
     const biomeOk = sv.biomes.includes(sv.last.biome);
     const diffOk = sv.last.difficulty <= sv.stats.cleared;
+    const endlessOk = sv.stats.wins > 0;
+    const endless = sv.last.endless;
     const chars = CHAR_IDS.map((id) => {
       const ok = sv.chars.includes(id);
       return `<button class="pick f ${id === sv.last.char ? 'sel' : ''} ${ok ? '' : 'locked'}" style="--c:${hex(CHARS[id].accent)}" data-act="pick-char" data-arg="${id}">
@@ -493,14 +500,19 @@ export class UI {
           </div>
           <div class="setup-col">
             <div><div class="group-label">${t('setup.stage')}</div><div class="pick-grid three">${biomes}</div></div>
-            <div class="panel detail" style="flex:none"><p>${t(`b.${sv.last.biome}.d`)}</p>${biomeOk ? '' : lock(`b.${sv.last.biome}.u`)}</div>
+            <div class="panel detail slim"><p>${t(`b.${sv.last.biome}.d`)}</p>${biomeOk ? '' : lock(`b.${sv.last.biome}.u`)}</div>
             <div><div class="group-label">${t('setup.diff')}</div><div class="pick-grid three">${diffs}</div></div>
-            <div class="panel detail" style="flex:none"><p>${t(`d.${sv.last.difficulty}.d`)}</p>${diffOk ? (best ? `<p>${icon('clock', 16)} ${t('rec.best', t('d.' + sv.last.difficulty))}: <b style="color:var(--amber-hot)">${fmtTime(best)}</b></p>` : '') : lock(`d.${sv.last.difficulty}.u`)}</div>
+            <div class="panel detail slim"><p>${t(`d.${sv.last.difficulty}.d`)}</p>${diffOk ? (best ? `<p>${icon('clock', 16)} ${t('rec.best', t('d.' + sv.last.difficulty))}: <b style="color:var(--amber-hot)">${fmtTime(best)}</b></p>` : '') : lock(`d.${sv.last.difficulty}.u`)}</div>
+            <div><div class="group-label">${t('setup.mode')}</div><div class="pick-grid two">
+              <button class="pick row f ${endless ? '' : 'sel'}" style="--c:#ffb347" data-act="pick-mode" data-arg="dawn"><span class="pic">${icon('wideglow', 22)}</span><span class="nm">${t('mode.dawn')}</span></button>
+              <button class="pick row f ${endless ? 'sel' : ''} ${endlessOk ? '' : 'locked'}" style="--c:#b98cff" data-act="pick-mode" data-arg="endless"><span class="pic">${icon(endlessOk ? 'reroll' : 'lock', 22)}</span><span class="nm">${t('mode.endless')}</span></button>
+            </div></div>
+            <div class="panel detail slim"><p>${t(endless ? 'mode.endless.d' : 'mode.dawn.d')}</p>${endless && !endlessOk ? lock('mode.endless.u') : ''}${endless && endlessOk && sv.stats.bestLoops > 0 ? `<p>${icon('trophy', 16)} ${t('rec.loops')}: <b style="color:var(--amber-hot)">${sv.stats.bestLoops}</b></p>` : ''}</div>
           </div>
         </div>
         <div class="foot">
           <button class="btn ghost f" data-act="title">${t('common.back')}</button>
-          <button class="btn primary f" data-act="start" ${charOk && biomeOk && diffOk ? '' : 'disabled'}>${icon('ember', 22)}${t('common.start')}</button>
+          <button class="btn primary f" data-act="start" ${charOk && biomeOk && diffOk && (!endless || endlessOk) ? '' : 'disabled'}>${icon('ember', 22)}${t('common.start')}</button>
         </div>
       </div>`);
   }
@@ -547,7 +559,7 @@ export class UI {
       body = `<div class="statlist">
         ${row(t('rec.runs'), fmtNum(st.runs))}${row(t('rec.wins'), fmtNum(st.wins))}${row(t('rec.kills'), fmtNum(st.kills))}${row(t('rec.elites'), fmtNum(st.eliteKills))}
         ${row(t('rec.beacons'), fmtNum(st.beacons))}${row(t('rec.time'), fmtTime(st.time))}${row(t('rec.maxlevel'), String(st.maxLevel))}${row(t('rec.maxcombo'), fmtNum(st.maxCombo))}
-        ${row(t('rec.cinders'), fmtNum(st.cindersEarned))}
+        ${row(t('rec.cinders'), fmtNum(st.cindersEarned))}${row(t('rec.loops'), st.bestLoops ? `${st.bestLoops} · ${fmtTime(st.bestEndlessTime)}` : '—')}
         ${[0, 1, 2].map((d) => row(t('rec.best', t('d.' + d)), st.bestTime[d] ? fmtTime(st.bestTime[d]) : '—')).join('')}
       </div>`;
     } else {
@@ -780,7 +792,12 @@ export class UI {
     else if (sim.bossT >= 0) obj = t('obj.bosswait');
     else if (herald) obj = t('obj.herald');
     else if (chan >= 0) obj = t('obj.channel', Math.floor(sim.beacons[chan].progress * 100));
-    else obj = t('obj.light', sim.stats.beacons, BEACON_COUNT);
+    else {
+      let litN = 0;
+      for (const b of sim.beacons) if (b.lit) litN++;
+      obj = t('obj.light', litN, BEACON_COUNT);
+    }
+    if (sim.cfg.endless) obj = `∞ ${t('hud.loop', sim.stats.loops + 1)}  ·  ${obj}`;
     this.set('obj', obj, (el, v) => (el.textContent = String(v)));
     // boss bar (final boss, or the herald while it lives)
     let bossE = sim.boss;
@@ -1068,8 +1085,8 @@ export class UI {
     const cell = (v: string, k: string) => `<div class="res-cell"><b>${v}</b><span>${k}</span></div>`;
     this.setModal('result', `
       <div class="panel result">
-        <div>${sum.daily ? `<div class="daily-tag">${icon('star', 14)}${t('menu.daily')}</div>` : ''}<div class="m-title ${sum.win ? 'gold' : 'red'}">${t(sum.win ? 'result.win' : 'result.lose')}</div><div class="m-sub">${t(sum.win ? 'result.win.sub' : 'result.lose.sub')}${sum.newBest ? ` · <b style="color:var(--gold)">${t('result.best')}</b>` : ''}</div></div>
-        <div class="res-grid">${cell(fmtTime(sum.time), t('result.time'))}${cell(String(sum.level), t('result.level'))}${cell(fmtNum(sum.kills), t('result.kills'))}${cell(`${sum.beacons}/${BEACON_COUNT}`, t('result.beacons'))}</div>
+        <div>${sum.daily ? `<div class="daily-tag">${icon('star', 14)}${t('menu.daily')}</div>` : ''}${sum.endless ? `<div class="daily-tag" style="color:var(--violet)">${icon('reroll', 14)}${t('result.endless')}</div>` : ''}<div class="m-title ${sum.win ? 'gold' : 'red'}">${t(sum.win ? 'result.win' : 'result.lose')}</div><div class="m-sub">${t(sum.win ? 'result.win.sub' : 'result.lose.sub')}${sum.newBest ? ` · <b style="color:var(--gold)">${t('result.best')}</b>` : ''}</div></div>
+        <div class="res-grid">${cell(fmtTime(sum.time), t('result.time'))}${cell(String(sum.level), t('result.level'))}${cell(fmtNum(sum.kills), t('result.kills'))}${sum.endless ? cell(String(sum.loops), t('result.loops')) : cell(`${sum.beacons}/${BEACON_COUNT}`, t('result.beacons'))}</div>
         <div class="res-cols scroll">
           <div><div class="group-label">${t('result.weapons')}</div><div class="wbars">${bars}</div>
             <div class="statline" style="margin-top:0.9em"><span class="k">${t('result.dmg')}</span><span class="v">${fmtNum(sum.dmgDealt)}</span><span class="k">${t('result.combo')}</span><span class="v">×${fmtNum(sum.maxCombo)}</span></div></div>
