@@ -177,6 +177,20 @@ export class EnemyRenderer {
   readonly marked: Enemy[] = [];
   /** burrowed enemies near the camera: drawn as moving dust by the view */
   readonly buried: Enemy[] = [];
+  /** enemies that just died: they sink and burn away over a fraction of a second */
+  private corpses: { kind: EnemyKind; x: number; z: number; face: number; scale: number; t0: number }[] = [];
+  private now = 0;
+
+  /** leave a short-lived dissolving body where an enemy fell */
+  addCorpse(kind: EnemyKind, x: number, z: number, face: number, scale: number) {
+    if (kind === 'herald' || kind === 'eclipse' || scale <= 0) return;
+    if (this.corpses.length >= 140) this.corpses.shift();
+    this.corpses.push({ kind, x, z, face, scale, t0: this.now });
+  }
+
+  clearCorpses() {
+    this.corpses.length = 0;
+  }
 
   constructor(shadows: boolean) {
     this.mat = makeWorldMat({ instFx: true });
@@ -209,6 +223,7 @@ export class EnemyRenderer {
     for (const k of ENEMY_KINDS) this.kinds[k].n = 0;
     this.marked.length = 0;
     this.buried.length = 0;
+    this.now = time;
     const R2 = 62 * 62;
     for (const list of lists) {
       for (let i = 0; i < list.length; i++) {
@@ -322,6 +337,36 @@ export class EnemyRenderer {
         f[idx * 4 + 3] = e.elite ? 1 : 0;
         (kr.phase.array as Float32Array)[idx] = tp;
       }
+    }
+    // --- dissolving bodies
+    const DUR = 0.45;
+    for (let i = this.corpses.length - 1; i >= 0; i--) {
+      const c = this.corpses[i];
+      const k = (time - c.t0) / DUR;
+      if (k >= 1 || k < 0) {
+        this.corpses.splice(i, 1);
+        continue;
+      }
+      const kr = this.kinds[c.kind];
+      if (kr.n >= kr.cap) continue;
+      const dx = c.x - cx, dz = c.z - cz;
+      if (dx * dx + dz * dz > R2) continue;
+      const idx = kr.n++;
+      const sy = c.scale * (1 - k * 0.45), sxz = c.scale * (1 + k * 0.18);
+      const yaw = -c.face;
+      const cs = Math.cos(yaw), sn = Math.sin(yaw);
+      const m = kr.mesh.instanceMatrix.array as Float32Array;
+      const o = idx * 16;
+      m[o] = cs * sxz; m[o + 1] = 0; m[o + 2] = -sn * sxz; m[o + 3] = 0;
+      m[o + 4] = 0; m[o + 5] = sy; m[o + 6] = 0; m[o + 7] = 0;
+      m[o + 8] = sn * sxz; m[o + 9] = 0; m[o + 10] = cs * sxz; m[o + 11] = 0;
+      m[o + 12] = c.x; m[o + 13] = height(c.x, c.z) - k * 0.15; m[o + 14] = c.z; m[o + 15] = 1;
+      const f = kr.fx.array as Float32Array;
+      f[idx * 4] = (1 - k) * 0.55;
+      f[idx * 4 + 1] = 0;
+      f[idx * 4 + 2] = 0;
+      f[idx * 4 + 3] = 2 + k;
+      (kr.phase.array as Float32Array)[idx] = 0;
     }
     for (const k of ENEMY_KINDS) {
       const kr = this.kinds[k];

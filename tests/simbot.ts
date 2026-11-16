@@ -1,6 +1,6 @@
 /**
  * Headless balance bot. Plays full runs against the pure simulation and prints a timeline.
- *   npx tsx tests/simbot.ts [runs] [difficulty] [char] [skill]
+ *   npx tsx tests/simbot.ts [runs] [difficulty] [char] [skill] [biome] [metaLevel] [endless]
  */
 import { Sim } from '../src/sim/sim';
 import { choose } from '../src/sim/choices';
@@ -19,14 +19,15 @@ export interface BotResult {
   log: string[];
   stepMs: number;
   maxEnemies: number;
+  loops: number;
 }
 
 /** skill 0..1: how well the bot dodges */
-export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', skill = 0.7, maxTime = 1500, verbose = false, biome: BiomeId = 'ashwood', metaLevel = 0): BotResult {
+export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', skill = 0.7, maxTime = 1500, verbose = false, biome: BiomeId = 'ashwood', metaLevel = 0, endless = false): BotResult {
   // metaLevel: how many ranks of every permanent upgrade the bot has bought
   const meta: Partial<Record<MetaId, number>> = {};
   for (const m of META) meta[m.id] = Math.min(m.max, metaLevel);
-  const sim = new Sim({ seed, char, difficulty, biome, meta });
+  const sim = new Sim({ seed, char, difficulty, biome, meta, endless });
   const input: InputState = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
   const dt = 1 / 60;
   const log: string[] = [];
@@ -155,6 +156,7 @@ export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', s
     log,
     stepMs: (performance.now() - t0) / steps,
     maxEnemies,
+    loops: sim.stats.loops,
   };
 }
 
@@ -166,14 +168,19 @@ if (isMain) {
   const skill = Number(process.argv[5] ?? 0.7);
   const biome = (process.argv[6] ?? 'ashwood') as BiomeId;
   const metaLevel = Number(process.argv[7] ?? 0);
+  const endless = process.argv[8] === 'endless';
   let wins = 0;
+  let loops = 0;
+  let total = 0;
   for (let i = 0; i < runs; i++) {
     const char = (charArg === 'all' ? CHAR_IDS[i % CHAR_IDS.length] : charArg) as CharId;
-    const r = runBot(1000 + i * 7919, diff, char, skill, 1500, runs === 1, biome, metaLevel);
+    const r = runBot(1000 + i * 7919, diff, char, skill, endless ? 3600 : 1500, runs === 1, biome, metaLevel, endless);
     if (r.win) wins++;
-    console.log(`#${i} ${char} ${r.win ? 'WIN ' : 'LOSS'} t=${(r.time / 60).toFixed(1)}m lvl=${r.level} kills=${r.kills} beacons=${r.beacons} minHp=${(r.hpLow * 100).toFixed(0)}% maxEn=${r.maxEnemies} step=${r.stepMs.toFixed(3)}ms`);
+    loops += r.loops;
+    total += r.time;
+    console.log(`#${i} ${char} ${r.win ? 'WIN ' : 'LOSS'} t=${(r.time / 60).toFixed(1)}m lvl=${r.level} kills=${r.kills} beacons=${r.beacons} minHp=${(r.hpLow * 100).toFixed(0)}% loops=${r.loops} maxEn=${r.maxEnemies} step=${r.stepMs.toFixed(3)}ms`);
     console.log('   ' + r.weapons);
     if (runs <= 3 && runs !== 1) r.log.forEach((l) => console.log(l));
   }
-  console.log(`wins ${wins}/${runs}`);
+  console.log(`wins ${wins}/${runs}  avg ${(total / runs / 60).toFixed(1)}m${endless ? `  avg loops ${(loops / runs).toFixed(2)}` : ''}`);
 }

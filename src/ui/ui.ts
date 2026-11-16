@@ -2,7 +2,7 @@ import './style.css';
 import '@fontsource/cinzel/latin-700.css';
 import '@fontsource/cinzel/latin-900.css';
 import type { AudioEngine } from '../audio/audio';
-import { isTouchPrimary, type Input } from '../core/input';
+import { BIND_ACTIONS, DEFAULT_BINDS, isTouchPrimary, keyLabel, type BindAction, type Input } from '../core/input';
 import { evoHint, fmtNum, fmtTime, getLang, passiveText, setLang, t, weaponLevelText, weaponName } from '../core/i18n';
 import { ACHIEVEMENTS, type RunSummary } from '../core/progress';
 import type { SaveStore } from '../core/save';
@@ -65,6 +65,7 @@ export class UI {
   screen: Screen = 'none';
   modal: Modal = null;
   private settingsFrom: 'title' | 'pause' = 'title';
+  private rebinding: BindAction | null = null;
   private recTab: 'ach' | 'stats' | 'codex' = 'ach';
   private focusIdx = -1;
   private openedAt = 0;
@@ -247,7 +248,40 @@ export class UI {
   private act(a: string, arg?: string) {
     const au = this.host.audio;
     const sv = this.save;
+    if (this.rebinding && a !== 'rebind') {
+      // leaving a pending key capture by clicking elsewhere cancels it
+      this.rebinding = null;
+      this.host.input.capture = null;
+    }
     switch (a) {
+      case 'rebind': {
+        const action = arg as BindAction;
+        if (!BIND_ACTIONS.includes(action)) break;
+        au.ui('click');
+        this.rebinding = action;
+        this.showSettings(true);
+        this.host.input.capture = (code) => {
+          this.rebinding = null;
+          if (code !== 'Escape') {
+            const keys = sv.settings.keys;
+            // a key can only do one thing: swap with whatever used it before
+            for (const o of BIND_ACTIONS) if (o !== action && keys[o] === code) keys[o] = keys[action];
+            keys[action] = code;
+            this.host.settingsChanged();
+            this.host.save.save();
+            au.ui('select');
+          } else au.ui('back');
+          if (this.screen === 'settings') this.showSettings(true);
+        };
+        break;
+      }
+      case 'keys-reset':
+        sv.settings.keys = { ...DEFAULT_BINDS };
+        au.ui('click');
+        this.host.settingsChanged();
+        this.host.save.save();
+        this.showSettings(true);
+        break;
       case 'title': au.ui('back'); this.showTitle(); break;
       case 'play': au.ui('click'); this.showSetup(); break;
       case 'daily': au.ui('select'); this.host.startRun(true); break;
@@ -600,6 +634,13 @@ export class UI {
           ${row(t('set.dmg'), seg('damageNumbers', onoff, String(s.damageNumbers)))}
           ${row(t('set.shake'), range('shake', s.shake, 0, 1.5))}
           ${row(t('set.zoom'), range('zoom', s.zoom, 0.75, 1.3))}
+          <div class="set-sec">${t('set.sec.access')}</div>
+          ${row(t('set.flash'), seg('reduceFlash', onoff, String(s.reduceFlash)))}
+          ${row(t('set.assist'), seg('colorAssist', onoff, String(s.colorAssist)))}
+          ${row(t('set.rumble'), seg('rumble', onoff, String(s.rumble)))}
+          ${isTouchPrimary() ? '' : `<div class="set-sec">${t('set.sec.keys')}</div>
+          ${BIND_ACTIONS.map((a) => row(t(`set.key.${a}`), `<button class="keycap f ${this.rebinding === a ? 'wait' : ''}" data-act="rebind" data-arg="${a}">${this.rebinding === a ? t('set.key.press') : keyLabel(s.keys[a])}</button>`)).join('')}
+          <div class="set-note">${t('set.key.note')}<button class="btn small ghost f" data-act="keys-reset">${t('set.key.reset')}</button></div>`}
           <div class="set-sec">${t('set.sec.video')}</div>
           ${row(t('set.quality'), seg('quality', [['low', t('set.q.low')], ['medium', t('set.q.medium')], ['high', t('set.q.high')], ['ultra', t('set.q.ultra')]], s.quality))}
           ${row(t('set.full'), `<button class="btn small f" data-act="full">${icon('fullscreen', 16)}${t('set.full')}</button>`)}
@@ -618,6 +659,13 @@ export class UI {
     if (keepScroll) this.screenEl.querySelector('.scroll')!.scrollTop = prev;
   }
 
+  /** the four movement keys as one short label, e.g. "WASD" */
+  private moveKeys(): string {
+    const k = this.save.settings.keys;
+    const l = [k.up, k.left, k.down, k.right].map(keyLabel);
+    return l.every((x) => x.length === 1) ? l.join('') : l.join(' ');
+  }
+
   private showHow() {
     const card = (n: number, ic: string) => `<div class="how-card"><h3>${icon(ic, 22)}${t(`how.${n}.t`)}</h3><p>${t(`how.${n}.d`)}</p></div>`;
     this.setScreen('how', `
@@ -625,7 +673,7 @@ export class UI {
         <div class="head"><h1>${t('how.title')}</h1></div>
         <div class="grid-body scroll"><div class="how-grid">
           ${card(1, 'glasslantern')}${card(2, 'beacon')}${card(3, 'up')}${card(4, 'crown')}
-          <div class="how-card wide"><h3>${icon('info', 22)}${t('how.controls')}</h3><ul><li>${t('how.c.kbm')}</li><li>${t('how.c.pad')}</li><li>${t('how.c.touch')}</li></ul></div>
+          <div class="how-card wide"><h3>${icon('info', 22)}${t('how.controls')}</h3><ul><li>${t('how.c.kbm', this.moveKeys(), keyLabel(this.save.settings.keys.dash))}</li><li>${t('how.c.pad')}</li><li>${t('how.c.touch')}</li></ul></div>
         </div></div>
         <div class="foot"><button class="btn ghost f" data-act="title">${t('common.back')}</button><button class="btn primary f" data-act="play">${t('menu.play')}</button></div>
       </div>`);
@@ -829,7 +877,7 @@ export class UI {
         this.tipStage = stage;
         const dev = this.host.input.device;
         const key = stage === 1 ? (dev === 'touch' ? 'tip.move.touch' : dev === 'gamepad' ? 'tip.move.pad' : 'tip.move') : stage === 2 ? 'tip.xp' : stage === 3 ? 'tip.beacon' : '';
-        if (key) this.h.tip.textContent = t(key);
+        if (key) this.h.tip.textContent = t(key, this.moveKeys(), keyLabel(this.save.settings.keys.dash));
         this.h.tip.classList.toggle('on', key !== '');
         if (stage === 4) {
           this.save.tutorial = true;
@@ -965,6 +1013,12 @@ export class UI {
         ds = weaponLevelText(c.id, c.level);
         tag = c.isNew ? `<span class="tag new">${t('common.new')}</span>` : `<span class="tag">${t('tag.weapon')}</span>`;
         if (c.level <= MAX_WEAPON_LEVEL) evo = `<div class="evo">${icon('up', 12)}${t('p.' + WEAPONS[c.id].evo)}${sim.passiveLevel(WEAPONS[c.id].evo) > 0 ? ' ✓' : ''}</div>`;
+        if (c.isNew) cls = 'sheen';
+        // this pick finishes an evolution recipe: say so
+        if (c.level === MAX_WEAPON_LEVEL && sim.passiveLevel(WEAPONS[c.id].evo) > 0) {
+          cls = 'ready';
+          evo = `<div class="evo ready">${icon('star', 12)}${t('levelup.ready')}</div>`;
+        }
         break;
       case 'evolve':
         color = '#ffd24a';
@@ -984,6 +1038,11 @@ export class UI {
         tag = c.isNew ? `<span class="tag new">${t('common.new')}</span>` : `<span class="tag">${t('tag.passive')}</span>`;
         const partner = WEAPON_IDS.filter((w) => WEAPONS[w].evo === c.id && sim.weapon(w));
         if (partner.length) evo = `<div class="evo">${icon('up', 12)}${partner.map((w) => t(`w.${w}.e`)).join(', ')}</div>`;
+        if (c.isNew) cls = 'sheen';
+        if (c.isNew && partner.some((w) => sim.weapon(w)!.level === MAX_WEAPON_LEVEL)) {
+          cls = 'ready';
+          evo = `<div class="evo ready">${icon('star', 12)}${t('levelup.ready')}</div>`;
+        }
         break;
       }
       case 'relic':
@@ -992,6 +1051,7 @@ export class UI {
         name = t('r.' + c.id);
         ds = t(`r.${c.id}.d`);
         tag = `<span class="tag">${t('tag.relic')}</span>`;
+        cls = 'sheen relic';
         break;
       case 'heal':
         color = '#7dff9b'; ic = 'heart'; name = t('choice.heal'); ds = t('choice.heal.d'); tag = `<span class="tag">${t('tag.bonus')}</span>`;

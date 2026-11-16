@@ -90,6 +90,10 @@ class App implements UIHost {
     this.audio.setVolumes(s.master, s.music, s.sfx);
     this.view.shakeMul = s.shake;
     this.view.showDamage = s.damageNumbers;
+    this.view.flashMul = s.reduceFlash ? 0.25 : 1;
+    this.view.assist = s.colorAssist;
+    this.input.binds = s.keys;
+    this.input.rumbleOn = s.rumble;
     this.view.overlay.enabled = true;
     this.view.zoom = s.zoom;
     if (this.view.quality !== s.quality) this.view.setQuality(s.quality);
@@ -405,9 +409,20 @@ class App implements UIHost {
     for (let i = 0; i < ev.length; i++) {
       const e = ev[i];
       if (e.t === 'announce') this.ui.announce(e.key, e.tone);
+      else if (e.t === 'hurt') this.input.rumble(Math.min(1, 0.45 + e.dmg / 40), 0.6, 160);
+      else if (e.t === 'dash') this.input.rumble(0, 0.35, 70);
+      else if (e.t === 'levelup') this.input.rumble(0.25, 0.5, 120);
+      else if (e.t === 'beaconLit') this.input.rumble(0.8, 0.8, 420);
+      else if (e.t === 'bossPhase' || e.t === 'bossDie') this.input.rumble(1, 0.8, 600);
+      else if (e.t === 'death') this.input.rumble(1, 1, 700);
+      else if (e.t === 'explode' && e.hostile) {
+        const dx = e.x - sim.player.x, dz = e.z - sim.player.z;
+        if (dx * dx + dz * dz < 144) this.input.rumble(0.5, 0.3, 140);
+      }
       else if (e.t === 'bossSpawn') {
         const big = e.kind === 'eclipse';
         this.cine = { t: 0, dur: big ? 3.2 : 2.0, x: e.x, z: e.z };
+        this.input.rumble(big ? 0.9 : 0.6, 0.5, big ? 900 : 500);
         this.ui.bossCard(e.kind, big ? 3.2 : 2.0);
       }
     }

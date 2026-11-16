@@ -101,6 +101,13 @@ varying vec4 vFx;
       .replace(
         '#include <clipping_planes_fragment>',
         `#include <clipping_planes_fragment>
+#ifdef USE_INSTFX
+  // aFx.w >= 2 marks a dying instance: (w - 2) is how far it has burned away
+  if (vFx.w >= 2.0) {
+    float dn = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+    if (dn < (vFx.w - 2.0) * 1.08) discard;
+  }
+#endif
 #ifdef USE_CUTOUT
   if (uCut.z > 0.0 && gl_FragCoord.z < uCut.w) {
     vec2 cd = (gl_FragCoord.xy - uCut.xy) / uCut.z;
@@ -127,7 +134,8 @@ varying vec4 vFx;
 #ifdef USE_INSTFX
   totalEmissiveRadiance += vColor.rgb * vGlow * vFx.y * 3.0 + vec3(1.0, 0.22, 0.2) * vFx.y * 0.3;
   totalEmissiveRadiance += vec3(1.0, 0.95, 0.85) * vFx.x * 1.1;
-  totalEmissiveRadiance += vec3(1.0, 0.72, 0.2) * vFx.w * 0.4;
+  totalEmissiveRadiance += vec3(1.0, 0.72, 0.2) * vFx.w * 0.4 * step(vFx.w, 1.5);
+  totalEmissiveRadiance += (vColor.rgb * 0.6 + vec3(1.2, 0.45, 0.12)) * (vFx.w - 1.7) * step(1.5, vFx.w);
   totalEmissiveRadiance += vec3(0.25, 0.5, 0.9) * vFx.z * 0.25;
 #endif`,
       );

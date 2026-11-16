@@ -179,6 +179,11 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .set-sec { font-size: 0.8em; letter-spacing: 0.24em; text-transform: uppercase; color: var(--mute); margin: 1.3em 0 0.5em 0.3em; }
 .set-row { display: flex; align-items: center; justify-content: space-between; gap: 1em; padding: 0.75em 1.1em; border-radius: 0.8em; background: rgba(18, 22, 48, 0.7); border: 1px solid var(--line); margin-bottom: 0.45em; min-height: 3.4em; }
 .set-row label { font-weight: 600; }
+.keycap { min-width: 4.6em; padding: 0.5em 0.9em; border-radius: 0.55em; border: 1px solid var(--line-strong); border-bottom-width: 3px; background: rgba(10, 12, 28, 0.75); color: var(--text); font-weight: 700; letter-spacing: 0.04em; pointer-events: auto; transition: all 0.12s; }
+.keycap:hover, .keycap.focus { border-color: #ffbe5c; color: #ffd9a0; }
+.keycap.wait { border-color: #ffbe5c; color: #ffbe5c; animation: keywait 0.9s ease-in-out infinite; }
+@keyframes keywait { 50% { opacity: 0.45; } }
+.set-note { display: flex; align-items: center; justify-content: space-between; gap: 1em; flex-wrap: wrap; color: var(--mute); font-size: 0.86em; padding: 0.3em 0.4em 0.2em; }
 .seg { display: inline-flex; border-radius: 0.6em; overflow: hidden; border: 1px solid var(--line-strong); }
 .seg button { padding: 0.45em 0.95em; color: var(--dim); background: rgba(10, 12, 28, 0.6); pointer-events: auto; font-weight: 600; font-size: 0.92em; transition: all 0.12s; }
 .seg button + button { border-left: 1px solid var(--line); }
@@ -317,6 +322,13 @@ body.aim canvas#game { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.
 .card.evolve::before { content: ''; position: absolute; inset: -1px; border-radius: inherit; padding: 2px; background: conic-gradient(from var(--a, 0deg), #ffd24a, #ff7a3c, #fff3c0, #ffd24a); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin 3s linear infinite; pointer-events: none; }
 @property --a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @keyframes spin { to { --a: 360deg; } }
+.card.sheen::after, .card.ready::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(112deg, transparent 38%, color-mix(in srgb, var(--c, #fff) 30%, rgba(255, 255, 255, 0.22)) 50%, transparent 62%); background-size: 260% 100%; background-position: 130% 0; animation: sheen 2.8s 0.5s ease-in-out infinite; mix-blend-mode: screen; }
+@keyframes sheen { 0% { background-position: 130% 0; } 55%, 100% { background-position: -40% 0; } }
+.card.relic { border-color: color-mix(in srgb, var(--c, #ffd24a) 60%, var(--gold)); }
+.card.relic .pic { box-shadow: inset 0 0 0 1px var(--gold), 0 0 2em color-mix(in srgb, var(--c, #ffd24a) 45%, transparent); }
+.card.ready { border-color: var(--gold); box-shadow: 0 1em 2.6em rgba(0, 0, 0, 0.55), 0 0 1.8em rgba(255, 200, 80, 0.28); }
+.card .evo.ready { opacity: 1; font-weight: 800; letter-spacing: 0.06em; animation: readypulse 1.1s ease-in-out infinite; }
+@keyframes readypulse { 50% { filter: brightness(1.5); transform: scale(1.06); } }
 .card.banishing { border-color: var(--red); }
 .m-actions { display: flex; gap: 0.7em; margin-top: 1.5em; flex-wrap: wrap; justify-content: center; animation: rise 0.4s 0.2s ease both; }
 .chest-wrap { display: flex; flex-direction: column; align-items: center; gap: 1em; }

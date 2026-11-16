@@ -1,5 +1,6 @@
 import { CHAR_IDS, META, type CharId, type MetaId } from '../sim/defs';
 import type { BiomeId } from '../sim/worldgen';
+import { BIND_ACTIONS, DEFAULT_BINDS, type KeyBinds } from './input';
 
 export type Lang = 'ko' | 'en';
 export type QualitySetting = 'low' | 'medium' | 'high' | 'ultra';
@@ -17,6 +18,14 @@ export interface Settings {
   showFps: boolean;
   /** lower the quality automatically when the frame rate stays low */
   autoQuality: boolean;
+  /** tone down full-screen flashes, chromatic aberration and bright light bursts */
+  reduceFlash: boolean;
+  /** high-contrast colours for enemy attacks */
+  colorAssist: boolean;
+  /** controller rumble and touch haptics */
+  rumble: boolean;
+  /** keyboard bindings (KeyboardEvent.code) */
+  keys: KeyBinds;
 }
 
 export interface LifetimeStats {
@@ -78,7 +87,7 @@ export function defaultSave(): SaveData {
       runs: 0, wins: 0, kills: 0, eliteKills: 0, beacons: 0, time: 0, maxLevel: 0, maxCombo: 0, cindersEarned: 0, evolutions: 0,
       bestTime: [0, 0, 0], winsByChar: {}, winsByBiome: {}, cleared: 0, bestLoops: 0, bestEndlessTime: 0,
     },
-    settings: { lang: defaultLang(), quality: 'high', master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true },
+    settings: { lang: defaultLang(), quality: 'high', master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true, reduceFlash: false, colorAssist: false, rumble: true, keys: { ...DEFAULT_BINDS } },
     last: { char: 'kindler', biome: 'ashwood', difficulty: 0, endless: false },
     tutorial: false,
     daily: { date: '', done: false, best: 0, streak: 0 },
@@ -136,6 +145,17 @@ export class SaveStore {
     s.zoom = Number.isFinite(s.zoom) ? Math.max(0.75, Math.min(1.3, s.zoom)) : 1;
     if (s.lang !== 'ko' && s.lang !== 'en') s.lang = defaultLang();
     if (!['low', 'medium', 'high', 'ultra'].includes(s.quality)) s.quality = 'high';
+    s.reduceFlash = !!s.reduceFlash;
+    s.colorAssist = !!s.colorAssist;
+    s.rumble = s.rumble !== false;
+    const keys = { ...DEFAULT_BINDS };
+    if (s.keys && typeof s.keys === 'object') {
+      for (const a of BIND_ACTIONS) {
+        const v = (s.keys as Partial<KeyBinds>)[a];
+        if (typeof v === 'string' && v.length > 0 && v.length < 24) keys[a] = v;
+      }
+    }
+    s.keys = keys;
   }
 
   save() {

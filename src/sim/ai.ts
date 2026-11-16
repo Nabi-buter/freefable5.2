@@ -276,7 +276,7 @@ export function updateEnemies(sim: Sim, dt: number) {
                 sim.events.push({ t: 'explode', x: e.x, z: e.z, r: R, c: 0xff4a6a, hostile: true });
                 if (dist < R + 0.4) sim.hurtPlayer(e.dmg, e.x, e.z);
                 e.alive = false;
-                sim.events.push({ t: 'kill', x: e.x, z: e.z, kind: e.kind, elite: false, r: e.r });
+                sim.events.push({ t: 'kill', x: e.x, z: e.z, kind: e.kind, elite: false, r: e.r, face: e.face, scale: 0 });
                 continue;
               }
             }

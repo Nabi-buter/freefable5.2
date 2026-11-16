@@ -59,6 +59,20 @@ describe('simulation', () => {
     expect(sim.stats.bossKilled).toBe(false);
     expect(sim.beacons.every((b) => !b.lit)).toBe(true);
   }, 60000);
+  it('keeps spatial query results intact across nested queries', () => {
+    const sim = new Sim({ seed: 9, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {} });
+    const input = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
+    for (let i = 0; i < 60 * 20; i++) {
+      sim.player.hp = sim.player.st.maxHp;
+      sim.step(1 / 60, input);
+      while (sim.pending.length) choose(sim, 0);
+    }
+    const first = sim.near(sim.player.x, sim.player.z, 60);
+    const snapshot = first.slice();
+    expect(snapshot.length).toBeGreaterThan(0);
+    for (let i = 0; i < 40; i++) sim.near(sim.player.x + 500, sim.player.z, 1);
+    expect(first).toEqual(snapshot);
+  }, 60000);
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);

@@ -241,7 +241,7 @@ export interface Pending {
 export type SimEvent =
   | { t: 'shoot'; w: WeaponId; x: number; z: number }
   | { t: 'hit'; x: number; z: number; dmg: number; crit: boolean; w: WeaponId | null; kill: boolean; big: boolean }
-  | { t: 'kill'; x: number; z: number; kind: EnemyKind; elite: boolean; r: number }
+  | { t: 'kill'; x: number; z: number; kind: EnemyKind; elite: boolean; r: number; face: number; /** 0 = no body left behind (blew itself up) */ scale: number }
   | { t: 'explode'; x: number; z: number; r: number; c: number; hostile: boolean }
   | { t: 'lightning'; pts: number[] }
   | { t: 'beam'; x: number; z: number; dx: number; dz: number; len: number; w: number }

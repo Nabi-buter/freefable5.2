@@ -12,6 +12,31 @@ export function isTouchPrimary(): boolean {
 
 export type Device = 'kbm' | 'gamepad' | 'touch';
 
+export interface KeyBinds {
+  up: string;
+  down: string;
+  left: string;
+  right: string;
+  dash: string;
+  pause: string;
+}
+export type BindAction = keyof KeyBinds;
+export const BIND_ACTIONS: BindAction[] = ['up', 'down', 'left', 'right', 'dash', 'pause'];
+export const DEFAULT_BINDS: KeyBinds = { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', dash: 'Space', pause: 'KeyP' };
+
+/** short label for a KeyboardEvent.code */
+export function keyLabel(code: string): string {
+  if (code.startsWith('Key')) return code.slice(3);
+  if (code.startsWith('Digit')) return code.slice(5);
+  if (code.startsWith('Numpad')) return 'Num ' + code.slice(6);
+  if (code.startsWith('Arrow')) return { Up: '↑', Down: '↓', Left: '←', Right: '→' }[code.slice(5)] ?? code;
+  const m: Record<string, string> = {
+    Space: 'Space', ShiftLeft: 'L-Shift', ShiftRight: 'R-Shift', ControlLeft: 'L-Ctrl', ControlRight: 'R-Ctrl', AltLeft: 'L-Alt', AltRight: 'R-Alt',
+    Enter: 'Enter', Tab: 'Tab', Backquote: '`', Minus: '-', Equal: '=', BracketLeft: '[', BracketRight: ']', Semicolon: ';', Quote: "'", Comma: ',', Period: '.', Slash: '/', Backslash: '\\',
+  };
+  return m[code] ?? code;
+}
+
 export interface StickView {
   active: boolean;
   ox: number;
@@ -33,6 +58,12 @@ export class Input {
   device: Device = 'kbm';
   /** virtual stick state for the touch HUD */
   stick: StickView = { active: false, ox: 0, oy: 0, x: 0, y: 0 };
+  /** rebindable keyboard controls (arrow keys, Shift and Esc always work as well) */
+  binds: KeyBinds = { ...DEFAULT_BINDS };
+  /** when set, the next key press is handed to this callback instead of the game (key rebinding) */
+  capture: ((code: string) => void) | null = null;
+  /** controller rumble / touch haptics */
+  rumbleOn = true;
   private keys = new Set<string>();
   private dashQ = false;
   private pauseQ = false;
@@ -91,10 +122,19 @@ export class Input {
     const t = e.target as HTMLElement | null;
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
     const c = e.code;
+    if (this.capture) {
+      if (down) {
+        const cb = this.capture;
+        this.capture = null;
+        cb(c);
+      }
+      e.preventDefault();
+      return;
+    }
     if (down) {
       if (!this.keys.has(c)) {
-        if (c === 'Space' || c === 'ShiftLeft' || c === 'ShiftRight') this.dashQ = true;
-        if (c === 'Escape' || c === 'KeyP') this.pauseQ = true;
+        if (c === this.binds.dash || c === 'ShiftLeft' || c === 'ShiftRight') this.dashQ = true;
+        if (c === 'Escape' || c === this.binds.pause) this.pauseQ = true;
         if (c === 'Escape' || c === 'Backspace') this.backQ = true;
         if (c === 'Enter' || c === 'Space') this.confirmQ = true;
         if (c === 'ArrowLeft' || c === 'KeyA' || c === 'ArrowUp' || c === 'KeyW') this.navQ = -1;
@@ -145,6 +185,26 @@ export class Input {
     if (e.cancelable) e.preventDefault();
   }
 
+  /** short haptic pulse on the active controller or phone. strong/weak 0..1 */
+  rumble(strong: number, weak: number, ms: number) {
+    if (!this.rumbleOn) return;
+    try {
+      if (this.device === 'gamepad') {
+        const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+        for (const p of pads) {
+          if (!p || !p.connected) continue;
+          const act = (p as unknown as { vibrationActuator?: { playEffect?: (type: string, o: object) => Promise<unknown> } }).vibrationActuator;
+          act?.playEffect?.('dual-rumble', { startDelay: 0, duration: ms, strongMagnitude: Math.min(1, strong), weakMagnitude: Math.min(1, weak) })?.catch(() => {});
+          break;
+        }
+      } else if (this.device === 'touch' && strong >= 0.5) {
+        navigator.vibrate?.(Math.min(60, ms * 0.4));
+      }
+    } catch {
+      /* haptics are best-effort */
+    }
+  }
+
   /** called by the touch HUD dash button */
   requestDash() {
     this.dashQ = true;
@@ -157,10 +217,11 @@ export class Input {
   poll(dt: number) {
     let mx = 0, my = 0;
     const k = this.keys;
-    if (k.has('KeyA') || k.has('ArrowLeft')) mx -= 1;
-    if (k.has('KeyD') || k.has('ArrowRight')) mx += 1;
-    if (k.has('KeyW') || k.has('ArrowUp')) my -= 1;
-    if (k.has('KeyS') || k.has('ArrowDown')) my += 1;
+    const kb = this.binds;
+    if (k.has(kb.left) || k.has('ArrowLeft')) mx -= 1;
+    if (k.has(kb.right) || k.has('ArrowRight')) mx += 1;
+    if (k.has(kb.up) || k.has('ArrowUp')) my -= 1;
+    if (k.has(kb.down) || k.has('ArrowDown')) my += 1;
     this.stickAimX = 0;
     this.stickAimY = 0;
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];

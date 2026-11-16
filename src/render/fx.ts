@@ -474,6 +474,9 @@ interface FloatText {
   t: number;
   dur: number;
   vx: number;
+  /** running total for merged damage numbers (0 = plain text) */
+  val: number;
+  crit: boolean;
 }
 
 export class Overlay {
@@ -516,7 +519,38 @@ export class Overlay {
       if (best > size) return;
       this.texts.splice(idx, 1);
     }
-    this.texts.push({ x, y, z, text, color, size, t: 0, dur, vx: (Math.random() - 0.5) * 1.4 });
+    this.texts.push({ x, y, z, text, color, size, t: 0, dur, vx: (Math.random() - 0.5) * 1.4, val: 0, crit: false });
+  }
+
+  /**
+   * Damage number. Rapid hits on the same spot (beams, auras, burn ticks) add up into one growing number
+   * instead of spraying dozens of tiny ones.
+   */
+  damage(x: number, y: number, z: number, dmg: number, crit: boolean) {
+    if (!this.enabled) return;
+    for (let i = this.texts.length - 1; i >= 0; i--) {
+      const f = this.texts[i];
+      if (f.val <= 0 || f.t > 0.32) continue;
+      const dx = f.x - x, dz = f.z - z;
+      if (dx * dx + dz * dz > 1.0) continue;
+      f.val += dmg;
+      f.crit = f.crit || crit;
+      f.text = String(Math.round(f.val)) + (f.crit ? '!' : '');
+      f.size = (13 + Math.min(13, Math.sqrt(f.val) * 0.85)) * (f.crit ? 1.3 : 1);
+      if (f.crit) f.color = '#ffd23a';
+      // re-pop a little and follow the target
+      f.t = Math.min(f.t, f.dur * 0.1);
+      f.x = x;
+      f.z = z;
+      return;
+    }
+    const size = (13 + Math.min(11, Math.sqrt(dmg) * 0.85)) * (crit ? 1.3 : 1);
+    this.text(x, y, z, String(Math.round(dmg)) + (crit ? '!' : ''), crit ? '#ffd23a' : '#f4f1ff', size, crit ? 0.85 : 0.6);
+    const f = this.texts[this.texts.length - 1];
+    if (f && f.t === 0 && f.x === x && f.z === z) {
+      f.val = dmg;
+      f.crit = crit;
+    }
   }
 
   /** project world → css pixels; returns false if behind camera */

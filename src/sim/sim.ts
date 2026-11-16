@@ -127,7 +127,6 @@ export class Sim {
     this.diff = DIFFICULTIES[clamp(cfg.difficulty, 0, DIFFICULTIES.length - 1)];
     this.char = CHARS[cfg.char];
     this.grid = new Grid(this.world.radius + 8, 1024);
-    for (let i = 0; i < 8; i++) this.scratch.push([]);
     this.beacons = this.world.beacons.map((b) => ({ x: b.x, z: b.z, progress: 0, lit: false, channeling: false, pulseT: 0, guard: false, litAt: 0 }));
     const m = (id: MetaId) => cfg.meta[id] ?? 0;
     this.player = {
@@ -220,10 +219,17 @@ export class Sim {
   }
 
   // ------------------------------------------------------------ queries
-  /** Alive enemies overlapping a circle. The returned array is scratch storage: valid until 8 further calls. */
+  /**
+   * Alive enemies overlapping a circle. The returned array is scratch storage that stays valid until the end
+   * of the current substep — kill chains (explosions → lightning → explosions…) nest these queries arbitrarily deep,
+   * so a fixed ring of buffers is not safe.
+   */
   near(x: number, z: number, r: number): Enemy[] {
-    const out = this.scratch[this.scratchI];
-    this.scratchI = (this.scratchI + 1) & 7;
+    let out = this.scratch[this.scratchI++];
+    if (!out) {
+      out = [];
+      this.scratch.push(out);
+    }
     out.length = 0;
     this.grid.query(this.enemies, x, z, r, out);
     for (let i = 0; i < this.bigs.length; i++) {
@@ -365,7 +371,7 @@ export class Sim {
     this.combo++;
     this.comboT = 2;
     if (this.combo > this.stats.maxCombo) this.stats.maxCombo = this.combo;
-    this.events.push({ t: 'kill', x: e.x, z: e.z, kind: e.kind, elite: e.elite || e.boss, r: e.r });
+    this.events.push({ t: 'kill', x: e.x, z: e.z, kind: e.kind, elite: e.elite || e.boss, r: e.r, face: e.face, scale: e.scale });
     const p = this.player;
     // drops
     if (e.def.xp > 0) this.dropXp(e.x, e.z, e.def.xp * (e.elite ? 12 : 1) * (1 + this.intensity() * 0.02));
@@ -430,7 +436,7 @@ export class Sim {
   private killQuiet(e: Enemy) {
     e.alive = false;
     this.stats.kills++;
-    this.events.push({ t: 'kill', x: e.x, z: e.z, kind: e.kind, elite: e.elite, r: e.r });
+    this.events.push({ t: 'kill', x: e.x, z: e.z, kind: e.kind, elite: e.elite, r: e.r, face: e.face, scale: e.scale });
   }
 
   dropXp(x: number, z: number, v: number) {
@@ -501,14 +507,17 @@ export class Sim {
     const boss = kind === 'herald' || kind === 'eclipse';
     let hpMul = (1 + 0.11 * I + 0.011 * I * I) * this.diff.hp;
     // bosses scale with the clock only: rushing the beacons must not buy an easier fight
-    if (boss) hpMul = (1 + 0.045 * (this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1 + 0.6 * this.stats.loops) * this.diff.hp;
+    const loops = this.stats.loops;
+    if (boss) hpMul = (1 + 0.045 * (this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1 + loops + 0.25 * loops * loops) * this.diff.hp;
     const biome = this.world.biome;
-    if (!boss) hpMul *= biome.enemyHp;
+    // endless night: every cycle the horde gets tougher and faster, so no build can coast forever
+    if (!boss) hpMul *= biome.enemyHp * (1 + 0.25 * loops);
+    const loopSpeed = boss ? 1 : 1 + Math.min(0.5, 0.07 * loops);
     const scale = elite ? 1.45 : 1;
     const e: Enemy = {
       id: this.id(), kind, def, x, z, kx: 0, kz: 0,
       hp: def.hp * hpMul * (elite ? 9 : 1), maxHp: 0,
-      r: def.radius * scale, speed: def.speed * (elite ? 1.08 : 1) * (boss ? 1 : biome.enemySpeed) * this.rng.range(0.94, 1.06), dmg: def.dmg * (elite ? 1.4 : 1),
+      r: def.radius * scale, speed: def.speed * (elite ? 1.08 : 1) * (boss ? 1 : biome.enemySpeed) * loopSpeed * this.rng.range(0.94, 1.06), dmg: def.dmg * (elite ? 1.4 : 1),
       alive: true, elite, boss, flash: 0, burnT: 0, burnDps: 0, burnAcc: 0, chillT: 0, freezeT: 0,
       t: 0, st: 0, stT: 0, ax: 0, az: 0, n: 0, face: 0, cdA: 0, cdB: 0, seed: this.rng.next(), spawn, scale, tele: 0, buried: false, affix: 0, phase: 1, c1: 0, lx: 0, lz: 0, ll: 0,
     };
@@ -550,6 +559,7 @@ export class Sim {
 
   private substep(dt: number, input: InputState) {
     this.time += dt;
+    this.scratchI = 0;
     this.compact();
     this.grid.rebuild(this.enemies);
     this.updatePlayer(dt, input);

@@ -238,6 +238,10 @@ export class GameView {
   focusW = 0;
   private trauma = 0;
   shakeMul = 1;
+  /** 1 = full-strength screen flashes, lower for the reduce-flash option */
+  flashMul = 1;
+  /** high-contrast colours for enemy attacks */
+  assist = false;
   showDamage = true;
   /** supplied by the app so the renderer stays free of i18n */
   affixLabel: ((affix: number) => string) | null = null;
@@ -247,6 +251,10 @@ export class GameView {
   private flash = 0;
   private aberr = 0;
   private fovKick = 0;
+  /** beacon-lit camera beat: seconds since the last beacon caught fire (large = idle) and where it is */
+  private litT = 99;
+  private litX = 0;
+  private litZ = 0;
   time = 0;
   private fxBudget = 0;
   private ambientT = 0;
@@ -436,6 +444,7 @@ export class GameView {
     this.trauma = 0;
     this.hurt = 0;
     this.flash = 0;
+    this.litT = 99;
     this.camTarget.set(0, this.height(0, 0), 0);
   }
 
@@ -512,7 +521,7 @@ export class GameView {
     best.light.color.setRGB(r, g, b);
     best.t = 0;
     best.dur = dur;
-    best.peak = peak * 0.32;
+    best.peak = peak * 0.32 * (0.35 + 0.65 * this.flashMul);
   }
 
   private burst(x: number, y: number, z: number, n: number, speed: number, life: number, size: number, r: number, g: number, b: number, up = 0.5, grav = 6, drag = 2) {
@@ -550,16 +559,14 @@ export class GameView {
             hitFx++;
             this.burst(ev.x, y, ev.z, ev.crit ? 6 : 3, ev.crit ? 9 : 6, 0.28, ev.crit ? 0.55 : 0.4, c[0] * 2, c[1] * 2, c[2] * 2, 0.5, 10, 3);
           }
-          if (this.showDamage && ev.dmg >= 1 && (hitFx < 30 || ev.crit || ev.big)) {
-            const size = (13 + Math.min(11, Math.sqrt(ev.dmg) * 0.85)) * (ev.crit ? 1.3 : 1);
-            this.overlay.text(ev.x, y + 0.6, ev.z, String(Math.round(ev.dmg)) + (ev.crit ? '!' : ''), ev.crit ? '#ffd23a' : '#f4f1ff', size, ev.crit ? 0.85 : 0.6);
-          }
+          if (this.showDamage && ev.dmg >= 1 && (hitFx < 30 || ev.crit || ev.big)) this.overlay.damage(ev.x, y + 0.6, ev.z, ev.dmg, ev.crit);
           break;
         }
         case 'kill': {
           const y = H(ev.x, ev.z);
           const c = KIND_COLOR[ev.kind];
           const big = ev.elite;
+          this.enemies?.addCorpse(ev.kind, ev.x, ev.z, ev.face, ev.scale);
           this.puff(ev.x, y + 0.4, ev.z, big ? 14 : 5, ev.r * 2.6 + 0.8, 0.09);
           this.burst(ev.x, y + 0.8, ev.z, big ? 28 : 7, big ? 12 : 6.5, 0.55, big ? 0.7 : 0.45, c[0] * 2.4, c[1] * 2.4, c[2] * 2.4, 0.9, 9, 1.6);
           this.ring(ev.x, ev.z, ev.r * 0.6, ev.r * 2.6 + (big ? 3 : 0.6), big ? 0.5 : 0.28, c[0], c[1], c[2]);
@@ -698,6 +705,9 @@ export class GameView {
           this.addShake(0.7);
           this.flash = Math.max(this.flash, 0.5);
           this.fovKick = 5;
+          this.litT = 0;
+          this.litX = ev.x;
+          this.litZ = ev.z;
           this.hitStop = Math.max(this.hitStop, 0.12);
           break;
         }
@@ -878,8 +888,8 @@ export class GameView {
     this.fovKick = damp(this.fovKick, 0, 3, realDt);
     const u = this.final.uniforms;
     u.uHurt.value = this.hurt * 0.5;
-    u.uFlash.value = this.flash * 0.35;
-    u.uAberr.value = this.aberr;
+    u.uFlash.value = this.flash * 0.35 * this.flashMul;
+    u.uAberr.value = this.aberr * this.flashMul;
     u.uTime.value = time;
     let low = 0;
     let bossMood = 0;
@@ -964,7 +974,11 @@ export class GameView {
       if (!b.alive) continue;
       const y = H(b.x, b.z) + 1.0;
       const s = b.r * 2.3 * (1 + Math.sin(time * 18 + b.id) * 0.12);
-      if (b.kind === 0) {
+      if (this.assist) {
+        // one unmistakable colour for everything that hurts, slightly larger
+        this.iBullet.add(b.x, y, b.z, 0, s * 1.2, s * 1.2, s * 1.2, 2.6, 0.5, 2.8);
+        dec.add(DECAL.glow, b.x, b.z, 1.4, 1.0, 0.25, 1.0, 0.5);
+      } else if (b.kind === 0) {
         this.iBullet.add(b.x, y, b.z, 0, s, s, s, 0.6, 1.7, 0.25);
         dec.add(DECAL.glow, b.x, b.z, 1.1, 0.3, 0.8, 0.1, 0.32);
       } else if (b.kind === 2) {
@@ -1034,11 +1048,13 @@ export class GameView {
           break;
         }
         case 'slam': {
-          dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.16, 0.5, 1.0, k);
+          if (this.assist) dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.3, 1.0, 1.0, k);
+          else dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.16, 0.5, 1.0, k);
           break;
         }
         case 'vent': {
-          dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.42, 0.1, 1.0, k);
+          if (this.assist) dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.3, 1.0, 1.0, k);
+          else dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.42, 0.1, 1.0, k);
           if (Math.random() < dt * 30 * (0.3 + k)) {
             const a = Math.random() * TAU, d = Math.sqrt(Math.random()) * z.r * 0.8;
             const x = z.x + Math.cos(a) * d, zz = z.z + Math.sin(a) * d;
@@ -1047,7 +1063,8 @@ export class GameView {
           break;
         }
         case 'frost': {
-          dec.add(DECAL.telegraph, z.x, z.z, z.r, 0.35, 0.8, 1.0, 1.0, k);
+          if (this.assist) dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.3, 1.0, 1.0, k);
+          else dec.add(DECAL.telegraph, z.x, z.z, z.r, 0.35, 0.8, 1.0, 1.0, k);
           if (Math.random() < dt * 24 * (0.3 + k)) {
             const a = Math.random() * TAU, d = Math.sqrt(Math.random()) * z.r * 0.8;
             const x = z.x + Math.cos(a) * d, zz = z.z + Math.sin(a) * d;
@@ -1260,11 +1277,20 @@ export class GameView {
     const k = 1 - Math.exp(-7 * realDt);
     // cinematic focus (boss introductions) pulls the view toward a point of interest
     const fw = this.focusW;
-    const fx = tx + (this.focusX - tx) * fw, fz = tz + (this.focusZ - tz) * fw;
+    let fx = tx + (this.focusX - tx) * fw, fz = tz + (this.focusZ - tz) * fw;
+    // a freshly lit beacon gets a breath of attention: drift toward it and pull back to take in the light
+    this.litT += realDt;
+    const lt = this.litT;
+    const lw = lt < 2.6 ? clamp(lt / 0.35, 0, 1) * (1 - clamp((lt - 1.3) / 1.3, 0, 1)) : 0;
+    const lws = lw * lw * (3 - 2 * lw);
+    if (lws > 0) {
+      fx += (this.litX - fx) * lws * 0.45;
+      fz += (this.litZ - fz) * lws * 0.45;
+    }
     this.camTarget.x += (fx - this.camTarget.x) * k;
     this.camTarget.z += (fz - this.camTarget.z) * k;
     this.camTarget.y += (py - this.camTarget.y) * (1 - Math.exp(-4 * realDt));
-    let dist = (35 * this.zoom + (sim.boss ? 5 : 0)) * (1 - fw * 0.3);
+    let dist = (35 * this.zoom + (sim.boss ? 5 : 0)) * (1 - fw * 0.3) * (1 + lws * 0.2);
     let pitch = 0.96; // radians above the horizon
     let lookY = 1.0;
     let yaw = 0;
