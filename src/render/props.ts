@@ -12,6 +12,15 @@ const _s = new THREE.Vector3();
 const _up = new THREE.Vector3(0, 1, 0);
 const _c = new THREE.Color();
 
+/** props are split into square sectors so three.js can frustum-cull whole groups of instances */
+const SECTOR = 46;
+const sector = (x: number, z: number) => Math.floor(x / SECTOR) + ',' + Math.floor(z / SECTOR);
+function cullable(mesh: THREE.InstancedMesh) {
+  mesh.computeBoundingSphere();
+  if (mesh.boundingSphere) mesh.boundingSphere.radius += 1.5;
+  mesh.frustumCulled = true;
+}
+
 export interface PropsResult {
   group: THREE.Group;
   dispose(): void;
@@ -48,7 +57,7 @@ export function buildProps(world: World, pal: Palette, opts: { shadows: boolean;
   for (const o of world.obstacles) {
     const def = lib[o.kind];
     const v = o.variant % def.geos.length;
-    const key = o.kind + ':' + v;
+    const key = o.kind + ':' + v + ':' + sector(o.x, o.z);
     let b = buckets.get(key);
     if (!b) buckets.set(key, (b = []));
     b.push(o);
@@ -76,7 +85,7 @@ export function buildProps(world: World, pal: Palette, opts: { shadows: boolean;
     mesh.castShadow = opts.shadows;
     mesh.receiveShadow = true;
     mesh.matrixAutoUpdate = false;
-    mesh.frustumCulled = false;
+    cullable(mesh);
     group.add(mesh);
     meshes.push(mesh);
   }
@@ -85,16 +94,18 @@ export function buildProps(world: World, pal: Palette, opts: { shadows: boolean;
   // decor
   const decorGeos = [G.geoGrassTuft(pal.grassBlade), G.geoFlower(pal.fern), G.geoSmallShroom(), G.geoPebble(pal.rock), G.geoFern(pal.fern)];
   geos.push(...decorGeos);
-  const dBuckets: number[][] = [[], [], [], [], []];
+  const dBuckets = new Map<string, number[]>();
   world.decor.forEach((d, i) => {
     // grass density scales with the quality setting; rarer decor always stays
     if (d.kind === 0 && d.tint > opts.decorDensity) return;
-    dBuckets[d.kind].push(i);
+    const key = d.kind + ':' + sector(d.x, d.z);
+    let b = dBuckets.get(key);
+    if (!b) dBuckets.set(key, (b = []));
+    b.push(i);
   });
   const shroomGlow = new THREE.Color(pal.shroomGlow);
-  for (let k = 0; k < 5; k++) {
-    const list = dBuckets[k];
-    if (list.length === 0) continue;
+  for (const [key, list] of dBuckets) {
+    const k = Number(key.split(':')[0]);
     const mesh = new THREE.InstancedMesh(decorGeos[k], k === 3 ? matStatic : matDecor, list.length);
     for (let i = 0; i < list.length; i++) {
       const d = world.decor[list[i]];
@@ -118,7 +129,7 @@ export function buildProps(world: World, pal: Palette, opts: { shadows: boolean;
     mesh.castShadow = false;
     mesh.receiveShadow = k !== 1 && k !== 2;
     mesh.matrixAutoUpdate = false;
-    mesh.frustumCulled = false;
+    cullable(mesh);
     group.add(mesh);
     meshes.push(mesh);
   }

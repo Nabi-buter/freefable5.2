@@ -377,7 +377,33 @@ class App implements UIHost {
   }
 }
 
-const app = new App();
+function fatal(ko: string, en: string) {
+  const veil = document.getElementById('veil');
+  if (!veil) return;
+  veil.classList.remove('gone');
+  const msg = veil.querySelector('.msg') as HTMLElement | null;
+  if (msg) {
+    msg.style.letterSpacing = '0.04em';
+    msg.style.textTransform = 'none';
+    msg.style.maxWidth = '30em';
+    msg.style.textAlign = 'center';
+    msg.style.lineHeight = '1.7';
+    msg.innerHTML = `${ko}<br>${en}`;
+  }
+}
+
+let app: App;
+try {
+  app = new App();
+  document.getElementById('game')!.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    fatal('그래픽 장치 연결이 끊겼습니다. 페이지를 새로고침해 주세요.', 'The graphics context was lost. Please reload the page.');
+  });
+} catch (err) {
+  console.error(err);
+  fatal('이 브라우저에서는 WebGL 2를 사용할 수 없어 게임을 실행할 수 없습니다.', 'CINDERWAKE needs WebGL 2, which is not available in this browser.');
+  throw err;
+}
 
 // ---- debugging hooks (only with ?debug in the URL)
 if (new URLSearchParams(location.search).has('debug')) {
