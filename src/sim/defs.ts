@@ -297,7 +297,7 @@ export interface DifficultyDef {
 export const DIFFICULTIES: DifficultyDef[] = [
   { id: 0, hp: 1, dmg: 1, spawn: 1, cinder: 1 },
   { id: 1, hp: 1.55, dmg: 1.35, spawn: 1.22, cinder: 1.6 },
-  { id: 2, hp: 2.3, dmg: 1.75, spawn: 1.45, cinder: 2.4 },
+  { id: 2, hp: 2.7, dmg: 2.0, spawn: 1.6, cinder: 2.4 },
 ];
 
 // ---------------------------------------------------------------- meta upgrades (bought with cinders between runs)

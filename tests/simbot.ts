@@ -5,7 +5,7 @@
 import { Sim } from '../src/sim/sim';
 import { choose } from '../src/sim/choices';
 import type { InputState } from '../src/sim/types';
-import { CHAR_IDS, type CharId } from '../src/sim/defs';
+import { CHAR_IDS, META, type CharId, type MetaId } from '../src/sim/defs';
 import type { BiomeId } from '../src/sim/worldgen';
 
 export interface BotResult {
@@ -22,8 +22,11 @@ export interface BotResult {
 }
 
 /** skill 0..1: how well the bot dodges */
-export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', skill = 0.7, maxTime = 1500, verbose = false, biome: BiomeId = 'ashwood'): BotResult {
-  const sim = new Sim({ seed, char, difficulty, biome, meta: {} });
+export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', skill = 0.7, maxTime = 1500, verbose = false, biome: BiomeId = 'ashwood', metaLevel = 0): BotResult {
+  // metaLevel: how many ranks of every permanent upgrade the bot has bought
+  const meta: Partial<Record<MetaId, number>> = {};
+  for (const m of META) meta[m.id] = Math.min(m.max, metaLevel);
+  const sim = new Sim({ seed, char, difficulty, biome, meta });
   const input: InputState = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
   const dt = 1 / 60;
   const log: string[] = [];
@@ -162,10 +165,11 @@ if (isMain) {
   const charArg = process.argv[4] ?? 'kindler';
   const skill = Number(process.argv[5] ?? 0.7);
   const biome = (process.argv[6] ?? 'ashwood') as BiomeId;
+  const metaLevel = Number(process.argv[7] ?? 0);
   let wins = 0;
   for (let i = 0; i < runs; i++) {
     const char = (charArg === 'all' ? CHAR_IDS[i % CHAR_IDS.length] : charArg) as CharId;
-    const r = runBot(1000 + i * 7919, diff, char, skill, 1500, runs === 1, biome);
+    const r = runBot(1000 + i * 7919, diff, char, skill, 1500, runs === 1, biome, metaLevel);
     if (r.win) wins++;
     console.log(`#${i} ${char} ${r.win ? 'WIN ' : 'LOSS'} t=${(r.time / 60).toFixed(1)}m lvl=${r.level} kills=${r.kills} beacons=${r.beacons} minHp=${(r.hpLow * 100).toFixed(0)}% maxEn=${r.maxEnemies} step=${r.stepMs.toFixed(3)}ms`);
     console.log('   ' + r.weapons);
