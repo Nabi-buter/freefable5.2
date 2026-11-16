@@ -10,6 +10,7 @@ import type {
 import { updateEnemies, updateDirector, initDirector, type DirectorState } from './ai';
 import { updateWeapons, updateProjs, updateZones, updateEProjs } from './weapons';
 import { makeChestPending, makeLevelPending, makeRelicPending } from './choices';
+import { castSkill, updateSkill } from './skills';
 
 export interface RunConfig {
   seed: number;
@@ -133,7 +134,7 @@ export class Sim {
       x: 0, z: 2.5, vx: 0, vz: 0, facing: Math.PI / 2, aim: Math.PI / 2,
       hp: 1, level: 1, xp: 0, xpNext: this.xpNeed(1),
       iframe: 0, dashT: 0, dashCdT: 0, dashCharges: 1, slowT: 0, dashX: 0, dashZ: 1,
-      moving: false, hurtT: 0, revives: m('m_revive'),
+      moving: false, hurtT: 0, revives: m('m_revive'), skillCd: 4, skillT: 0, skillAcc: 0,
       weapons: [], passives: [], relics: [],
       st: {} as Stats,
       rerolls: 1 + m('m_reroll'), banishes: m('m_banish'), alive: true,
@@ -637,6 +638,8 @@ export class Sim {
       mz /= ml;
     }
     p.moving = ml > 0.1;
+    updateSkill(this, dt);
+    if (input.skill && this.endT < 0) castSkill(this);
     if (input.dash && p.dashT <= 0 && p.dashCharges > 0) {
       p.dashCharges--;
       p.dashT = 0.2;
@@ -668,7 +671,7 @@ export class Sim {
       }
     } else {
       const k = 1 - Math.exp(-16 * dt);
-      const sp = st.speed * (p.slowT > 0 ? 0.62 : 1);
+      const sp = st.speed * (p.slowT > 0 ? 0.62 : 1) * (p.skillT > 0 && this.char.skill === 'cinderstep' ? 1.45 : 1);
       p.vx += (mx * sp - p.vx) * k;
       p.vz += (mz * sp - p.vz) * k;
     }

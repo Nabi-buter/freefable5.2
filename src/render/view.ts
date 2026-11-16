@@ -711,6 +711,56 @@ export class GameView {
           this.hitStop = Math.max(this.hitStop, 0.12);
           break;
         }
+        case 'skill': {
+          const y = H(ev.x, ev.z);
+          switch (ev.id) {
+            case 'flare':
+              this.ring(ev.x, ev.z, 0.5, ev.r, 0.4, 3, 1.5, 0.4);
+              this.ring(ev.x, ev.z, 0.2, ev.r * 0.7, 0.55, 2.2, 0.9, 0.25);
+              this.ring(ev.x, ev.z, 0, ev.r * 0.95, 0.7, 1.3, 0.6, 0.2, DECAL.glow);
+              for (let k = 0; k < 90; k++) {
+                const a = Math.random() * TAU, s = (0.4 + Math.random() * 0.6) * ev.r / 0.4;
+                this.sparks.spawn(ev.x, y + 0.6, ev.z, Math.cos(a) * s, 1 + Math.random() * 5, Math.sin(a) * s, 0.45 + Math.random() * 0.3, 0.8, 3.2, 1.5 + Math.random(), 0.35, { drag: 1.4 });
+              }
+              this.flashLight(ev.x, y + 3, ev.z, 1, 0.6, 0.25, 260, 0.6);
+              this.addShake(0.55);
+              this.flash = Math.max(this.flash, 0.3);
+              break;
+            case 'tempest':
+              this.ring(ev.x, ev.z, 1, ev.r, 0.5, 0.9, 1.4, 3);
+              this.burst(ev.x, y + 1.5, ev.z, 40, 14, 0.5, 0.5, 1.4, 2.0, 3.2, 1, 2, 2);
+              this.flashLight(ev.x, y + 5, ev.z, 0.6, 0.8, 1, 320, 0.5);
+              this.addShake(0.6);
+              this.flash = Math.max(this.flash, 0.4);
+              this.aberr = Math.max(this.aberr, 0.014);
+              break;
+            case 'bulwark':
+              this.ring(ev.x, ev.z, 0.5, ev.r, 0.38, 1.0, 2.6, 3);
+              this.ring(ev.x, ev.z, 0.5, ev.r * 0.6, 0.6, 0.6, 1.6, 2);
+              this.burst(ev.x, y + 1, ev.z, 36, 9, 0.6, 0.5, 0.8, 1.8, 2.2, 0.4, 0, 2.5);
+              this.flashLight(ev.x, y + 3, ev.z, 0.5, 0.9, 1, 200, 0.5);
+              this.addShake(0.5);
+              break;
+            case 'deepfreeze':
+              this.ring(ev.x, ev.z, 0.5, ev.r, 0.55, 1.6, 2.6, 3.2);
+              this.ring(ev.x, ev.z, 0, ev.r, 0.9, 0.5, 0.9, 1.2, DECAL.glow);
+              for (let k = 0; k < 110; k++) {
+                const a = Math.random() * TAU, d = Math.sqrt(Math.random()) * ev.r;
+                const x = ev.x + Math.cos(a) * d, z = ev.z + Math.sin(a) * d;
+                this.sparks.spawn(x, H(x, z) + 0.2, z, 0, 1.5 + Math.random() * 3, 0, 0.7 + Math.random() * 0.5, 0.5, 1.4, 2.4, 3.2, { drag: 1, grav: -1 });
+              }
+              this.flashLight(ev.x, y + 4, ev.z, 0.6, 0.85, 1, 240, 0.7);
+              this.addShake(0.4);
+              this.flash = Math.max(this.flash, 0.3);
+              break;
+            case 'cinderstep':
+              this.ring(ev.x, ev.z, 0.3, 4, 0.3, 3, 1.1, 0.3);
+              this.burst(ev.x, y + 0.6, ev.z, 30, 8, 0.5, 0.5, 3, 1.2, 0.3, 0.6, 2, 2);
+              this.fovKick = Math.max(this.fovKick, 3);
+              break;
+          }
+          break;
+        }
         case 'beaconPulse': {
           this.ring(ev.x, ev.z, 1.5, ev.r, 0.6, 1.6, 0.9, 0.3);
           break;
@@ -966,6 +1016,17 @@ export class GameView {
       }
     }
     this.iEmber.end(); this.iFrost.end(); this.iDart.end(); this.iGlaive.end();
+
+    // --- lingering signature effects
+    if (p.alive && p.skillT > 0) {
+      if (sim.char.skill === 'bulwark') {
+        const pulse = 0.75 + Math.sin(time * 14) * 0.15;
+        dec.add(DECAL.ring, p.x, p.z, 2.1, 0.4 * pulse, 1.2 * pulse, 1.6 * pulse, Math.min(1, p.skillT * 2));
+        dec.add(DECAL.glow, p.x, p.z, 2.6, 0.3, 0.8, 1.0, 0.22 * Math.min(1, p.skillT * 2));
+      } else if (sim.char.skill === 'cinderstep' && Math.random() < dt * 60) {
+        this.sparks.spawn(p.x, H(p.x, p.z) + 0.4, p.z, (Math.random() - 0.5) * 2, 1.5 + Math.random() * 2, (Math.random() - 0.5) * 2, 0.4, 0.5, 3, 1.3, 0.3, { drag: 1 });
+      }
+    }
 
     // --- enemy projectiles
     this.iBullet.begin();

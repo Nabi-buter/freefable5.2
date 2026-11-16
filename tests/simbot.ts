@@ -131,6 +131,8 @@ export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', s
     input.mx = mx;
     input.mz = mz;
     input.dash = threat > 2.2 && Math.random() < skill * 0.2;
+    // signature ability: a decent player saves it for a crowd, a boss or a bad moment
+    input.skill = p.skillCd <= 0 && (threat > 1.6 || sim.bigs.length > 0 || p.hp < p.st.maxHp * 0.4) && Math.random() < 0.05 + skill * 0.2;
     sim.step(dt, input);
     sim.events.length = 0;
     steps++;

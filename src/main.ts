@@ -242,6 +242,7 @@ class App implements UIHost {
     inp.mx = input.moveX;
     inp.mz = input.moveY;
     inp.dash = input.takeDash();
+    inp.skill = input.takeSkill();
     const auto = this.save.data.settings.autoAim;
     const p = sim.player;
     if (input.device === 'gamepad') {
@@ -308,6 +309,7 @@ class App implements UIHost {
           this.view.focusZ = c.z;
           simDt *= 0.12;
           this.inp.dash = false;
+          this.inp.skill = false;
           sim.player.iframe = Math.max(sim.player.iframe, 0.4);
           if (u >= 1) {
             this.cine = null;
@@ -411,6 +413,7 @@ class App implements UIHost {
       if (e.t === 'announce') this.ui.announce(e.key, e.tone);
       else if (e.t === 'hurt') this.input.rumble(Math.min(1, 0.45 + e.dmg / 40), 0.6, 160);
       else if (e.t === 'dash') this.input.rumble(0, 0.35, 70);
+      else if (e.t === 'skill') this.input.rumble(0.7, 0.9, 260);
       else if (e.t === 'levelup') this.input.rumble(0.25, 0.5, 120);
       else if (e.t === 'beaconLit') this.input.rumble(0.8, 0.8, 420);
       else if (e.t === 'bossPhase' || e.t === 'bossDie') this.input.rumble(1, 0.8, 600);

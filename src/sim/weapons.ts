@@ -13,7 +13,7 @@ function spawnProj(sim: Sim, kind: Proj['kind'], weapon: WeaponId, x: number, z:
   return pr;
 }
 
-function zone(sim: Sim, kind: Zone['kind'], x: number, z: number, r: number, dur: number, dmg: number, weapon: WeaponId | null, evolved: boolean, hostile = false): Zone {
+export function zone(sim: Sim, kind: Zone['kind'], x: number, z: number, r: number, dur: number, dmg: number, weapon: WeaponId | null, evolved: boolean, hostile = false): Zone {
   const zn: Zone = { id: sim.id(), kind, x, z, r, t: 0, dur, dmg, tick: 0, hostile, weapon, evolved, dx: 0, dz: 0, len: 0, alive: true };
   sim.zones.push(zn);
   return zn;

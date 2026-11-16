@@ -2,6 +2,7 @@ import './style.css';
 import '@fontsource/cinzel/latin-700.css';
 import '@fontsource/cinzel/latin-900.css';
 import type { AudioEngine } from '../audio/audio';
+import { SKILLS } from '../sim/defs';
 import { BIND_ACTIONS, DEFAULT_BINDS, isTouchPrimary, keyLabel, type BindAction, type Input } from '../core/input';
 import { evoHint, fmtNum, fmtTime, getLang, passiveText, setLang, t, weaponLevelText, weaponName } from '../core/i18n';
 import { ACHIEVEMENTS, type RunSummary } from '../core/progress';
@@ -148,6 +149,7 @@ export class UI {
     const num = input.takeNumber();
     const keys = input.takeKeys();
     input.takeDash();
+    input.takeSkill();
     input.takePause();
     const guard = performance.now() - this.openedAt < 320;
     if (nav !== 0) this.setFocus(this.focusIdx < 0 ? 0 : this.focusIdx + nav);
@@ -529,6 +531,7 @@ export class UI {
                 <span class="k">${t('setup.hp')}</span><span class="v"><span class="meter"><i style="width:${(c.hp / 140) * 100}%"></i></span>${c.hp}</span>
                 <span class="k">${t('setup.speed')}</span><span class="v"><span class="meter"><i style="width:${((c.speed - 5.5) / 2.6) * 100}%"></i></span>${c.speed.toFixed(1)}</span>
                 <span class="k">${t('setup.trait')}</span><span class="v">${t(`c.${sv.last.char}.t`)}</span>
+                <span class="k">${t('setup.skill')}</span><span class="v sk" style="--c:${hex(SKILLS[c.skill].color)}">${icon(c.skill, 15)}<b>${t('sk.' + c.skill)}</b> · ${t('sk.cd', SKILLS[c.skill].cd)}<small>${t(`sk.${c.skill}.d`)}</small></span>
               </div>
             </div>
           </div>
@@ -673,7 +676,7 @@ export class UI {
         <div class="head"><h1>${t('how.title')}</h1></div>
         <div class="grid-body scroll"><div class="how-grid">
           ${card(1, 'glasslantern')}${card(2, 'beacon')}${card(3, 'up')}${card(4, 'crown')}
-          <div class="how-card wide"><h3>${icon('info', 22)}${t('how.controls')}</h3><ul><li>${t('how.c.kbm', this.moveKeys(), keyLabel(this.save.settings.keys.dash))}</li><li>${t('how.c.pad')}</li><li>${t('how.c.touch')}</li></ul></div>
+          <div class="how-card wide"><h3>${icon('info', 22)}${t('how.controls')}</h3><ul><li>${t('how.c.kbm', this.moveKeys(), keyLabel(this.save.settings.keys.dash))}</li><li>${t('how.c.pad')}</li><li>${t('how.c.skill', keyLabel(this.save.settings.keys.skill))}</li><li>${t('how.c.touch')}</li></ul></div>
         </div></div>
         <div class="foot"><button class="btn ghost f" data-act="title">${t('common.back')}</button><button class="btn primary f" data-act="play">${t('menu.play')}</button></div>
       </div>`);
@@ -685,7 +688,7 @@ export class UI {
       <div class="xp"><i></i></div>
       <div class="tl">
         <div class="hpwrap"><div class="lvl"><small>LV</small><b data-h="lvl">1</b></div><div class="hp" data-h="hp"><div class="lag" data-h="hplag"></div><div class="fill" data-h="hpfill"></div><span data-h="hptext"></span></div></div>
-        <div class="dashes" data-h="dashes"></div>
+        <div class="act-row"><div class="skill" data-h="skill"><span data-h="skic"></span><i data-h="skcd"></i><b data-h="sknum"></b><small data-h="skkey"></small></div><div class="dashes" data-h="dashes"></div></div>
         <div class="slots" data-h="weapons"></div>
         <div class="slots" data-h="passives"></div>
         <div class="slots" data-h="relics"></div>
@@ -710,6 +713,7 @@ export class UI {
       <div class="minimap"><canvas width="190" height="190" data-h="mini"></canvas></div>
       <div class="stick" data-h="stick"><i data-h="knob"></i></div>
       <button class="dashbtn" data-h="dashbtn">${icon('dash', 34)}</button>
+      <button class="skillbtn" data-h="skillbtn"><span data-h="skbic"></span><i data-h="skbcd"></i></button>
       <div class="fps hidden" data-h="fps"></div>`;
     this.hud.querySelectorAll<HTMLElement>('[data-h]').forEach((e) => (this.h[e.dataset.h!] = e));
     this.h.xp = this.hud.querySelector('.xp i')!;
@@ -721,6 +725,13 @@ export class UI {
     };
     this.h.dashbtn.addEventListener('touchstart', dash, { passive: false });
     this.h.dashbtn.addEventListener('mousedown', dash);
+    const skill = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.host.input.requestSkill();
+    };
+    this.h.skillbtn.addEventListener('touchstart', skill, { passive: false });
+    this.h.skillbtn.addEventListener('mousedown', skill);
   }
 
   showHud() {
@@ -799,6 +810,29 @@ export class UI {
       el.innerHTML = html;
       this.h.dashbtn.classList.toggle('empty', p.dashCharges === 0);
     });
+    // signature ability
+    const sk = SKILLS[sim.char.skill];
+    this.set('skid', sk.id, () => {
+      const col = hex(sk.color);
+      this.h.skic.innerHTML = icon(sk.id, 20);
+      this.h.skbic.innerHTML = icon(sk.id, 30);
+      this.h.skill.style.setProperty('--c', col);
+      this.h.skillbtn.style.setProperty('--c', col);
+    });
+    const skf = p.skillCd > 0 ? p.skillCd / sk.cd : 0;
+    this.set('skf', Math.round(skf * 60), () => {
+      const deg = (skf * 360).toFixed(0) + 'deg';
+      this.h.skcd.style.setProperty('--f', deg);
+      this.h.skbcd.style.setProperty('--f', deg);
+    });
+    this.set('sknum', p.skillCd > 0 ? Math.ceil(p.skillCd) : 0, (_, v) => {
+      this.h.sknum.textContent = v ? String(v) : '';
+      this.h.skill.classList.toggle('ready', !v);
+      this.h.skillbtn.classList.toggle('ready', !v);
+    });
+    this.set('skon', p.skillT > 0 ? 1 : 0, (_, v) => this.h.skill.classList.toggle('active', v === 1));
+    const dev = this.host.input.device;
+    this.set('skkey', dev === 'gamepad' ? 'X' : dev === 'touch' ? '' : keyLabel(this.save.settings.keys.skill), (el, v) => (el.textContent = String(v)));
     // build icons
     const wKey = p.weapons.map((w) => w.id + w.level).join(',');
     this.set('weapons', wKey, (el) => {
@@ -872,14 +906,14 @@ export class UI {
     // first-run tips
     if (!this.save.tutorial) {
       this.tipT += dt;
-      const stage = this.tipT < 1 ? 0 : this.tipT < 9 ? 1 : this.tipT < 11 ? 0 : this.tipT < 20 ? 2 : this.tipT < 22 ? 0 : this.tipT < 31 ? 3 : 4;
+      const stage = this.tipT < 1 ? 0 : this.tipT < 9 ? 1 : this.tipT < 11 ? 0 : this.tipT < 20 ? 2 : this.tipT < 22 ? 0 : this.tipT < 31 ? 3 : this.tipT < 33 ? 0 : this.tipT < 42 ? 4 : 5;
       if (stage !== this.tipStage) {
         this.tipStage = stage;
         const dev = this.host.input.device;
-        const key = stage === 1 ? (dev === 'touch' ? 'tip.move.touch' : dev === 'gamepad' ? 'tip.move.pad' : 'tip.move') : stage === 2 ? 'tip.xp' : stage === 3 ? 'tip.beacon' : '';
-        if (key) this.h.tip.textContent = t(key, this.moveKeys(), keyLabel(this.save.settings.keys.dash));
+        const key = stage === 1 ? (dev === 'touch' ? 'tip.move.touch' : dev === 'gamepad' ? 'tip.move.pad' : 'tip.move') : stage === 2 ? 'tip.xp' : stage === 3 ? 'tip.beacon' : stage === 4 ? (dev === 'touch' ? 'tip.skill.touch' : dev === 'gamepad' ? 'tip.skill.pad' : 'tip.skill') : '';
+        if (key) this.h.tip.textContent = stage === 4 ? t(key, keyLabel(this.save.settings.keys.skill)) : t(key, this.moveKeys(), keyLabel(this.save.settings.keys.dash));
         this.h.tip.classList.toggle('on', key !== '');
-        if (stage === 4) {
+        if (stage === 5) {
           this.save.tutorial = true;
           this.host.save.save();
         }

@@ -1,4 +1,4 @@
-import type { EnemyDef, EnemyKind, PassiveId, RelicId, WeaponId } from './defs';
+import type { EnemyDef, EnemyKind, PassiveId, RelicId, SkillId, WeaponId } from './defs';
 
 export interface InputState {
   /** desired movement, length <= 1 */
@@ -10,6 +10,8 @@ export interface InputState {
   autoAim: boolean;
   /** edge-triggered dash request */
   dash: boolean;
+  /** edge-triggered signature ability request */
+  skill?: boolean;
 }
 
 export interface Stats {
@@ -72,6 +74,10 @@ export interface Player {
   moving: boolean;
   hurtT: number;
   revives: number;
+  /** signature ability: cooldown left, active time left, scratch accumulator */
+  skillCd: number;
+  skillT: number;
+  skillAcc: number;
   weapons: WeaponInst[];
   passives: PassiveInst[];
   relics: RelicId[];
@@ -264,6 +270,8 @@ export type SimEvent =
   | { t: 'death'; x: number; z: number }
   | { t: 'victory' }
   | { t: 'loop'; n: number }
+  | { t: 'skill'; id: SkillId; x: number; z: number; r: number }
+  | { t: 'skillReady' }
   | { t: 'spawnElite'; x: number; z: number }
   | { t: 'freeze'; x: number; z: number };
 

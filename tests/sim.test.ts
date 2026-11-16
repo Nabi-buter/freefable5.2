@@ -73,6 +73,31 @@ describe('simulation', () => {
     for (let i = 0; i < 40; i++) sim.near(sim.player.x + 500, sim.player.z, 1);
     expect(first).toEqual(snapshot);
   }, 60000);
+  it('every signature ability fires, goes on cooldown and comes back', () => {
+    for (const c of ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker'] as const) {
+      const sim = new Sim({ seed: 21, char: c, difficulty: 0, biome: 'ashwood', meta: {} });
+      const input = { mx: 1, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false, skill: false };
+      const run = (secs: number) => {
+        for (let i = 0; i < 60 * secs; i++) {
+          sim.player.hp = sim.player.st.maxHp;
+          sim.step(1 / 60, input);
+          while (sim.pending.length) choose(sim, 0);
+          sim.events.length = 0;
+        }
+      };
+      run(25);
+      expect(sim.player.skillCd).toBe(0);
+      input.skill = true;
+      sim.player.hp = sim.player.st.maxHp;
+      sim.step(1 / 60, input);
+      input.skill = false;
+      expect(sim.events.some((e) => e.t === 'skill' && e.id === sim.char.skill)).toBe(true);
+      expect(sim.player.skillCd).toBeGreaterThan(10);
+      sim.events.length = 0;
+      run(27);
+      expect(sim.player.skillCd).toBe(0);
+    }
+  }, 60000);
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);

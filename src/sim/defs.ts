@@ -277,17 +277,35 @@ export interface CharDef {
   area: number;
   xp: number;
   dashCharges: number;
+  /** signature ability */
+  skill: SkillId;
   /** cloak colour / accent colour for the renderer */
   cloak: number;
   accent: number;
 }
 
+// ---------------------------------------------------------------- signature abilities
+export type SkillId = 'flare' | 'tempest' | 'bulwark' | 'deepfreeze' | 'cinderstep';
+export interface SkillDef {
+  id: SkillId;
+  /** cooldown, seconds */
+  cd: number;
+  color: number;
+}
+export const SKILLS: Record<SkillId, SkillDef> = {
+  flare: { id: 'flare', cd: 20, color: 0xffa040 },
+  tempest: { id: 'tempest', cd: 18, color: 0x9fc4ff },
+  bulwark: { id: 'bulwark', cd: 26, color: 0x7de8ff },
+  deepfreeze: { id: 'deepfreeze', cd: 24, color: 0xbdf0ff },
+  cinderstep: { id: 'cinderstep', cd: 18, color: 0xff5a2a },
+};
+
 export const CHARS: Record<CharId, CharDef> = {
-  kindler: { id: 'kindler', weapon: 'ember', hp: 100, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1, xp: 1.1, dashCharges: 1, cloak: 0x7a3524, accent: 0xffa040 },
-  stormcaller: { id: 'stormcaller', weapon: 'arc', hp: 80, speed: 7.9, armor: 0, might: 1, haste: 1.12, area: 1, xp: 1, dashCharges: 1, cloak: 0x2a3f7a, accent: 0x9fc4ff },
-  warden: { id: 'warden', weapon: 'wisps', hp: 140, speed: 6.6, armor: 2, might: 1, haste: 1, area: 1, xp: 1, dashCharges: 1, cloak: 0x2f5a44, accent: 0x7de8ff },
-  frostweaver: { id: 'frostweaver', weapon: 'frost', hp: 90, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1.18, xp: 1, dashCharges: 1, cloak: 0x3b5d7c, accent: 0xbdf0ff },
-  ashwalker: { id: 'ashwalker', weapon: 'trail', hp: 95, speed: 7.7, armor: 0, might: 1.1, haste: 1, area: 1, xp: 1, dashCharges: 2, cloak: 0x3a2d33, accent: 0xff5a2a },
+  kindler: { id: 'kindler', weapon: 'ember', hp: 100, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1, xp: 1.1, dashCharges: 1, skill: 'flare', cloak: 0x7a3524, accent: 0xffa040 },
+  stormcaller: { id: 'stormcaller', weapon: 'arc', hp: 80, speed: 7.9, armor: 0, might: 1, haste: 1.12, area: 1, xp: 1, dashCharges: 1, skill: 'tempest', cloak: 0x2a3f7a, accent: 0x9fc4ff },
+  warden: { id: 'warden', weapon: 'wisps', hp: 140, speed: 6.6, armor: 2, might: 1, haste: 1, area: 1, xp: 1, dashCharges: 1, skill: 'bulwark', cloak: 0x2f5a44, accent: 0x7de8ff },
+  frostweaver: { id: 'frostweaver', weapon: 'frost', hp: 90, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1.18, xp: 1, dashCharges: 1, skill: 'deepfreeze', cloak: 0x3b5d7c, accent: 0xbdf0ff },
+  ashwalker: { id: 'ashwalker', weapon: 'trail', hp: 95, speed: 7.7, armor: 0, might: 1.1, haste: 1, area: 1, xp: 1, dashCharges: 2, skill: 'cinderstep', cloak: 0x3a2d33, accent: 0xff5a2a },
 };
 
 // ---------------------------------------------------------------- difficulty

@@ -388,6 +388,40 @@ export class AudioEngine {
         case 'victory':
           this.chord([62, 66, 69, 74, 78, 81, 86], 4, { type: 'triangle', vol: 0.11, strum: 0.16, rev: 0.9 });
           break;
+        case 'skill':
+          switch (ev.id) {
+            case 'flare':
+              this.tone(90, 0.7, { to: 36, vol: 0.26 });
+              this.noise(0.7, { freq: 2600, to: 140, vol: 0.2, rev: 0.4 });
+              this.tone(midi(62), 0.5, { type: 'triangle', vol: 0.06, rev: 0.6 });
+              break;
+            case 'tempest':
+              this.noise(0.5, { type: 'bandpass', freq: 5200, to: 600, q: 1.2, vol: 0.2, rev: 0.5 });
+              this.tone(1400, 0.22, { type: 'sawtooth', to: 120, vol: 0.09 });
+              this.tone(70, 0.9, { to: 34, vol: 0.24, rev: 0.4 });
+              break;
+            case 'bulwark':
+              this.tone(196, 0.8, { type: 'triangle', vol: 0.14, rev: 0.7 });
+              this.tone(294, 0.8, { type: 'triangle', vol: 0.1, rev: 0.7 });
+              this.tone(80, 0.5, { to: 42, vol: 0.22 });
+              this.noise(0.3, { freq: 1400, to: 200, vol: 0.1 });
+              break;
+            case 'deepfreeze':
+              this.tone(2600, 0.9, { to: 900, vol: 0.05, rev: 0.8 });
+              this.tone(1950, 1.1, { to: 700, vol: 0.04, type: 'triangle', rev: 0.8 });
+              this.noise(0.9, { type: 'bandpass', freq: 6400, to: 1800, q: 2, vol: 0.12, rev: 0.6 });
+              this.tone(110, 0.6, { to: 50, vol: 0.16 });
+              break;
+            case 'cinderstep':
+              this.noise(0.45, { type: 'bandpass', freq: 700, to: 3600, q: 1.4, vol: 0.14 });
+              this.tone(180, 0.35, { to: 520, type: 'sawtooth', vol: 0.05 });
+              break;
+          }
+          break;
+        case 'skillReady':
+          this.tone(midi(81), 0.12, { type: 'triangle', vol: 0.05, rev: 0.4 });
+          this.tone(midi(88), 0.2, { type: 'triangle', vol: 0.05, rev: 0.5, delay: 0.07 });
+          break;
         case 'freeze':
           if (this.ok('freeze', 0.08)) this.tone(2400 + Math.random() * 600, 0.16, { vol: 0.035, rev: 0.4 });
           break;

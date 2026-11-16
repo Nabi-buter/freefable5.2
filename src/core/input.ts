@@ -18,11 +18,12 @@ export interface KeyBinds {
   left: string;
   right: string;
   dash: string;
+  skill: string;
   pause: string;
 }
 export type BindAction = keyof KeyBinds;
-export const BIND_ACTIONS: BindAction[] = ['up', 'down', 'left', 'right', 'dash', 'pause'];
-export const DEFAULT_BINDS: KeyBinds = { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', dash: 'Space', pause: 'KeyP' };
+export const BIND_ACTIONS: BindAction[] = ['up', 'down', 'left', 'right', 'dash', 'skill', 'pause'];
+export const DEFAULT_BINDS: KeyBinds = { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', dash: 'Space', skill: 'KeyE', pause: 'KeyP' };
 
 /** short label for a KeyboardEvent.code */
 export function keyLabel(code: string): string {
@@ -66,6 +67,7 @@ export class Input {
   rumbleOn = true;
   private keys = new Set<string>();
   private dashQ = false;
+  private skillQ = false;
   private pauseQ = false;
   private confirmQ = false;
   private navQ = 0;
@@ -103,6 +105,8 @@ export class Input {
       this.pointerX = e.clientX;
       this.pointerY = e.clientY;
       if (e.button === 2) this.dashQ = true;
+      // left click on the playfield (not on a button) fires the signature ability
+      if (e.button === 0 && e.target instanceof HTMLCanvasElement) this.skillQ = true;
     });
     window.addEventListener('contextmenu', (e) => e.preventDefault());
     el.addEventListener('touchstart', (e) => this.onTouch(e), { passive: false });
@@ -134,6 +138,7 @@ export class Input {
     if (down) {
       if (!this.keys.has(c)) {
         if (c === this.binds.dash || c === 'ShiftLeft' || c === 'ShiftRight') this.dashQ = true;
+        if (c === this.binds.skill) this.skillQ = true;
         if (c === 'Escape' || c === this.binds.pause) this.pauseQ = true;
         if (c === 'Escape' || c === 'Backspace') this.backQ = true;
         if (c === 'Enter' || c === 'Space') this.confirmQ = true;
@@ -209,6 +214,9 @@ export class Input {
   requestDash() {
     this.dashQ = true;
   }
+  requestSkill() {
+    this.skillQ = true;
+  }
   requestPause() {
     this.pauseQ = true;
   }
@@ -246,8 +254,12 @@ export class Input {
       }
       const b = (i: number) => !!pad!.buttons[i]?.pressed;
       const edge = (i: number) => b(i) && !this.padPrev[i];
-      if (edge(0) || edge(5) || edge(7) || edge(4)) {
+      if (edge(0) || edge(5) || edge(7)) {
         this.dashQ = true;
+        this.setDevice('gamepad');
+      }
+      if (edge(2) || edge(3) || edge(4) || edge(6)) {
+        this.skillQ = true;
         this.setDevice('gamepad');
       }
       if (edge(0)) this.confirmQ = true;
@@ -289,6 +301,11 @@ export class Input {
     this.dashQ = false;
     return v;
   }
+  takeSkill(): boolean {
+    const v = this.skillQ;
+    this.skillQ = false;
+    return v;
+  }
   takePause(): boolean {
     const v = this.pauseQ;
     this.pauseQ = false;
@@ -321,7 +338,7 @@ export class Input {
     return k;
   }
   clearQueues() {
-    this.dashQ = this.pauseQ = this.confirmQ = this.backQ = false;
+    this.dashQ = this.skillQ = this.pauseQ = this.confirmQ = this.backQ = false;
     this.navQ = 0;
     this.numQ = 0;
     this.keyQ.length = 0;
