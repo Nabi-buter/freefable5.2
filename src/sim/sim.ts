@@ -1,6 +1,6 @@
 import { RNG, clamp } from '../core/rng';
 import {
-  CHARS, DIFFICULTIES, ENEMIES, META, PASSIVES, WEAPONS,
+  CHARS, DIFFICULTIES, ENEMIES, META, PASSIVES, SKILLS, WEAPONS,
   type CharDef, type CharId, type DifficultyDef, type EnemyKind, type MetaId, type PassiveId, type RelicId, type WeaponId,
 } from './defs';
 import { World, type BiomeId } from './worldgen';
@@ -152,6 +152,12 @@ export class Sim {
 
   xpNeed(level: number): number {
     return Math.floor(6 + 5 * level + 0.9 * level * level);
+  }
+
+  /** full cooldown of the signature ability after permanent upgrades, seconds */
+  skillCooldown(): number {
+    const cut = (this.cfg.meta.m_skill ?? 0) * (META.find((d) => d.id === 'm_skill')?.per ?? 0);
+    return SKILLS[this.char.skill].cd * (1 - cut / 100);
   }
 
   /** intensity scalar driving spawn rate and enemy scaling */

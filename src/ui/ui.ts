@@ -46,11 +46,11 @@ const BIOME_ICON: Record<BiomeId, string> = { ashwood: 'starmoss', frostmere: 'f
 const DIFF_COLOR = ['#ffb347', '#8fa8ff', '#ff5a5a'];
 const META_ICON: Record<MetaId, string> = {
   m_hp: 'vigor', m_might: 'might', m_haste: 'haste', m_speed: 'swift', m_regen: 'mending', m_armor: 'plating', m_magnet: 'magnet', m_xp: 'wisdom',
-  m_cinder: 'cinder', m_luck: 'fortune', m_reroll: 'reroll', m_banish: 'banish', m_revive: 'phoenix',
+  m_cinder: 'cinder', m_luck: 'fortune', m_skill: 'flare', m_reroll: 'reroll', m_banish: 'banish', m_revive: 'phoenix',
 };
 const META_COLOR: Record<MetaId, string> = {
   m_hp: '#ff5d6c', m_might: '#ff9a4a', m_haste: '#ffe36b', m_speed: '#8affea', m_regen: '#7dff9b', m_armor: '#b9c4d6', m_magnet: '#6bd1ff', m_xp: '#c7a2ff',
-  m_cinder: '#ffb347', m_luck: '#ffd24a', m_reroll: '#7fd4ff', m_banish: '#ff8a80', m_revive: '#ff7a3c',
+  m_cinder: '#ffb347', m_luck: '#ffd24a', m_skill: '#ffa040', m_reroll: '#7fd4ff', m_banish: '#ff8a80', m_revive: '#ff7a3c',
 };
 const ENEMY_COLOR: Record<string, string> = {
   shade: '#ff4d86', skitter: '#9dff5a', brute: '#ff8a2a', spitter: '#a6ff3a', wraith: '#6cf2ff', bomber: '#ff3a6a', husk: '#ffd24a', rime: '#8fe0ff', worm: '#ff7a2a', sporecap: '#9cff8a', herald: '#b04aff', eclipse: '#ff5a3c',
@@ -819,7 +819,7 @@ export class UI {
       this.h.skill.style.setProperty('--c', col);
       this.h.skillbtn.style.setProperty('--c', col);
     });
-    const skf = p.skillCd > 0 ? p.skillCd / sk.cd : 0;
+    const skf = p.skillCd > 0 ? Math.min(1, p.skillCd / sim.skillCooldown()) : 0;
     this.set('skf', Math.round(skf * 60), () => {
       const deg = (skf * 360).toFixed(0) + 'deg';
       this.h.skcd.style.setProperty('--f', deg);

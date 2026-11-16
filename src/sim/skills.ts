@@ -3,7 +3,7 @@
  * Their damage is partly a share of the target's health so they clear the horde at any point of a run
  * without deleting elites or bosses.
  */
-import { SKILLS, type SkillId } from './defs';
+import type { SkillId } from './defs';
 import type { Enemy } from './types';
 import type { Sim } from './sim';
 import { zone } from './weapons';
@@ -23,10 +23,9 @@ export function castSkill(sim: Sim): boolean {
   const p = sim.player;
   if (!skillReady(sim)) return false;
   const id: SkillId = sim.char.skill;
-  const def = SKILLS[id];
   const L = p.level;
   const area = p.st.area;
-  p.skillCd = def.cd;
+  p.skillCd = sim.skillCooldown();
   let radius = 0;
   switch (id) {
     case 'flare': {
