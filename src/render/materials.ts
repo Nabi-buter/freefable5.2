@@ -7,11 +7,15 @@ export const shared = {
   /** terrain height texture + world extent, used by ground decals */
   uHeightMap: { value: null as THREE.Texture | null },
   uHeightExtent: { value: 170 },
+  /** see-through hole around the player: x, y (framebuffer px), radius (px), depth (0..1) */
+  uCut: { value: new THREE.Vector4(0, 0, 0, 1) },
 };
 
 export interface WorldMatOpts {
   sway?: boolean;
   instFx?: boolean;
+  /** dither away fragments that stand between the camera and the player */
+  cutout?: boolean;
   color?: number;
   side?: THREE.Side;
   transparent?: boolean;
@@ -35,9 +39,11 @@ export function makeWorldMat(o: WorldMatOpts = {}): THREE.MeshLambertMaterial {
   mat.defines = {};
   if (o.sway) mat.defines.USE_SWAY = '';
   if (o.instFx) mat.defines.USE_INSTFX = '';
+  if (o.cutout) mat.defines.USE_CUTOUT = '';
   mat.onBeforeCompile = (sh) => {
     sh.uniforms.uTime = shared.uTime;
     sh.uniforms.uGlowMul = shared.uGlowMul;
+    sh.uniforms.uCut = shared.uCut;
     sh.vertexShader = sh.vertexShader
       .replace(
         '#include <common>',
@@ -83,8 +89,26 @@ vGlow = aGlow;
         `#include <common>
 varying float vGlow;
 uniform float uGlowMul;
+#ifdef USE_CUTOUT
+uniform vec4 uCut;
+#endif
 #ifdef USE_INSTFX
 varying vec4 vFx;
+#endif`,
+      )
+      .replace(
+        '#include <clipping_planes_fragment>',
+        `#include <clipping_planes_fragment>
+#ifdef USE_CUTOUT
+  if (uCut.z > 0.0 && gl_FragCoord.z < uCut.w) {
+    vec2 cd = (gl_FragCoord.xy - uCut.xy) / uCut.z;
+    cd.y *= 0.82;
+    float cr = length(cd);
+    if (cr < 1.0) {
+      float ign = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+      if (ign > smoothstep(0.5, 1.0, cr) * 1.05) discard;
+    }
+  }
 #endif`,
       )
       .replace(

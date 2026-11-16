@@ -299,7 +299,7 @@ export class EnemyRenderer {
         m[o + 12] = e.x; m[o + 13] = y; m[o + 14] = e.z; m[o + 15] = 1;
         const f = kr.fx.array as Float32Array;
         f[idx * 4] = e.boss ? e.flash * 0.22 : e.flash * 0.75;
-        f[idx * 4 + 1] = e.tele ? 0.6 + 0.4 * Math.sin(time * 30) : 0;
+        f[idx * 4 + 1] = e.tele ? (e.kind === 'eclipse' ? 0.22 : 0.6 + 0.4 * Math.sin(time * 30)) : 0;
         f[idx * 4 + 2] = frozen ? 1 : e.chillT > 0 ? 0.45 : 0;
         f[idx * 4 + 3] = e.elite ? 1 : 0;
         (kr.phase.array as Float32Array)[idx] = tp;

@@ -251,23 +251,32 @@ export function geoHerald(): THREE.BufferGeometry {
 
 /** Final boss body: a black sun wearing a crown of thorns. Core glow + ring are separate meshes. */
 export function geoEclipse(): THREE.BufferGeometry {
-  const dark = 0x0b0714, rim = 0x2a1440, glow = 0xff5a3c, eye = 0xfff0c0;
+  const dark = 0x07040e, rim = 0x241038, glow = 0xff5a3c, eye = 0xfff0c0;
   const parts = [
-    part(lumpy(ico(2.3, 2), 0.05, 9), dark, { pos: [0, 4.2, 0], jitter: 0.2 }),
-    part(sph(0.75, 10, 8), eye, { pos: [1.9, 4.3, 0], glow: 3.2, scl: [0.5, 1, 1] }),
-    part(sph(0.38, 8, 6), 0x1a0408, { pos: [2.2, 4.3, 0], scl: [0.5, 1.5, 0.5] }),
+    part(lumpy(ico(2.3, 2), 0.05, 9), dark, { pos: [0, 4.2, 0], jitter: 0.25 }),
+    // a single burning eye, tilted up so the high camera can meet its gaze
+    part(sph(0.8, 10, 8), eye, { pos: [1.55, 5.5, 0], glow: 2.6, scl: [0.55, 0.8, 1.15], rot: [0, 0, 0.75] }),
+    part(sph(0.4, 8, 6), 0x1a0408, { pos: [1.8, 5.75, 0], scl: [0.5, 0.7, 0.45], rot: [0, 0, 0.75] }),
     part(cone(1.6, 3.4, 9), rim, { pos: [0, 1.6, 0], rot: [Math.PI, 0, 0], sway: (x, y) => Math.max(0, 2.6 - y) * 0.4, jitter: 0.16 }),
   ];
-  for (let i = 0; i < 14; i++) {
-    const a = (i / 14) * Math.PI * 2;
-    const len = i % 2 ? 2.2 : 1.4;
-    const y = 4.2, r = 2.3 + len * 0.42;
-    // spikes radiate in the plane facing the player (Y-Z plane)
-    parts.push(part(cone(0.3, len, 4), i % 2 ? glow : rim, { pos: [0, y + Math.cos(a) * r, Math.sin(a) * r], rot: [a, 0, 0], glow: i % 2 ? 1.6 : 0 }));
+  // crown of thorns around the equator: reads as a black sun from above
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2;
+    const long = i % 2 === 0;
+    const len = long ? 2.6 : 1.5;
+    const r = 2.2 + len * 0.45;
+    parts.push(part(cone(0.34, len, 4), long ? glow : rim, {
+      pos: [Math.cos(a) * r, 4.2 + (long ? 0.15 : -0.2), Math.sin(a) * r],
+      rot: [0, -a, -Math.PI / 2], glow: long ? 1.5 : 0,
+    }));
+  }
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2 + 0.4;
+    parts.push(part(cone(0.22, 1.4, 4), rim, { pos: [Math.cos(a) * 1.1, 6.6, Math.sin(a) * 1.1], rot: [Math.sin(a) * 0.5, 0, -Math.cos(a) * 0.5] }));
   }
   for (let i = 0; i < 6; i++) {
     const a = (i / 6) * Math.PI * 2 + 0.3;
-    parts.push(part(box(0.14, 1.3, 0.3), glow, { pos: [Math.cos(a) * 2.25, 4.2 + Math.sin(a * 2) * 1.2, Math.sin(a) * 2.25], rot: [0, -a, 0.4], glow: 2 }));
+    parts.push(part(box(0.12, 1.1, 0.26), glow, { pos: [Math.cos(a) * 2.2, 4.2 + Math.sin(a * 2) * 1.0, Math.sin(a) * 2.2], rot: [0, -a, 0.4], glow: 1.8 }));
   }
   return merge(parts);
 }

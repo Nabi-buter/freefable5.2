@@ -185,7 +185,7 @@ function buildWater(pal: Palette): THREE.Mesh {
         col = mix(col, uSky, clamp(fres, 0.0, 1.0) * 0.7);
         vec3 H = normalize(normalize(uLightDir) + V);
         float spec = pow(max(dot(N, H), 0.0), 90.0);
-        col += uLightCol * spec * (1.2 + uDawn * 2.0);
+        col += uLightCol * spec * (1.2 + uDawn * 0.6);
         // animated shoreline foam
         float wob = sin(t * 1.3 + p.x * 0.45 + p.y * 0.38) * 0.22 + sin(t * 0.7 - p.x * 0.2 + p.y * 0.6) * 0.15;
         float foam = smoothstep(0.75, 0.05, depth + wob);
@@ -269,8 +269,10 @@ function buildSky(pal: Palette): THREE.Mesh {
         col = mix(col, mix(uHor * 1.5, uSunCol, uDawn * 0.8), clm * (0.25 + uDawn * 0.45));
         // sunrise
         float sd = max(dot(d, uSunDir), 0.0);
-        col += uSunCol * (pow(sd, 6.0) * 0.55 + pow(sd, 48.0) * 1.0 + smoothstep(0.9990, 0.9996, sd) * 8.0) * uDawn;
-        col += uSunCol * smoothstep(0.35, 0.0, abs(d.y)) * uDawn * 0.35;
+        col += uSunCol * (pow(sd, 5.0) * 0.22 + pow(sd, 40.0) * 0.4 + smoothstep(0.9990, 0.9996, sd) * 2.6) * uDawn;
+        col += uSunCol * smoothstep(0.3, 0.0, abs(d.y)) * uDawn * 0.12;
+        // keep the sky itself under the bloom threshold; only the sun disc may exceed it
+        col = min(col, vec3(0.86) + smoothstep(0.9985, 0.9996, sd) * 3.0 * uDawn);
         gl_FragColor = vec4(col, 1.0);
       }`,
   });
@@ -336,9 +338,9 @@ export class Environment {
     this.fog.density = lerp(0.0125, 0.0042, d);
     this.hemi.color.copy(this.tmpA.setHex(p.hemiSkyN)).lerp(this.tmpB.setHex(p.hemiSkyD), d);
     this.hemi.groundColor.copy(this.tmpA.setHex(p.hemiGroundN)).lerp(this.tmpB.setHex(p.hemiGroundD), d);
-    this.hemi.intensity = lerp(1.9, 2.2, d);
+    this.hemi.intensity = lerp(1.9, 1.05, d);
     this.moon.color.copy(this.tmpA.setHex(p.moon)).lerp(this.tmpB.setHex(p.sun), d);
-    this.moon.intensity = lerp(2.6, 3.4, d);
+    this.moon.intensity = lerp(2.6, 1.9, d);
     this.lightDir.copy(this.moonDir).lerp(this.sunDir, d).normalize();
     this.moon.position.copy(focus).addScaledVector(this.lightDir, 130);
     this.moon.target.position.copy(focus);

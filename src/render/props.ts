@@ -21,8 +21,8 @@ export interface PropsResult {
 export function buildProps(world: World, pal: Palette, opts: { shadows: boolean; decorDensity: number }): PropsResult {
   const group = new THREE.Group();
   const rng = new RNG(world.seed + 99);
-  const matSway = makeWorldMat({ sway: true });
-  const matStatic = makeWorldMat();
+  const matSway = makeWorldMat({ sway: true, cutout: true });
+  const matStatic = makeWorldMat({ cutout: true });
   const matDecor = makeWorldMat({ sway: true, side: THREE.DoubleSide });
   const geos: THREE.BufferGeometry[] = [];
   const meshes: THREE.InstancedMesh[] = [];

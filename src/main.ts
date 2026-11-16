@@ -372,4 +372,38 @@ if (new URLSearchParams(location.search).has('debug')) {
     }
     return { t: sim.time, lvl: sim.player.level, en: sim.enemies.length, beacons: sim.stats.beacons, w: sim.player.weapons.map((x) => x.id + x.level) };
   };
+  // scenario shortcuts for screenshots
+  w.cheat = {
+    lightAll() {
+      const sim = app.sim as unknown as { beacons: { lit: boolean }[]; lightBeacon(i: number): void; pending: unknown[] } | null;
+      if (!sim) return;
+      sim.beacons.forEach((b, i) => {
+        if (!b.lit) sim.lightBeacon(i);
+      });
+      while (app.sim!.pending.length) choose(app.sim!, 0);
+    },
+    boss() {
+      (w.cheat as { lightAll(): void }).lightAll();
+      app.sim!.bossT = 0.05;
+    },
+    win() {
+      if (app.sim?.boss) app.sim.boss.hp = 1;
+    },
+    die() {
+      const sim = app.sim;
+      if (!sim) return;
+      sim.player.revives = 0;
+      sim.player.iframe = 0;
+      sim.player.hp = 1;
+      sim.hurtPlayer(9999, sim.player.x + 1, sim.player.z);
+    },
+    level(n: number) {
+      const sim = app.sim;
+      if (!sim) return;
+      for (let i = 0; i < n; i++) {
+        sim.addXp(sim.player.xpNext / sim.player.st.xp + 0.01);
+        while (sim.pending.length) choose(sim, 0);
+      }
+    },
+  };
 }

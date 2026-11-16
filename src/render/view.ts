@@ -261,7 +261,7 @@ export class GameView {
     this.overlay = new Overlay(overlayCanvas);
     this.composer = new EffectComposer(this.renderer);
     this.renderPass = new RenderPass(this.scene, this.camera);
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.7, 0.6, 0.9);
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.55, 0.55, 1.0);
     this.final = new ShaderPass(FinalShader);
     this.composer.addPass(this.renderPass);
     this.composer.addPass(this.bloom);
@@ -318,17 +318,17 @@ export class GameView {
         varying vec2 vUv; uniform float uTime, uPow; uniform vec3 uCol;
         void main() {
           vec2 c = vUv - 0.5; float r = length(c) * 2.0; float a = atan(c.y, c.x);
-          float corona = smoothstep(1.0, 0.42, r) * smoothstep(0.34, 0.46, r);
-          float rays = 0.6 + 0.4 * sin(a * 9.0 + uTime * 0.8) * sin(a * 5.0 - uTime * 0.5);
-          float rim = smoothstep(0.06, 0.0, abs(r - 0.45)) * 2.0;
-          gl_FragColor = vec4(uCol * (corona * rays * 1.3 + rim) * uPow, 1.0);
+          float corona = pow(smoothstep(1.0, 0.44, r), 3.0) * smoothstep(0.38, 0.46, r);
+          float rays = 0.55 + 0.45 * sin(a * 9.0 + uTime * 0.8) * sin(a * 5.0 - uTime * 0.5);
+          float rim = smoothstep(0.035, 0.0, abs(r - 0.455)) * 2.4;
+          gl_FragColor = vec4(uCol * (corona * rays * 1.6 + rim) * uPow, 1.0);
         }`,
     });
     this.bossHalo = new THREE.Mesh(new THREE.PlaneGeometry(13, 13), haloMat);
     this.bossHalo.visible = false;
     this.bossHalo.renderOrder = 4;
     const ringGeo = new THREE.TorusGeometry(3.6, 0.08, 4, 40);
-    this.bossRing = new THREE.Mesh(ringGeo, glowMat(2.6, 0.7, 0.3));
+    this.bossRing = new THREE.Mesh(ringGeo, glowMat(1.8, 0.45, 0.2));
     this.bossRing.visible = false;
     this.fxGroup.add(this.bossHalo, this.bossRing);
     this.setQuality('high');
@@ -832,10 +832,20 @@ export class GameView {
     // ---- camera
     this.updateCamera(dt, realDt);
 
+    // ---- see-through hole so canopies never hide the player
+    const cut = shared.uCut.value;
+    if (sim && this.mode === 'follow') {
+      const p = sim.player;
+      this.v3.set(p.x, this.height(p.x, p.z) + 1.0, p.z).project(this.camera);
+      const pr = this.renderer.getPixelRatio();
+      const bw = this.w * pr, bh = this.h * pr;
+      cut.set((this.v3.x * 0.5 + 0.5) * bw, (this.v3.y * 0.5 + 0.5) * bh, bh * 0.2, this.v3.z * 0.5 + 0.5 - 0.00002);
+    } else cut.z = 0;
+
     // ---- environment / post
     let dawnTarget = 0;
     if (sim) {
-      dawnTarget = Math.min(0.5, sim.stats.beacons * 0.085);
+      dawnTarget = Math.min(0.3, sim.stats.beacons * 0.055);
       if (sim.stats.bossKilled) dawnTarget = 1;
     } else dawnTarget = 0.06;
     this.dawn = damp(this.dawn, dawnTarget, sim?.stats.bossKilled ? 0.55 : 0.8, realDt);
@@ -846,7 +856,7 @@ export class GameView {
     this.fovKick = damp(this.fovKick, 0, 3, realDt);
     const u = this.final.uniforms;
     u.uHurt.value = this.hurt * 0.5;
-    u.uFlash.value = this.flash * 0.6;
+    u.uFlash.value = this.flash * 0.35;
     u.uAberr.value = this.aberr;
     u.uTime.value = time;
     let low = 0;
@@ -861,7 +871,7 @@ export class GameView {
     tint.x = damp(tint.x, 1 + bossMood * 0.12, 1.5, realDt);
     tint.y = damp(tint.y, 1 - bossMood * 0.1, 1.5, realDt);
     tint.z = damp(tint.z, 1 - bossMood * 0.06, 1.5, realDt);
-    this.bloom.strength = 0.7 + this.dawn * 0.2;
+    this.bloom.strength = 0.55 - this.dawn * 0.25;
 
     this.composer.render(realDt);
     this.drawOverlay(realDt);
@@ -933,8 +943,8 @@ export class GameView {
       const y = H(b.x, b.z) + 1.0;
       const s = b.r * 2.3 * (1 + Math.sin(time * 18 + b.id) * 0.12);
       if (b.kind === 0) this.iBullet.add(b.x, y, b.z, 0, s, s, s, 0.6, 1.7, 0.25);
-      else this.iBullet.add(b.x, y, b.z, 0, s, s, s, 1.9, 0.12, 0.75);
-      dec.add(DECAL.glow, b.x, b.z, 1.2, b.kind === 0 ? 0.3 : 0.9, b.kind === 0 ? 0.8 : 0.12, b.kind === 0 ? 0.1 : 0.5, 0.4);
+      else this.iBullet.add(b.x, y, b.z, 0, s * 0.85, s * 0.85, s * 0.85, 1.5, 0.06, 0.5);
+      dec.add(DECAL.glow, b.x, b.z, 1.1, b.kind === 0 ? 0.3 : 0.9, b.kind === 0 ? 0.8 : 0.08, b.kind === 0 ? 0.1 : 0.4, 0.32);
     }
     this.iBullet.end();
 
@@ -1053,11 +1063,11 @@ export class GameView {
       this.bossHalo.quaternion.copy(this.camera.quaternion);
       const sc = (0.9 + boss.spawn * 0.25) * (1 + (boss.tele ? Math.sin(time * 24) * 0.04 : 0));
       this.bossHalo.scale.setScalar(sc);
-      ((this.bossHalo.material as THREE.ShaderMaterial).uniforms.uPow.value as number) = 0.9 + boss.flash * 0.8 + (boss.phase - 1) * 0.35;
+      ((this.bossHalo.material as THREE.ShaderMaterial).uniforms.uPow.value as number) = 0.42 + boss.flash * 0.1 + (boss.phase - 1) * 0.14;
       this.bossRing.visible = true;
       this.bossRing.position.set(boss.x, by, boss.z);
       this.bossRing.rotation.set(Math.PI / 2 + Math.sin(time * 0.7) * 0.35, time * 0.9, 0);
-      dec.add(DECAL.glow, boss.x, boss.z, 9, 0.9, 0.2, 0.1, 0.8);
+      dec.add(DECAL.glow, boss.x, boss.z, 9, 0.9, 0.2, 0.1, 0.35);
       if (Math.random() < dt * 40) {
         const a = Math.random() * TAU;
         this.sparks.spawn(boss.x + Math.cos(a) * 3, by + (Math.random() - 0.5) * 3, boss.z + Math.sin(a) * 3, Math.cos(a) * 2, 1 + Math.random() * 2, Math.sin(a) * 2, 0.9, 0.6, 3, 0.8, 0.3, { drag: 0.6 });
@@ -1110,7 +1120,7 @@ export class GameView {
       dyn.crystal.scale.set(sc, sc, sc);
       dyn.pillar.visible = L > 0.01;
       if (dyn.pillar.visible) {
-        (dyn.pillar.material as THREE.ShaderMaterial).uniforms.uPow.value = L * (0.34 + Math.sin(time * 3 + i) * 0.04) * (1 - this.dawn * 0.45);
+        (dyn.pillar.material as THREE.ShaderMaterial).uniforms.uPow.value = L * (0.3 + Math.sin(time * 3 + i) * 0.03) * (1 - this.dawn * 0.8);
         dyn.pillar.scale.set(1, L, 1);
       }
       if (d < 85) {
