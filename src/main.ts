@@ -34,6 +34,9 @@ class App implements UIHost {
   private fps = 60;
   private menuBiome = '';
   private forcedQuality = false;
+  private aimCursor = false;
+  /** boss introduction: slow the world and swing the camera over */
+  private cine: { t: number; dur: number; x: number; z: number } | null = null;
   private slowT = 0;
   private fpsWin = 0;
   private fpsWinN = 0;
@@ -141,6 +144,8 @@ class App implements UIHost {
       this.ui.showHud();
       this.input.clearQueues();
       this.hitStopT = 0;
+      this.cine = null;
+      this.view.focusW = 0;
       this.audio.music?.setMood('run', 0);
       this.audio.setDuck(1);
       this.state = 'playing';
@@ -282,6 +287,22 @@ class App implements UIHost {
           this.hitStopT -= real;
           simDt *= 0.08;
         }
+        if (this.cine) {
+          const c = this.cine;
+          c.t += real;
+          const u = c.t / c.dur;
+          // ease in, hold, ease out
+          this.view.focusW = Math.min(1, u * 4) * Math.min(1, (1 - u) * 3.5);
+          this.view.focusX = c.x;
+          this.view.focusZ = c.z;
+          simDt *= 0.12;
+          this.inp.dash = false;
+          sim.player.iframe = Math.max(sim.player.iframe, 0.4);
+          if (u >= 1) {
+            this.cine = null;
+            this.view.focusW = 0;
+          }
+        }
         sim.step(simDt, this.inp);
         fxDt = simDt > 0 ? Math.max(simDt, dt * 0.35) : dt;
         this.drainEvents(sim);
@@ -339,6 +360,11 @@ class App implements UIHost {
       default:
         break;
     }
+    const aim = this.state === 'playing' && this.input.device === 'kbm' && !this.save.data.settings.autoAim;
+    if (aim !== this.aimCursor) {
+      this.aimCursor = aim;
+      document.body.classList.toggle('aim', aim);
+    }
     this.audio.music?.update();
     this.view.frame(fxDt, this.state === 'paused' ? 0.0001 : real);
   }
@@ -372,6 +398,11 @@ class App implements UIHost {
     for (let i = 0; i < ev.length; i++) {
       const e = ev[i];
       if (e.t === 'announce') this.ui.announce(e.key, e.tone);
+      else if (e.t === 'bossSpawn') {
+        const big = e.kind === 'eclipse';
+        this.cine = { t: 0, dur: big ? 3.2 : 2.0, x: e.x, z: e.z };
+        this.ui.bossCard(e.kind, big ? 3.2 : 2.0);
+      }
     }
     ev.length = 0;
   }

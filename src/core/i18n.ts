@@ -53,6 +53,8 @@ const S: Record<string, Pair> = {
   'ann.phase3': ['일식이 무너져 내린다', 'The Eclipse is breaking'],
   'boss.herald': ['밤의 전령', 'Herald of Night'],
   'boss.eclipse': ['일식', 'The Eclipse'],
+  'boss.eclipse.sub': ['밤의 주인', 'Master of the Night'],
+  'boss.herald.sub': ['봉화의 수문장', 'Warden of the Beacon'],
   'tip.move': ['WASD 이동 · 마우스 조준 · Space 대시', 'WASD to move · Mouse to aim · Space to dash'],
   'tip.move.touch': ['왼쪽 화면을 끌어 이동 · 공격은 자동', 'Drag the left side to move · attacks are automatic'],
   'tip.move.pad': ['왼쪽 스틱 이동 · 오른쪽 스틱 조준 · A 대시', 'Left stick to move · Right stick to aim · A to dash'],

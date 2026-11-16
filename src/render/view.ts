@@ -230,6 +230,10 @@ export class GameView {
   private camPos = new THREE.Vector3(0, 30, 30);
   private lookAt = new THREE.Vector3();
   zoom = 1;
+  /** cinematic focus point and weight (0 = follow the player) */
+  focusX = 0;
+  focusZ = 0;
+  focusW = 0;
   private trauma = 0;
   shakeMul = 1;
   showDamage = true;
@@ -1228,10 +1232,13 @@ export class GameView {
     const tx = p.x + Math.cos(p.aim) * lead * 0.5 + p.vx * 0.12;
     const tz = p.z + Math.sin(p.aim) * lead * 0.5 + p.vz * 0.12;
     const k = 1 - Math.exp(-7 * realDt);
-    this.camTarget.x += (tx - this.camTarget.x) * k;
-    this.camTarget.z += (tz - this.camTarget.z) * k;
+    // cinematic focus (boss introductions) pulls the view toward a point of interest
+    const fw = this.focusW;
+    const fx = tx + (this.focusX - tx) * fw, fz = tz + (this.focusZ - tz) * fw;
+    this.camTarget.x += (fx - this.camTarget.x) * k;
+    this.camTarget.z += (fz - this.camTarget.z) * k;
     this.camTarget.y += (py - this.camTarget.y) * (1 - Math.exp(-4 * realDt));
-    let dist = 35 * this.zoom + (sim.boss ? 5 : 0);
+    let dist = (35 * this.zoom + (sim.boss ? 5 : 0)) * (1 - fw * 0.3);
     let pitch = 0.96; // radians above the horizon
     let lookY = 1.0;
     let yaw = 0;

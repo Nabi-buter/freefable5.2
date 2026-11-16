@@ -636,6 +636,7 @@ export class UI {
       </div>
       <div class="combo" data-h="combo"><b data-h="combon">0</b><small>${'COMBO'}</small></div>
       <div class="banner"><div class="line" data-h="banner"></div></div>
+      <div class="cine" data-h="cine"></div>
       <div class="tipline" data-h="tip"></div>
       <div class="minimap"><canvas width="190" height="190" data-h="mini"></canvas></div>
       <div class="stick" data-h="stick"><i data-h="knob"></i></div>
@@ -659,6 +660,8 @@ export class UI {
     this.hud.classList.remove('hidden', 'fade');
     this.cache = {};
     this.h.banner.className = 'line';
+    this.h.cine.className = 'cine';
+    this.h.cine.innerHTML = '';
     this.h.tip.classList.remove('on');
     this.tipT = 0;
     this.tipStage = 0;
@@ -680,6 +683,17 @@ export class UI {
     this.cache[key] = val;
     fn(this.h[key] ?? this.hud, val);
     return true;
+  }
+
+  /** letterboxed title card for a boss arrival */
+  bossCard(kind: string, dur: number) {
+    const el = this.h.cine;
+    el.style.setProperty('--d', dur + 's');
+    el.innerHTML = `<div class="bar top"></div><div class="bar bot"></div><div class="who ${kind}"><small>${t(`boss.${kind}.sub`)}</small><b>${t('boss.' + kind)}</b></div>`;
+    el.className = 'cine';
+    void el.offsetWidth;
+    el.className = 'cine on';
+    this.h.banner.className = 'line';
   }
 
   announce(key: string, tone: 'info' | 'warn' | 'good') {
