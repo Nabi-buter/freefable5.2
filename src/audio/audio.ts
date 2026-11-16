@@ -258,6 +258,12 @@ export class AudioEngine {
                 this.noise(0.38, { freq: 2200, to: 180, vol: 0.12, rev: 0.25 });
               }
               break;
+            case 'sigil':
+              if (this.ok('s.sigil', 0.25)) {
+                this.tone(midi(74), 0.25, { type: 'triangle', vol: 0.035, rev: 0.5 });
+                this.tone(midi(81), 0.3, { type: 'sine', vol: 0.025, rev: 0.6, delay: 0.06 });
+              }
+              break;
             case 'starfall':
               if (this.ok('s.star', 0.2)) this.tone(1500, 0.5, { to: 420, vol: 0.03, type: 'triangle' });
               break;

@@ -115,6 +115,43 @@ export function updateWeapons(sim: Sim, dt: number, input: InputState) {
         }
         break;
       }
+      case 'sigil': {
+        w.t -= dt;
+        if (w.t <= 0) {
+          w.t += cd;
+          const n = s.count + st.amount;
+          const R = s.area * st.area;
+          // keep the field tidy: the oldest runes fade when too many are down
+          let live = 0;
+          for (const zn of sim.zones) if (zn.alive && zn.kind === 'sigil') live++;
+          const cap = 6 + n * 3;
+          for (let i = 0; i < sim.zones.length && live + n > cap; i++) {
+            const zn = sim.zones[i];
+            if (zn.alive && zn.kind === 'sigil' && zn.len === 0) {
+              zn.alive = false;
+              live--;
+            }
+          }
+          const cands = sim.near(p.x, p.z, 11);
+          for (let i = 0; i < n; i++) {
+            let tx: number, tz: number;
+            if (cands.length > 0 && sim.rng.next() < 0.7) {
+              // in the path of something that is coming for you
+              const c = cands[Math.floor(sim.rng.next() * cands.length)];
+              const k = sim.rng.range(0.35, 0.8);
+              tx = p.x + (c.x - p.x) * k + sim.rng.range(-1, 1);
+              tz = p.z + (c.z - p.z) * k + sim.rng.range(-1, 1);
+            } else {
+              const a = sim.rng.angle(), d = sim.rng.range(2.5, 7);
+              tx = p.x + Math.cos(a) * d;
+              tz = p.z + Math.sin(a) * d;
+            }
+            zone(sim, 'sigil', tx, tz, R, s.dur * st.dur, s.dmg, 'sigil', evo);
+          }
+          sim.events.push({ t: 'shoot', w: 'sigil', x: p.x, z: p.z });
+        }
+        break;
+      }
       case 'starfall': {
         w.t -= dt;
         if (w.t <= 0) {
@@ -441,6 +478,31 @@ export function updateZones(sim: Sim, dt: number) {
           if (z.kind === 'fire' && z.evolved) {
             sim.blasts.push({ x: z.x, z: z.z, r: z.r * 1.4, dmg: z.dmg * 2.5, w: z.weapon, kb: 6, burn: z.dmg * 0.3, c: 0xff6a2a });
           }
+        }
+        break;
+      }
+      case 'sigil': {
+        // len > 0: the echo burst of an evolved rune is counting down
+        if (z.len > 0) {
+          z.len -= dt;
+          if (z.len <= 0) {
+            z.alive = false;
+            sim.blasts.push({ x: z.x, z: z.z, r: z.r * 1.15, dmg: z.dmg * 0.7, w: z.weapon, kb: 6, burn: 0, c: 0xffd76a });
+          }
+          break;
+        }
+        let trip = z.t >= z.dur;
+        if (!trip && z.t > 0.45) {
+          z.tick -= dt;
+          if (z.tick <= 0) {
+            z.tick = 0.08;
+            trip = sim.near(z.x, z.z, z.r * 0.4).length > 0;
+          }
+        }
+        if (trip) {
+          sim.blasts.push({ x: z.x, z: z.z, r: z.r, dmg: z.dmg, w: z.weapon, kb: 11, burn: 0, c: 0xc9a2ff });
+          if (z.evolved) z.len = 0.45;
+          else z.alive = false;
         }
         break;
       }

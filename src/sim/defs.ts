@@ -37,8 +37,8 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
 };
 
 // ---------------------------------------------------------------- weapons
-export type WeaponId = 'ember' | 'wisps' | 'nova' | 'arc' | 'starfall' | 'lance' | 'frost' | 'darts' | 'trail' | 'aura' | 'glaive';
-export const WEAPON_IDS: WeaponId[] = ['ember', 'wisps', 'nova', 'arc', 'starfall', 'lance', 'frost', 'darts', 'trail', 'aura', 'glaive'];
+export type WeaponId = 'ember' | 'wisps' | 'nova' | 'arc' | 'starfall' | 'lance' | 'frost' | 'darts' | 'trail' | 'aura' | 'glaive' | 'sigil';
+export const WEAPON_IDS: WeaponId[] = ['ember', 'wisps', 'nova', 'arc', 'starfall', 'lance', 'frost', 'darts', 'trail', 'aura', 'glaive', 'sigil'];
 
 export interface WStats {
   /** base damage per hit (or per tick) */
@@ -122,6 +122,19 @@ export const WEAPONS: Record<WeaponId, WeaponDef> = {
       L(34, 1.2, 7, 0, 8.5, 0, 0),
       L(40, 1.05, 9, 0, 9, 0, 0),
       L(52, 0.8, 14, 0, 10, 0, 0), // Tempest: forks from every hit
+    ],
+  },
+  // runes on the ground that burst when something steps on them
+  sigil: {
+    id: 'sigil', evo: 'fortune', color: 0xc9a2ff,
+    levels: [
+      L(46, 2.4, 1, 0, 2.7, 7, 0),
+      L(56, 2.3, 2, 0, 2.7, 7, 0),
+      L(66, 2.2, 2, 0, 3.1, 8, 0),
+      L(78, 2.0, 3, 0, 3.1, 8, 0),
+      L(86, 1.9, 3, 0, 3.5, 9, 0),
+      L(96, 1.7, 4, 0, 3.7, 9, 0),
+      L(120, 1.4, 5, 0, 4.4, 10, 0), // Seal of Fate: every rune bursts twice
     ],
   },
   // meteors on random enemies
