@@ -161,11 +161,11 @@ interface KindRender {
   cap: number;
 }
 
-const CAPS: Record<EnemyKind, number> = { shade: 460, skitter: 460, brute: 200, spitter: 200, wraith: 220, bomber: 220, husk: 200, herald: 4, eclipse: 2 };
+const CAPS: Record<EnemyKind, number> = { shade: 460, skitter: 460, brute: 200, spitter: 200, wraith: 220, bomber: 220, husk: 200, rime: 160, worm: 160, herald: 4, eclipse: 2 };
 /** colour of each kind's glow, used for death sparks */
 export const KIND_COLOR: Record<EnemyKind, [number, number, number]> = {
   shade: [1.0, 0.25, 0.5], skitter: [0.6, 1.0, 0.35], brute: [1.0, 0.55, 0.15], spitter: [0.65, 1.0, 0.25], wraith: [0.4, 0.95, 1.0],
-  bomber: [1.0, 0.25, 0.4], husk: [1.0, 0.82, 0.3], herald: [0.7, 0.3, 1.0], eclipse: [1.0, 0.4, 0.2],
+  bomber: [1.0, 0.25, 0.4], husk: [1.0, 0.82, 0.3], rime: [0.55, 0.92, 1.0], worm: [1.0, 0.5, 0.18], herald: [0.7, 0.3, 1.0], eclipse: [1.0, 0.4, 0.2],
 };
 
 export class EnemyRenderer {
@@ -175,12 +175,14 @@ export class EnemyRenderer {
   private geos: THREE.BufferGeometry[] = [];
   /** elites / bosses visible this frame, for overlay health bars */
   readonly marked: Enemy[] = [];
+  /** burrowed enemies near the camera: drawn as moving dust by the view */
+  readonly buried: Enemy[] = [];
 
   constructor(shadows: boolean) {
     this.mat = makeWorldMat({ instFx: true });
     const builders: Record<EnemyKind, () => THREE.BufferGeometry> = {
       shade: G.geoShade, skitter: G.geoSkitter, brute: G.geoBrute, spitter: G.geoSpitter, wraith: G.geoWraith,
-      bomber: G.geoBomber, husk: G.geoHusk, herald: G.geoHerald, eclipse: G.geoEclipse,
+      bomber: G.geoBomber, husk: G.geoHusk, rime: G.geoRime, worm: G.geoWorm, herald: G.geoHerald, eclipse: G.geoEclipse,
     };
     for (const kind of ENEMY_KINDS) {
       const geo = builders[kind]();
@@ -206,6 +208,7 @@ export class EnemyRenderer {
   update(lists: Enemy[][], height: HeightFn, cx: number, cz: number, time: number) {
     for (const k of ENEMY_KINDS) this.kinds[k].n = 0;
     this.marked.length = 0;
+    this.buried.length = 0;
     const R2 = 62 * 62;
     for (const list of lists) {
       for (let i = 0; i < list.length; i++) {
@@ -213,6 +216,10 @@ export class EnemyRenderer {
         if (!e.alive) continue;
         const dx = e.x - cx, dz = e.z - cz;
         if (dx * dx + dz * dz > R2) continue;
+        if (e.buried) {
+          this.buried.push(e);
+          continue;
+        }
         const kr = this.kinds[e.kind];
         if (kr.n >= kr.cap) continue;
         const idx = kr.n++;
@@ -265,6 +272,17 @@ export class EnemyRenderer {
           }
           case 'husk':
             y += Math.abs(Math.sin(tp * 0.9)) * 0.08;
+            break;
+          case 'rime': {
+            const st = Math.abs(Math.sin(tp * 0.8));
+            y += st * 0.1;
+            break;
+          }
+          case 'worm':
+            if (e.tele) {
+              sx *= 1.08;
+              sz *= 1.08;
+            }
             break;
           case 'herald':
             y += Math.sin(time * 1.6) * 0.1;

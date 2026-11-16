@@ -56,7 +56,7 @@ class Grid {
         let i = this.head[gz * this.n + gx];
         while (i >= 0) {
           const e = list[i];
-          if (e.alive) {
+          if (e.alive && !e.buried) {
             const dx = e.x - x, dz = e.z - z;
             const rr = r + e.r;
             if (dx * dx + dz * dz < rr * rr) out.push(e);
@@ -238,7 +238,7 @@ export class Sim {
     const scan = (list: Enemy[]) => {
       for (let i = 0; i < list.length; i++) {
         const e = list[i];
-        if (!e.alive || e.spawn < 0.5) continue;
+        if (!e.alive || e.spawn < 0.5 || e.buried) continue;
         if (skip && skip.has(e.id)) continue;
         const dx = e.x - x, dz = e.z - z;
         const d = dx * dx + dz * dz;
@@ -385,6 +385,9 @@ export class Sim {
         this.spawnEnemy(e.kind, e.x + Math.cos(a) * 1.3, e.z + Math.sin(a) * 1.3, false, 0.5);
       }
     }
+    if (e.kind === 'rime') {
+      this.zones.push({ id: this.id(), kind: 'frost', x: e.x, z: e.z, r: 3.8, t: 0, dur: 0.75, dmg: 5, tick: 0, hostile: true, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true });
+    }
     if (e.kind === 'husk') {
       for (let i = 0; i < 3; i++) {
         const a = this.rng.angle();
@@ -498,7 +501,7 @@ export class Sim {
       hp: def.hp * hpMul * (elite ? 9 : 1), maxHp: 0,
       r: def.radius * scale, speed: def.speed * (elite ? 1.08 : 1) * (boss ? 1 : biome.enemySpeed) * this.rng.range(0.94, 1.06), dmg: def.dmg * (elite ? 1.4 : 1),
       alive: true, elite, boss, flash: 0, burnT: 0, burnDps: 0, burnAcc: 0, chillT: 0, freezeT: 0,
-      t: 0, st: 0, stT: 0, ax: 0, az: 0, n: 0, face: 0, cdA: 0, cdB: 0, seed: this.rng.next(), spawn, scale, tele: 0, affix: 0, phase: 1, c1: 0, lx: 0, lz: 0, ll: 0,
+      t: 0, st: 0, stT: 0, ax: 0, az: 0, n: 0, face: 0, cdA: 0, cdB: 0, seed: this.rng.next(), spawn, scale, tele: 0, buried: false, affix: 0, phase: 1, c1: 0, lx: 0, lz: 0, ll: 0,
     };
     e.maxHp = e.hp;
     if (boss) this.bigs.push(e);

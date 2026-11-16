@@ -225,6 +225,49 @@ export function geoHusk(): THREE.BufferGeometry {
   ]);
 }
 
+export function geoRime(): THREE.BufferGeometry {
+  const ice = 0x8fc4e8, deep = 0x4f7fae, core = 0x9ff0ff, frost = 0xe6f6ff;
+  const arm = (x: number, y: number) => (y < 1.3 ? 0.55 : 0);
+  return merge([
+    part(lumpy(ico(0.62, 1), 0.14, 71), deep, { pos: [-0.05, 0.6, 0], scl: [1, 0.95, 1.1], jitter: 0.16 }),
+    part(lumpy(ico(0.9, 1), 0.16, 72), ice, { pos: [0, 1.45, 0], scl: [1, 1, 1.2], jitter: 0.18, grad: [0.75, 1.15] }),
+    part(box(0.5, 0.42, 0.52), ice, { pos: [0.42, 2.25, 0], rot: [0, 0, -0.15], jitter: 0.12 }),
+    part(box(0.08, 0.1, 0.4), core, { pos: [0.68, 2.27, 0], glow: 3 }),
+    part(ico(0.3, 0), core, { pos: [0.72, 1.45, 0], glow: 2.4, scl: [0.6, 1.2, 1] }),
+    part(cone(0.24, 0.9, 4), frost, { pos: [-0.45, 2.35, 0.35], rot: [0.35, 0, 0.5], glow: 0.25 }),
+    part(cone(0.28, 1.2, 4), frost, { pos: [-0.6, 2.45, -0.1], rot: [-0.1, 0, 0.7], glow: 0.25 }),
+    part(cone(0.2, 0.7, 4), frost, { pos: [-0.3, 2.3, -0.55], rot: [-0.5, 0, 0.4], glow: 0.25 }),
+    part(box(0.5, 1.3, 0.5), deep, { pos: [0.15, 1.05, 1.08], rot: [0.12, 0, 0], sway: arm, jitter: 0.14 }),
+    part(box(0.5, 1.3, 0.5), deep, { pos: [0.15, 1.05, -1.08], rot: [-0.12, 0, 0], sway: arm, jitter: 0.14 }),
+    part(lumpy(ico(0.42, 0), 0.2, 73), ice, { pos: [0.2, 0.42, 1.12], sway: 0.55, jitter: 0.14 }),
+    part(lumpy(ico(0.42, 0), 0.2, 74), ice, { pos: [0.2, 0.42, -1.12], sway: 0.55, jitter: 0.14 }),
+    part(box(0.42, 0.36, 0.4), deep, { pos: [0, 0.18, 0.34], sway: -0.5 }),
+    part(box(0.42, 0.36, 0.4), deep, { pos: [0, 0.18, -0.34], sway: -0.5 }),
+  ]);
+}
+
+export function geoWorm(): THREE.BufferGeometry {
+  const hide = 0x4a1c14, dark = 0x2a100c, lava = 0xff7a2a, dirt = 0x3a2a22;
+  const sw = (k: number) => (x: number, y: number) => Math.max(0, y - 0.3) * k;
+  const parts = [
+    part(lumpy(ico(1.0, 1), 0.2, 81), dirt, { pos: [0, 0.08, 0], scl: [1.25, 0.28, 1.25], jitter: 0.18 }),
+    part(sph(0.56, 8, 6), hide, { pos: [0, 0.5, 0], jitter: 0.14, sway: sw(0.25) }),
+    part(sph(0.52, 8, 6), hide, { pos: [0.08, 1.15, 0], jitter: 0.14, sway: sw(0.3) }),
+    part(sph(0.47, 8, 6), hide, { pos: [0.32, 1.75, 0], jitter: 0.14, sway: sw(0.35) }),
+    part(sph(0.43, 8, 6), hide, { pos: [0.72, 2.18, 0], jitter: 0.14, sway: sw(0.4) }),
+    part(cyl(0.5, 0.5, 0.08, 8), lava, { pos: [0.03, 0.83, 0], glow: 2.2, sway: sw(0.28) }),
+    part(cyl(0.46, 0.46, 0.08, 8), lava, { pos: [0.19, 1.46, 0], rot: [0, 0, -0.35], glow: 2.2, sway: sw(0.33) }),
+    part(cyl(0.42, 0.42, 0.08, 8), lava, { pos: [0.52, 1.98, 0], rot: [0, 0, -0.8], glow: 2.2, sway: sw(0.38) }),
+    part(sph(0.26, 6, 5), lava, { pos: [1.05, 2.3, 0], glow: 3, scl: [0.8, 1, 1], sway: sw(0.42) }),
+  ];
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+    parts.push(part(cone(0.1, 0.55, 4), dark, { pos: [1.25, 2.32 + Math.cos(a) * 0.3, Math.sin(a) * 0.3], rot: [0, 0, -Math.PI / 2 + Math.cos(a) * 0.45], sway: sw(0.42) }));
+  }
+  for (let i = 0; i < 5; i++) parts.push(part(cone(0.09, 0.4, 4), dark, { pos: [-0.38 + i * 0.12, 0.7 + i * 0.36, 0], rot: [0, 0, 1.2 - i * 0.12], sway: sw(0.3) }));
+  return merge(parts);
+}
+
 export function geoHerald(): THREE.BufferGeometry {
   const armor = 0x2a2238, dark = 0x120e1c, glow = 0xb04aff, bone = 0x8a7f9a;
   const cape = (x: number, y: number) => (x < -0.2 ? Math.max(0, 2.6 - y) * 0.5 : 0);

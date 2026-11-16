@@ -124,6 +124,8 @@ export interface Enemy {
   scale: number;
   /** visual hint: 0 none, 1 winding up attack */
   tele: number;
+  /** underground and untouchable (burrowing enemies) */
+  buried: boolean;
   /** elite affix: 0 none, 1 swift, 2 regenerating, 3 volatile, 4 splitting, 5 armoured */
   affix: number;
   /** boss scratch: phase, move counter, locked charge direction + length */
@@ -167,7 +169,7 @@ export interface EProj {
   life: number;
   r: number;
   dmg: number;
-  kind: number; // 0 spit, 1 boss orb
+  kind: number; // 0 spit, 1 boss orb, 2 fireball
   alive: boolean;
 }
 

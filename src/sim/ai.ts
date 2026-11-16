@@ -15,7 +15,7 @@ export function initDirector(): DirectorState {
   return { budget: 3, next: 'shade', eliteT: 55, swarmT: 95, graceT: 1.5, hazardT: 22 };
 }
 
-const UNLOCKS: { kind: EnemyKind; at: number; w: number }[] = [
+const UNLOCKS: { kind: EnemyKind; at: number; w: number; only?: string }[] = [
   { kind: 'shade', at: 0, w: 10 },
   { kind: 'skitter', at: 0.75, w: 6 },
   { kind: 'bomber', at: 2.4, w: 2.6 },
@@ -23,16 +23,20 @@ const UNLOCKS: { kind: EnemyKind; at: number; w: number }[] = [
   { kind: 'brute', at: 4.6, w: 2.2 },
   { kind: 'wraith', at: 6.0, w: 2.8 },
   { kind: 'husk', at: 7.4, w: 2.6 },
+  { kind: 'rime', at: 3.0, w: 2.4, only: 'frostmere' },
+  { kind: 'worm', at: 3.6, w: 1.5, only: 'emberwaste' },
 ];
 
 function pickKind(sim: Sim, I: number): EnemyKind {
   const bw = sim.world.biome.weights;
   const wOf = (u: { kind: EnemyKind; w: number }) => (u.kind === 'shade' ? Math.max(4, u.w - I * 0.35) : u.w) * (bw[u.kind] ?? 1);
+  const here = sim.world.biome.id;
+  const ok = (u: { at: number; only?: string }) => I >= u.at && (!u.only || u.only === here);
   let total = 0;
-  for (const u of UNLOCKS) if (I >= u.at) total += wOf(u);
+  for (const u of UNLOCKS) if (ok(u)) total += wOf(u);
   let r = sim.rng.next() * total;
   for (const u of UNLOCKS) {
-    if (I < u.at) continue;
+    if (!ok(u)) continue;
     r -= wOf(u);
     if (r <= 0) return u.kind;
   }
@@ -278,6 +282,44 @@ export function updateEnemies(sim: Sim, dt: number) {
             }
             break;
           }
+          case 'burrow': {
+            e.stT += dt;
+            if (e.st === 0) {
+              // tunnelling: fast, unseen, aiming a little ahead of the player
+              e.buried = true;
+              const tx = p.x + p.vx * 0.5 - e.x, tz = p.z + p.vz * 0.5 - e.z;
+              const td = Math.hypot(tx, tz) || 1;
+              vx = (tx / td) * e.speed;
+              vz = (tz / td) * e.speed;
+              if ((td < 3.2 && e.stT > 1.2) || e.stT > 3.4) {
+                e.st = 1;
+                e.stT = 0;
+                slam(sim, e.x, e.z, 2.6, 1.05, e.dmg);
+              }
+            } else if (e.st === 1) {
+              if (e.stT >= 1.05) {
+                e.st = 2;
+                e.stT = 0;
+                e.c1 = 0;
+                e.buried = false;
+                e.spawn = 0.55;
+              }
+            } else {
+              e.tele = e.stT % 0.95 > 0.6 ? 1 : 0;
+              const shot = Math.floor(e.stT / 0.95);
+              if (shot > e.c1 && shot <= 2 && dist < 18) {
+                e.c1 = shot;
+                sim.eprojs.push({ id: sim.id(), x: e.x + nx * 0.6, z: e.z + nz * 0.6, vx: nx * 9.2, vz: nz * 9.2, life: 2.6, r: 0.36, dmg: e.dmg * 0.7, kind: 2, alive: true });
+                sim.events.push({ t: 'spit', x: e.x, z: e.z });
+              }
+              if (e.stT >= 4.0) {
+                e.st = 0;
+                e.stT = 0;
+                e.buried = true;
+              }
+            }
+            break;
+          }
           case 'herald': {
             vx = nx * e.speed;
             vz = nz * e.speed;
@@ -325,7 +367,7 @@ export function updateEnemies(sim: Sim, dt: number) {
       vx *= speedMul;
       vz *= speedMul;
       // separation from neighbours (skip for bosses)
-      if (!e.boss && active) {
+      if (!e.boss && active && !e.buried) {
         const nb = sim.near(e.x, e.z, e.r * 0.9);
         let sx = 0, sz = 0;
         for (let k = 0; k < nb.length && k < 6; k++) {
@@ -354,7 +396,7 @@ export function updateEnemies(sim: Sim, dt: number) {
       } else if (e.tele) {
         e.face = Math.atan2(nz, nx);
       }
-      if (!e.boss) world.resolve(e, e.r * 0.8);
+      if (!e.boss && !e.buried) world.resolve(e, e.r * 0.8);
       const ed = e.x * e.x + e.z * e.z;
       if (ed > lim * lim) {
         const s = lim / Math.sqrt(ed);
@@ -362,7 +404,7 @@ export function updateEnemies(sim: Sim, dt: number) {
         e.z *= s;
       }
       // contact damage
-      if (active && dist < e.r + 0.5 && !(e.def.ai === 'bomber')) {
+      if (active && !e.buried && dist < e.r + 0.5 && !(e.def.ai === 'bomber')) {
         if (sim.hurtPlayer(e.dmg, e.x, e.z) && !e.boss) {
           e.kx -= nx * 5;
           e.kz -= nz * 5;

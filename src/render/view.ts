@@ -796,6 +796,12 @@ export class GameView {
         const a = this.player.accent;
         for (let k = 0; k < 3; k++) this.sparks.spawn(p.x + (Math.random() - 0.5) * 0.6, H(p.x, p.z) + 0.3 + Math.random() * 1.2, p.z + (Math.random() - 0.5) * 0.6, 0, 0.5, 0, 0.35, 0.7, a.r * 2, a.g * 2, a.b * 2, { size1: 0.1 });
       }
+      // burrowing enemies show only as a travelling plume of dust
+      for (const e of this.enemies.buried) {
+        const gy = H(e.x, e.z);
+        if (Math.random() < dt * 40) this.smoke.spawn(e.x + (Math.random() - 0.5) * 0.8, gy + 0.1, e.z + (Math.random() - 0.5) * 0.8, (Math.random() - 0.5) * 1.5, 1 + Math.random() * 1.5, (Math.random() - 0.5) * 1.5, 0.5, 0.9, 0.32, 0.2, 0.14, { drag: 2, size1: 1.6 });
+        if (Math.random() < dt * 18) this.sparks.spawn(e.x, gy + 0.2, e.z, (Math.random() - 0.5) * 2, 1.5 + Math.random() * 2, (Math.random() - 0.5) * 2, 0.4, 0.35, 2.4, 0.9, 0.2, { grav: 6 });
+      }
       this.syncSim(sim, dt);
     } else if (this.player && this.enemies) {
       const hx = 2.4, hz = 1.8;
@@ -950,9 +956,17 @@ export class GameView {
       if (!b.alive) continue;
       const y = H(b.x, b.z) + 1.0;
       const s = b.r * 2.3 * (1 + Math.sin(time * 18 + b.id) * 0.12);
-      if (b.kind === 0) this.iBullet.add(b.x, y, b.z, 0, s, s, s, 0.6, 1.7, 0.25);
-      else this.iBullet.add(b.x, y, b.z, 0, s * 0.85, s * 0.85, s * 0.85, 1.5, 0.06, 0.5);
-      dec.add(DECAL.glow, b.x, b.z, 1.1, b.kind === 0 ? 0.3 : 0.9, b.kind === 0 ? 0.8 : 0.08, b.kind === 0 ? 0.1 : 0.4, 0.32);
+      if (b.kind === 0) {
+        this.iBullet.add(b.x, y, b.z, 0, s, s, s, 0.6, 1.7, 0.25);
+        dec.add(DECAL.glow, b.x, b.z, 1.1, 0.3, 0.8, 0.1, 0.32);
+      } else if (b.kind === 2) {
+        this.iBullet.add(b.x, y, b.z, 0, s, s, s, 2.6, 0.85, 0.15);
+        dec.add(DECAL.glow, b.x, b.z, 1.2, 0.9, 0.35, 0.08, 0.4);
+        if (Math.random() < dt * 30) this.sparks.spawn(b.x, y, b.z, 0, 0.6, 0, 0.3, 0.4, 2.6, 0.9, 0.15, { size1: 0.05 });
+      } else {
+        this.iBullet.add(b.x, y, b.z, 0, s * 0.85, s * 0.85, s * 0.85, 1.5, 0.06, 0.5);
+        dec.add(DECAL.glow, b.x, b.z, 1.1, 0.9, 0.08, 0.4, 0.32);
+      }
     }
     this.iBullet.end();
 
