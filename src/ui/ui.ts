@@ -617,6 +617,7 @@ export class UI {
         <div class="dashes" data-h="dashes"></div>
         <div class="slots" data-h="weapons"></div>
         <div class="slots" data-h="passives"></div>
+        <div class="slots" data-h="relics"></div>
       </div>
       <div class="tc">
         <div class="timer" data-h="timer">00:00</div>
@@ -653,7 +654,7 @@ export class UI {
   showHud() {
     this.setScreen('none');
     this.closeModal();
-    this.hud.classList.remove('hidden');
+    this.hud.classList.remove('hidden', 'fade');
     this.cache = {};
     this.h.banner.className = 'line';
     this.h.tip.classList.remove('on');
@@ -664,6 +665,12 @@ export class UI {
 
   hideHud() {
     this.hud.classList.add('hidden');
+    this.hud.classList.remove('fade');
+  }
+
+  /** fade the HUD away for the ending cinematics */
+  fadeHud() {
+    this.hud.classList.add('fade');
   }
 
   private set(key: string, val: string | number, fn: (el: HTMLElement, v: string | number) => void) {
@@ -717,14 +724,16 @@ export class UI {
       }
       el.innerHTML = html;
     });
-    const pKey = p.passives.map((w) => w.id + w.level).join(',') + '|' + p.relics.join(',');
+    this.set('relics', p.relics.join(','), (el) => {
+      el.innerHTML = p.relics.map((r) => `<span class="slot small relic" style="--c:${hex(RELIC_COLORS[r])}">${icon(r, 16)}</span>`).join('');
+    });
+    const pKey = p.passives.map((w) => w.id + w.level).join(',');
     this.set('passives', pKey, (el) => {
       let html = '';
       for (let i = 0; i < MAX_PASSIVES; i++) {
         const w = p.passives[i];
         html += w ? `<span class="slot small" style="--c:${hex(PASSIVES[w.id].color)}">${icon(w.id, 16)}<b>${w.level}</b></span>` : `<span class="slot small empty"></span>`;
       }
-      for (const r of p.relics) html += `<span class="slot small relic" style="--c:${hex(RELIC_COLORS[r])}">${icon(r, 16)}</span>`;
       el.innerHTML = html;
     });
     // timer + beacons + objective

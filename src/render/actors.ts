@@ -283,7 +283,7 @@ export class EnemyRenderer {
           sx *= w;
           sz *= w;
         }
-        if (e.flash > 0.3) {
+        if (e.flash > 0.3 && !e.boss) {
           const k = 1 + e.flash * 0.1;
           sx *= k;
           sz *= k;
@@ -298,7 +298,7 @@ export class EnemyRenderer {
         m[o + 8] = s * sz; m[o + 9] = 0; m[o + 10] = c * sz; m[o + 11] = 0;
         m[o + 12] = e.x; m[o + 13] = y; m[o + 14] = e.z; m[o + 15] = 1;
         const f = kr.fx.array as Float32Array;
-        f[idx * 4] = e.flash;
+        f[idx * 4] = e.boss ? e.flash * 0.22 : e.flash * 0.75;
         f[idx * 4 + 1] = e.tele ? 0.6 + 0.4 * Math.sin(time * 30) : 0;
         f[idx * 4 + 2] = frozen ? 1 : e.chillT > 0 ? 0.45 : 0;
         f[idx * 4 + 3] = e.elite ? 1 : 0;

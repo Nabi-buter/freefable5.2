@@ -183,7 +183,8 @@ input[type='range']::-moz-range-thumb { width: 1.2em; height: 1.2em; border-radi
 .codex { display: grid; grid-template-columns: repeat(auto-fill, minmax(17em, 1fr)); gap: 0.7em; padding-bottom: 1em; }
 
 /* ------------------------------------------------------------------ HUD */
-#hud { position: absolute; inset: 0; pointer-events: none; }
+#hud { position: absolute; inset: 0; pointer-events: none; transition: opacity 1.2s ease; }
+#hud.fade { opacity: 0; }
 #hud .xp { position: absolute; left: 0; right: 0; top: 0; height: 0.62em; background: rgba(6, 8, 20, 0.7); border-bottom: 1px solid rgba(120, 170, 255, 0.25); }
 #hud .xp i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3d8bff, #8fe6ff); box-shadow: 0 0 1em rgba(110, 200, 255, 0.8); transition: width 0.18s ease-out; }
 #hud .xp.flash i { filter: brightness(2); }

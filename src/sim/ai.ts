@@ -47,7 +47,7 @@ export function updateDirector(sim: Sim, dt: number) {
   const p = sim.player;
   let channeling = false;
   for (const b of sim.beacons) if (b.channeling) channeling = true;
-  let rate = (1.5 + 0.95 * I + 0.07 * I * I) * sim.diff.spawn;
+  let rate = (1.1 + 0.6 * I + 0.09 * I * I) * sim.diff.spawn;
   if (channeling) rate *= 1.6;
   if (sim.boss) rate *= 0.4;
   const maxAlive = Math.min(440, 50 + 30 * I);

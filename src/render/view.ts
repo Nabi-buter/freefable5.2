@@ -933,7 +933,7 @@ export class GameView {
       const y = H(b.x, b.z) + 1.0;
       const s = b.r * 2.3 * (1 + Math.sin(time * 18 + b.id) * 0.12);
       if (b.kind === 0) this.iBullet.add(b.x, y, b.z, 0, s, s, s, 0.6, 1.7, 0.25);
-      else this.iBullet.add(b.x, y, b.z, 0, s, s, s, 2.2, 0.35, 1.2);
+      else this.iBullet.add(b.x, y, b.z, 0, s, s, s, 1.9, 0.12, 0.75);
       dec.add(DECAL.glow, b.x, b.z, 1.2, b.kind === 0 ? 0.3 : 0.9, b.kind === 0 ? 0.8 : 0.12, b.kind === 0 ? 0.1 : 0.5, 0.4);
     }
     this.iBullet.end();
@@ -1103,14 +1103,14 @@ export class GameView {
       const pulse = 1 + Math.sin(time * 2 + i) * 0.12;
       const L = dyn.lit;
       const pr = Math.max(prog, L);
-      mat.color.setRGB(lerp(0.3, 4.2, pr) * pulse, lerp(0.6, 2.0, pr) * pulse, lerp(1.5, 0.5, pr) * pulse);
+      mat.color.setRGB(lerp(0.3, 2.6, pr) * pulse, lerp(0.6, 1.25, pr) * pulse, lerp(1.5, 0.3, pr) * pulse);
       dyn.crystal.position.y = dyn.y + 5.7 + Math.sin(time * 1.4 + i * 2) * 0.18 + prog * 0.5;
       dyn.crystal.rotation.y = time * (0.5 + pr * 2.5);
       const sc = 1 + pr * 0.5;
       dyn.crystal.scale.set(sc, sc, sc);
       dyn.pillar.visible = L > 0.01;
       if (dyn.pillar.visible) {
-        (dyn.pillar.material as THREE.ShaderMaterial).uniforms.uPow.value = L * (0.55 + Math.sin(time * 3 + i) * 0.05);
+        (dyn.pillar.material as THREE.ShaderMaterial).uniforms.uPow.value = L * (0.34 + Math.sin(time * 3 + i) * 0.04) * (1 - this.dawn * 0.45);
         dyn.pillar.scale.set(1, L, 1);
       }
       if (d < 85) {
@@ -1128,12 +1128,12 @@ export class GameView {
             this.sparks.spawn(b.x + (Math.random() - 0.5) * 2, dyn.y + 4.5 + Math.random(), b.z + (Math.random() - 0.5) * 2, 0, 0.6, 0, 1.4, 0.32, 0.5, 1.0, 2.6, {});
           }
         } else {
-          dec.add(DECAL.lit, b.x, b.z, sim?.hasRelic('beaconbond') ? 14 : 8.5, 1.0, 0.6, 0.22, 0.55);
-          dec.add(DECAL.glow, b.x, b.z, 11, 0.9, 0.45, 0.14, 0.7);
+          dec.add(DECAL.lit, b.x, b.z, sim?.hasRelic('beaconbond') ? 14 : 8.5, 1.0, 0.6, 0.22, 0.42);
+          dec.add(DECAL.glow, b.x, b.z, 11, 0.9, 0.45, 0.14, 0.4);
           const n = Math.random() < dt * 60 ? 2 : 1;
           for (let k = 0; k < n; k++) {
             const a = Math.random() * TAU, dd = Math.random() * 0.9;
-            this.sparks.spawn(b.x + Math.cos(a) * dd, dyn.y + 4.4 + Math.random() * 0.4, b.z + Math.sin(a) * dd, (Math.random() - 0.5) * 0.8, 2.5 + Math.random() * 4, (Math.random() - 0.5) * 0.8, 0.6 + Math.random() * 0.6, 1.3, 3.4, 1.2 + Math.random(), 0.22, { size1: 0.15, drag: 0.4 });
+            this.sparks.spawn(b.x + Math.cos(a) * dd, dyn.y + 4.4 + Math.random() * 0.4, b.z + Math.sin(a) * dd, (Math.random() - 0.5) * 0.8, 2.5 + Math.random() * 4, (Math.random() - 0.5) * 0.8, 0.6 + Math.random() * 0.6, 1.0, 1.7, 0.55 + Math.random() * 0.45, 0.1, { size1: 0.12, drag: 0.4 });
           }
         }
       }
@@ -1209,9 +1209,9 @@ export class GameView {
     if (this.mode === 'victory') {
       const e = clamp(this.modeT / 5, 0, 1);
       const s = e * e * (3 - 2 * e);
-      dist = lerp(dist, 15, s);
-      pitch = lerp(pitch, 0.13, s);
-      lookY = lerp(1, 4.5, s);
+      dist = lerp(dist, 25, s);
+      pitch = lerp(pitch, 0.27, s);
+      lookY = lerp(1, 5.5, s);
       // swing round to look at the sunrise (sun sits toward +x,+z)
       yaw = lerp(0, -2.25, s) + (this.modeT > 5 ? (this.modeT - 5) * 0.02 : 0);
     } else if (this.mode === 'death') {

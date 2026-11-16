@@ -40,7 +40,7 @@ export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', s
       pend.choices.forEach((c, i) => {
         let s = Math.random();
         if (c.type === 'evolve') s += 10;
-        else if (c.type === 'weapon') s += c.isNew ? 1.5 : 2;
+        else if (c.type === 'weapon') s += c.isNew ? (sim.player.weapons.length < 4 ? 3 : 1.5) : 2.2;
         else if (c.type === 'passive') s += 1;
         if (s > bs) {
           bs = s;
@@ -83,33 +83,37 @@ export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', s
     }
     // only push for beacons when strong enough for the current count
     const ready = p.level >= 4 + sim.stats.beacons * 5;
+    // embers nearby always tug at the bot, like they do at a human player
+    let px = 0, pz = 0, pn = 0;
+    for (const k of sim.pickups) {
+      if (k.kind !== 'xp' && k.kind !== 'chest' && k.kind !== 'heal') continue;
+      const d = Math.hypot(k.x - p.x, k.z - p.z);
+      if (d < 13 && d > 0.5) {
+        const w = k.kind === 'chest' ? 6 : 1;
+        px += ((k.x - p.x) / d) * w;
+        pz += ((k.z - p.z) / d) * w;
+        pn += w;
+      }
+    }
+    const pl = Math.hypot(px, pz) || 1;
     if (target && ready) {
       const d = Math.hypot(target.x - p.x, target.z - p.z) || 1;
       if (d > 3) {
         gx = (target.x - p.x) / d;
         gz = (target.z - p.z) / d;
       }
+      // detour for embers while travelling, but hold the ring once channeling
+      if (pn > 0 && d > 7) {
+        gx = gx * 0.55 + (px / pl) * 0.45;
+        gz = gz * 0.55 + (pz / pl) * 0.45;
+      }
+    } else if (pn > 0) {
+      gx = px / pl;
+      gz = pz / pl;
     } else {
-      // roam in a slow circle near xp
       wander += dt * 0.25;
-      let px = 0, pz = 0, pn = 0;
-      for (const k of sim.pickups) {
-        if (k.kind !== 'xp' && k.kind !== 'chest' && k.kind !== 'heal') continue;
-        const d = Math.hypot(k.x - p.x, k.z - p.z);
-        if (d < 14 && d > 0.5) {
-          px += (k.x - p.x) / d;
-          pz += (k.z - p.z) / d;
-          pn++;
-        }
-      }
-      if (pn > 0) {
-        const l = Math.hypot(px, pz) || 1;
-        gx = px / l;
-        gz = pz / l;
-      } else {
-        gx = Math.cos(wander);
-        gz = Math.sin(wander);
-      }
+      gx = Math.cos(wander);
+      gz = Math.sin(wander);
     }
     const tw = Math.min(1, threat * (0.6 + skill));
     let mx = gx * (1 - tw * 0.85) + fx * skill * 1.6;

@@ -100,7 +100,7 @@ varying vec4 vFx;
   totalEmissiveRadiance += vColor.rgb * vGlow * uGlowMul;
 #ifdef USE_INSTFX
   totalEmissiveRadiance += vColor.rgb * vGlow * vFx.y * 3.0 + vec3(1.0, 0.22, 0.2) * vFx.y * 0.3;
-  totalEmissiveRadiance += vec3(1.0, 0.95, 0.85) * vFx.x * 1.5;
+  totalEmissiveRadiance += vec3(1.0, 0.95, 0.85) * vFx.x * 1.1;
   totalEmissiveRadiance += vec3(1.0, 0.72, 0.2) * vFx.w * 0.4;
   totalEmissiveRadiance += vec3(0.25, 0.5, 0.9) * vFx.z * 0.25;
 #endif`,

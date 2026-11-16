@@ -129,7 +129,7 @@ export function finishRun(save: SaveData, sim: Sim): RunSummary {
   ach('level30', p.level >= 30);
   ach('evolve', evolved >= 1);
   ach('evolve3', evolved >= 3);
-  ach('combo', sim.stats.maxCombo >= 300);
+  ach('combo', sim.stats.maxCombo >= 1000);
   ach('swift', win && sim.time < 12 * 60);
   ach('untouched', win && sim.stats.dmgTaken <= 150);
   ach('elites', st.eliteKills >= 50);

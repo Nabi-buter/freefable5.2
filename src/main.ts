@@ -290,11 +290,13 @@ class App implements UIHost {
           this.state = 'ending';
           this.endT = 2.8;
           this.view.setMode('death');
+          this.ui.fadeHud();
           this.audio.music?.setMood('death', 0);
         } else if (sim.state === 'victory') {
           this.state = 'ending';
-          this.endT = 8.5;
+          this.endT = 9.5;
           this.view.setMode('victory');
+          this.ui.fadeHud();
         }
         // music follows the run
         const m = this.audio.music;

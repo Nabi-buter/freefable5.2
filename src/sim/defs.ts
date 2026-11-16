@@ -28,8 +28,8 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
   wraith: { kind: 'wraith', hp: 32, speed: 3.1, dmg: 13, radius: 0.65, xp: 4, mass: 1.4, ai: 'charger', cost: 3.5 },
   bomber: { kind: 'bomber', hp: 15, speed: 4.4, dmg: 20, radius: 0.55, xp: 3, mass: 0.8, ai: 'bomber', cost: 2.5 },
   husk: { kind: 'husk', hp: 46, speed: 2.7, dmg: 10, radius: 0.8, xp: 4, mass: 2, ai: 'chase', cost: 3.5 },
-  herald: { kind: 'herald', hp: 950, speed: 2.9, dmg: 18, radius: 1.7, xp: 60, mass: 30, ai: 'herald', cost: 0 },
-  eclipse: { kind: 'eclipse', hp: 9000, speed: 3.0, dmg: 24, radius: 2.6, xp: 0, mass: 1000, ai: 'eclipse', cost: 0 },
+  herald: { kind: 'herald', hp: 1100, speed: 2.9, dmg: 18, radius: 1.7, xp: 60, mass: 30, ai: 'herald', cost: 0 },
+  eclipse: { kind: 'eclipse', hp: 22000, speed: 3.0, dmg: 24, radius: 2.6, xp: 0, mass: 1000, ai: 'eclipse', cost: 0 },
 };
 
 // ---------------------------------------------------------------- weapons
@@ -281,7 +281,7 @@ export interface CharDef {
 export const CHARS: Record<CharId, CharDef> = {
   kindler: { id: 'kindler', weapon: 'ember', hp: 100, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1, xp: 1.1, dashCharges: 1, cloak: 0x7a3524, accent: 0xffa040 },
   stormcaller: { id: 'stormcaller', weapon: 'arc', hp: 80, speed: 7.9, armor: 0, might: 1, haste: 1.12, area: 1, xp: 1, dashCharges: 1, cloak: 0x2a3f7a, accent: 0x9fc4ff },
-  warden: { id: 'warden', weapon: 'wisps', hp: 140, speed: 6.6, armor: 1, might: 1, haste: 1, area: 1, xp: 1, dashCharges: 1, cloak: 0x2f5a44, accent: 0x7de8ff },
+  warden: { id: 'warden', weapon: 'wisps', hp: 140, speed: 6.6, armor: 2, might: 1, haste: 1, area: 1, xp: 1, dashCharges: 1, cloak: 0x2f5a44, accent: 0x7de8ff },
   frostweaver: { id: 'frostweaver', weapon: 'frost', hp: 90, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1.18, xp: 1, dashCharges: 1, cloak: 0x3b5d7c, accent: 0xbdf0ff },
   ashwalker: { id: 'ashwalker', weapon: 'trail', hp: 95, speed: 7.7, armor: 0, might: 1.1, haste: 1, area: 1, xp: 1, dashCharges: 2, cloak: 0x3a2d33, accent: 0xff5a2a },
 };

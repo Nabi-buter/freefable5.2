@@ -24,8 +24,8 @@ export const PALETTES: Record<BiomeId, Palette> = {
     stone: 0x8b8e9c, stoneDark: 0x555868, moss: 0x4a7a44,
     crystal: 0x5ad8ff, shroomCap: 0x8a4a7a, shroomGlow: 0x6affd0, ice: 0xa8e4ff, cactus: 0x4a7a50, bone: 0xd8cdb8,
     flowers: [0xff8ad0, 0x8ad0ff, 0xffe08a, 0xb0ffb0], grassBlade: 0x4f9a58, fern: 0x3a8a60,
-    skyTopN: 0x04061a, skyHorN: 0x16264f, skyTopD: 0x3d68b0, skyHorD: 0xffa26b,
-    fogN: 0x0e1a36, fogD: 0xe8a98a,
+    skyTopN: 0x04061a, skyHorN: 0x16264f, skyTopD: 0x2f5aa8, skyHorD: 0xff9456,
+    fogN: 0x0e1a36, fogD: 0xd98a66,
     waterDeep: 0x061226, waterShallow: 0x1a5a6a,
     hemiSkyN: 0x4a63b8, hemiGroundN: 0x141826, hemiSkyD: 0xbfd4ff, hemiGroundD: 0x6a5040,
     moon: 0x9fb8ff, sun: 0xffc890, aurora: 0x3affb0,
@@ -333,7 +333,7 @@ export class Environment {
     skyU.uDawn.value = d;
     skyU.uSunDir.value.copy(this.sunDir).setY(lerp(-0.06, 0.12, d)).normalize();
     this.fog.color.copy(this.tmpA.setHex(p.fogN)).lerp(this.tmpB.setHex(p.fogD), d);
-    this.fog.density = lerp(0.0125, 0.0055, d);
+    this.fog.density = lerp(0.0125, 0.0042, d);
     this.hemi.color.copy(this.tmpA.setHex(p.hemiSkyN)).lerp(this.tmpB.setHex(p.hemiSkyD), d);
     this.hemi.groundColor.copy(this.tmpA.setHex(p.hemiGroundN)).lerp(this.tmpB.setHex(p.hemiGroundD), d);
     this.hemi.intensity = lerp(1.9, 2.2, d);

@@ -147,7 +147,7 @@ export class Sim {
   }
 
   xpNeed(level: number): number {
-    return Math.floor(6 + 5 * level + 0.42 * level * level);
+    return Math.floor(6 + 5 * level + 0.9 * level * level);
   }
 
   /** intensity scalar driving spawn rate and enemy scaling */
@@ -358,7 +358,7 @@ export class Sim {
     e.alive = false;
     this.stats.kills++;
     this.combo++;
-    this.comboT = 3;
+    this.comboT = 2;
     if (this.combo > this.stats.maxCombo) this.stats.maxCombo = this.combo;
     this.events.push({ t: 'kill', x: e.x, z: e.z, kind: e.kind, elite: e.elite || e.boss, r: e.r });
     const p = this.player;
@@ -445,7 +445,9 @@ export class Sim {
   hurtPlayer(dmg: number, sx: number, sz: number): boolean {
     const p = this.player;
     if (!p.alive || p.iframe > 0 || this.state !== 'playing' || this.endT >= 0) return false;
-    const mult = (1 + 0.04 * this.intensity()) * this.diff.dmg;
+    // past the 18 minute mark the night turns lethal, so no vigil can stall forever
+    const late = Math.max(0, this.time / 60 - 18);
+    const mult = (1 + 0.04 * this.intensity()) * (1 + late * 0.15) * this.diff.dmg;
     const d = Math.max(1, Math.round(dmg * mult - p.st.armor));
     p.hp -= d;
     p.iframe = 0.55;
@@ -476,7 +478,8 @@ export class Sim {
     const I = this.intensity();
     const boss = kind === 'herald' || kind === 'eclipse';
     let hpMul = (1 + 0.11 * I + 0.011 * I * I) * this.diff.hp;
-    if (boss) hpMul = (1 + 0.085 * I) * this.diff.hp;
+    // bosses scale with the clock only: rushing the beacons must not buy an easier fight
+    if (boss) hpMul = (1 + 0.045 * (this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1) * this.diff.hp;
     const scale = elite ? 1.45 : 1;
     const e: Enemy = {
       id: this.id(), kind, def, x, z, kx: 0, kz: 0,
