@@ -792,7 +792,14 @@ export class Sim {
     if (this.bossT >= 0) {
       this.bossT -= dt;
       if (this.bossT < 0) {
-        const pos = this.ringPoint(16, 20, 3, Math.atan2(-p.z, -p.x));
+        // arrive in open ground: never on top of a beacon tower
+        let pos = this.ringPoint(16, 20, 3, Math.atan2(-p.z, -p.x));
+        for (let tries = 0; tries < 10; tries++) {
+          let clear = true;
+          for (const b of this.beacons) if (Math.hypot(b.x - pos.x, b.z - pos.z) < 13) clear = false;
+          if (clear) break;
+          pos = this.ringPoint(16, 24, 3);
+        }
         this.boss = this.spawnEnemy('eclipse', pos.x, pos.z);
         this.events.push({ t: 'bossSpawn', x: pos.x, z: pos.z, kind: 'eclipse' });
       }

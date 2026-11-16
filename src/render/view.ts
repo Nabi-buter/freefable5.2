@@ -969,7 +969,7 @@ export class GameView {
         }
       } else if (w.id === 'aura') {
         const R = s.area * p.st.area;
-        dec.add(DECAL.aura, p.x, p.z, R, 1.0, 0.8, 0.4, evo ? 0.8 : 0.5);
+        dec.add(DECAL.aura, p.x, p.z, R, 1.0, 0.75, 0.35, evo ? 0.5 : 0.3);
       }
     }
     this.iWisp.end();
@@ -1139,7 +1139,7 @@ export class GameView {
       dyn.crystal.scale.set(sc, sc, sc);
       dyn.pillar.visible = L > 0.01;
       if (dyn.pillar.visible) {
-        (dyn.pillar.material as THREE.ShaderMaterial).uniforms.uPow.value = L * (0.3 + Math.sin(time * 3 + i) * 0.03) * (1 - this.dawn * 0.8);
+        (dyn.pillar.material as THREE.ShaderMaterial).uniforms.uPow.value = L * (0.21 + Math.sin(time * 3 + i) * 0.02) * (1 - this.dawn * 0.75);
         dyn.pillar.scale.set(1, L, 1);
       }
       if (d < 85) {
@@ -1238,9 +1238,9 @@ export class GameView {
     if (this.mode === 'victory') {
       const e = clamp(this.modeT / 5, 0, 1);
       const s = e * e * (3 - 2 * e);
-      dist = lerp(dist, 25, s);
-      pitch = lerp(pitch, 0.27, s);
-      lookY = lerp(1, 5.5, s);
+      dist = lerp(dist, 26, s);
+      pitch = lerp(pitch, 0.2, s);
+      lookY = lerp(1, 7.5, s);
       // swing round to look at the sunrise (sun sits toward +x,+z)
       yaw = lerp(0, -2.25, s) + (this.modeT > 5 ? (this.modeT - 5) * 0.02 : 0);
     } else if (this.mode === 'death') {

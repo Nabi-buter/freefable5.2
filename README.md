@@ -1,0 +1,86 @@
+# CINDERWAKE
+
+**봉화를 밝혀, 새벽을 깨워라 — Light the beacons. Wake the dawn.**
+
+브라우저에서 바로 실행되는 3D 액션 로그라이트입니다. 끝나지 않는 밤에 잠긴 섬에서 마지막 등불지기가 되어
+다섯 봉화를 밝히고, 밤의 주인 **일식**을 쓰러뜨려 새벽을 되찾으세요.
+
+A 3D action roguelite that runs in the browser. You are the last lightbearer on an isle drowned in endless night:
+light five beacons, defeat **the Eclipse**, and bring back the dawn.
+
+![Dawn breaks over the isle](docs/screenshots/dawn.jpg)
+
+> 모델·지형·셰이더·효과음·음악까지 **모든 에셋이 코드로 생성**됩니다. 이미지나 오디오 파일은 하나도 없습니다.
+> Every asset — models, terrain, shaders, sound effects and music — is **generated in code**. There is not a single image or audio file.
+
+## 플레이 / Play
+
+GitHub Pages: **https://nabi-buter.github.io/freefable5.2/**
+
+| | |
+| --- | --- |
+| ![Title](docs/screenshots/title.jpg) | ![Combat](docs/screenshots/combat.jpg) |
+| ![Level up](docs/screenshots/levelup.jpg) | ![Lighting a beacon](docs/screenshots/beacon.jpg) |
+| ![The Eclipse](docs/screenshots/boss.jpg) | ![Dawn](docs/screenshots/dawn.jpg) |
+
+## 특징 / Features
+
+- **한 판 10~15분**의 밀도 높은 런: 이동·대시 → 자동 공격 → 불씨 수집 → 레벨업 3택 → 봉화 점화 → 유물 → 보스 → 새벽
+- **무기 11종**(각 6레벨 + 진화형) · **패시브 13종** · **유물 16종** — 무기와 짝 패시브를 모으면 진화
+- **적 7종 + 미니보스 + 3페이즈 최종 보스**, 위협 예산 기반 스폰 디렉터, 정예·포위 이벤트
+- **지역 3곳**: 잿빛 숲 · 서리 호수(서리 폭발) · 불씨 황무지(용암 분출) — 지역마다 적 구성과 지형 위험이 다릅니다
+- **등불지기 5명**, **난이도 3단계**, 영구 강화 13종, 업적 20개, 도감
+- 봉화를 밝힐수록 밤하늘이 조금씩 밝아지고, 보스를 쓰러뜨리면 **실제로 해가 뜹니다**
+- 절차적 로우폴리 3D 월드: 시드 기반 섬, 인스턴싱 숲, 바다·하늘·오로라 셰이더, 블룸, 그림자
+- **절차적 오디오**: Web Audio로 합성한 효과음과, 전투 강도에 따라 레이어가 쌓이는 생성형 음악
+- 키보드·마우스 / 게임패드 / 터치 지원, 한국어·English, 자동 저장, 그래픽 품질 4단계 + 자동 조절
+
+## 조작 / Controls
+
+| | 이동 Move | 조준 Aim | 대시 Dash | 일시정지 Pause |
+| --- | --- | --- | --- | --- |
+| 키보드·마우스 | WASD / 방향키 | 마우스 | Space / 우클릭 | Esc / P |
+| 게임패드 | 왼쪽 스틱 | 오른쪽 스틱 | A / RB | Start |
+| 터치 | 화면 왼쪽 드래그 | 자동 | 대시 버튼 | 일시정지 버튼 |
+
+레벨업 카드는 숫자 키 `1`–`4`로 고를 수 있고, 마우스 휠로 카메라 거리를 조절합니다.
+
+## 개발 / Development
+
+```bash
+npm install
+npm run dev      # 개발 서버 (http://localhost:5173)
+npm run build    # 타입 체크 + 프로덕션 빌드 → dist/
+npm test         # 월드 생성·시뮬레이션 테스트
+npm run sim      # 헤드리스 밸런스 봇
+```
+
+밸런스 봇은 렌더링 없이 시뮬레이션만 초당 수만 스텝으로 돌려 승률과 진행 속도를 측정합니다.
+
+```bash
+npx tsx tests/simbot.ts 10 0 all 0.7 ashwood   # 판수 난이도 캐릭터 실력 지역
+```
+
+### 구조
+
+- `src/sim/` — 렌더링과 분리된 순수 게임 로직 (Node에서 그대로 실행)
+- `src/render/` — three.js 렌더러, 절차적 모델, 셰이더, 파티클
+- `src/audio/` — 효과음 합성과 생성형 음악
+- `src/ui/` — DOM 기반 메뉴·HUD
+- `src/core/` — 입력, 세이브, 다국어, 업적
+
+자세한 내용은 [`docs/HANDOFF.md`](docs/HANDOFF.md)를 참고하세요.
+
+### 배포
+
+`main` 또는 개발 브랜치에 푸시하면 `.github/workflows/deploy.yml`이 빌드·테스트 후 GitHub Pages로 배포합니다.
+저장소 **Settings → Pages**의 Source가 *GitHub Actions*여야 하고, 기본 브랜치가 아닌 브랜치에서 배포하려면
+**Settings → Environments → github-pages → Deployment branches**에 해당 브랜치를 추가해야 합니다.
+
+## 기술 / Tech
+
+[three.js](https://threejs.org/) · TypeScript · Vite · Web Audio API · 글꼴 [Cinzel](https://fonts.google.com/specimen/Cinzel) (SIL OFL)
+
+## 라이선스 / License
+
+MIT — [LICENSE](LICENSE)
