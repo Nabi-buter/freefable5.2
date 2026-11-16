@@ -225,6 +225,26 @@ export function geoHusk(): THREE.BufferGeometry {
   ]);
 }
 
+export function geoSporecap(): THREE.BufferGeometry {
+  const stalk = 0xd8cfe8, cap = 0x6a3ab0, under = 0x3a2468, spot = 0x9cffa0, dark = 0x241a3a;
+  const parts = [
+    part(lumpy(cyl(0.34, 0.46, 1.0, 7), 0.06, 91), stalk, { pos: [0, 0.6, 0], jitter: 0.1, grad: [0.7, 1.05] }),
+    part(sph(0.95, 9, 6), cap, { pos: [0, 1.35, 0], scl: [1, 0.55, 1], jitter: 0.12, sway: 0.18 }),
+    part(cyl(0.9, 0.5, 0.16, 9), under, { pos: [0, 1.14, 0], sway: 0.18 }),
+    part(sph(0.09, 5, 3), spot, { pos: [0.36, 0.78, 0.15], glow: 3 }),
+    part(sph(0.09, 5, 3), spot, { pos: [0.36, 0.78, -0.15], glow: 3 }),
+    part(box(0.3, 0.26, 0.3), dark, { pos: [0.05, 0.13, 0.3], sway: -0.6 }),
+    part(box(0.3, 0.26, 0.3), dark, { pos: [0.05, 0.13, -0.3], sway: -0.6 }),
+  ];
+  // glowing blotches scattered over the cap
+  const blot: [number, number, number][] = [[0.5, 0.25, 0.14], [-0.35, 0.5, 0.17], [0.1, -0.6, 0.15], [-0.55, -0.3, 0.12], [0.6, -0.35, 0.1], [-0.05, 0.05, 0.16]];
+  for (const [x, z, r] of blot) {
+    const h = 1.35 + Math.sqrt(Math.max(0, 1 - (x * x + z * z) / 0.9)) * 0.52;
+    parts.push(part(sph(r, 5, 3), spot, { pos: [x, h, z], scl: [1, 0.45, 1], glow: 1.1, sway: 0.18 }));
+  }
+  return merge(parts);
+}
+
 export function geoRime(): THREE.BufferGeometry {
   const ice = 0x8fc4e8, deep = 0x4f7fae, core = 0x9ff0ff, frost = 0xe6f6ff;
   const arm = (x: number, y: number) => (y < 1.3 ? 0.55 : 0);

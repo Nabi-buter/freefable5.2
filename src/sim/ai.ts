@@ -25,6 +25,7 @@ const UNLOCKS: { kind: EnemyKind; at: number; w: number; only?: string }[] = [
   { kind: 'husk', at: 7.4, w: 2.6 },
   { kind: 'rime', at: 3.0, w: 2.4, only: 'frostmere' },
   { kind: 'worm', at: 3.6, w: 1.5, only: 'emberwaste' },
+  { kind: 'sporecap', at: 3.2, w: 2.3, only: 'gloommire' },
 ];
 
 function pickKind(sim: Sim, I: number): EnemyKind {
@@ -205,6 +206,20 @@ export function updateEnemies(sim: Sim, dt: number) {
             const w = Math.sin(e.t * 1.7 + e.seed * 40) * 0.28;
             vx = (nx - nz * w) * e.speed;
             vz = (nz + nx * w) * e.speed;
+            if (e.kind === 'sporecap') {
+              // swell up near the bearer, then let out a cloud that lingers where it stood
+              e.c1 -= dt * speedMul;
+              if (dist < 6.5 && e.c1 < 0.7) {
+                e.tele = 1;
+                vx *= 0.35;
+                vz *= 0.35;
+                if (e.c1 <= 0) {
+                  e.c1 = sim.rng.range(6, 8);
+                  sim.zones.push({ id: sim.id(), kind: 'spore', x: e.x, z: e.z, r: 2.9, t: 0, dur: 0.7, dmg: 7, tick: 0, hostile: true, weapon: null, evolved: false, dx: 3.2, dz: 0, len: 0, alive: true });
+                  sim.events.push({ t: 'spit', x: e.x, z: e.z });
+                }
+              } else if (e.c1 < 0.7) e.c1 = 0.7;
+            }
             break;
           }
           case 'ranged': {

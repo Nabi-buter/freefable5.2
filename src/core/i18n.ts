@@ -403,6 +403,8 @@ const S: Record<string, Pair> = {
   'e.rime.d': ['서리 호수에만 사는 느린 거인. 쓰러지면 서리 폭발을 일으켜 주변을 얼립니다.', 'A slow giant found only in Frostmere. It bursts into frost when it falls, freezing everything nearby.'],
   'e.worm': ['재벌레', 'Cinderworm'],
   'e.worm.d': ['불씨 황무지의 모래 밑을 파고들어 발밑에서 솟아올라 불덩이를 뱉습니다. 땅속에 있을 때는 공격할 수 없습니다.', 'Tunnels under the Ember Wastes, erupts beneath you and spits fire. It cannot be harmed while underground.'],
+  'e.sporecap': ['포자갓', 'Sporecap'],
+  'e.sporecap.d': ['달그늘 늪에만 사는 걸어 다니는 독버섯. 가까이 오면 몸을 부풀려 독안개를 내뿜습니다. 안개는 다른 적도 갉아먹습니다.', 'A walking toadstool found only in Gloommire. Up close it swells and puffs out a poison cloud that gnaws at other foes too.'],
   'e.herald': ['밤의 전령', 'Herald of Night'],
   'e.herald.d': ['봉화를 지키는 수문장. 내려찍기를 피하세요.', 'A beacon guardian. Step out of its slams.'],
   'e.eclipse': ['일식', 'The Eclipse'],

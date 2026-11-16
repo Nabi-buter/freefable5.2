@@ -1,8 +1,8 @@
 /** Static game data: enemies, weapons, passives, relics, characters, meta upgrades. Pure data, no logic. */
 
 // ---------------------------------------------------------------- enemies
-export type EnemyKind = 'shade' | 'skitter' | 'brute' | 'spitter' | 'wraith' | 'bomber' | 'husk' | 'rime' | 'worm' | 'herald' | 'eclipse';
-export const ENEMY_KINDS: EnemyKind[] = ['shade', 'skitter', 'brute', 'spitter', 'wraith', 'bomber', 'husk', 'rime', 'worm', 'herald', 'eclipse'];
+export type EnemyKind = 'shade' | 'skitter' | 'brute' | 'spitter' | 'wraith' | 'bomber' | 'husk' | 'rime' | 'worm' | 'sporecap' | 'herald' | 'eclipse';
+export const ENEMY_KINDS: EnemyKind[] = ['shade', 'skitter', 'brute', 'spitter', 'wraith', 'bomber', 'husk', 'rime', 'worm', 'sporecap', 'herald', 'eclipse'];
 
 export type EnemyAI = 'chase' | 'ranged' | 'charger' | 'bomber' | 'burrow' | 'herald' | 'eclipse';
 
@@ -32,6 +32,8 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
   rime: { kind: 'rime', hp: 120, speed: 2.0, dmg: 16, radius: 1.05, xp: 7, mass: 5, ai: 'chase', cost: 5.5 },
   // Ember Wastes only: tunnels under the sand, surfaces beneath you and spits fire
   worm: { kind: 'worm', hp: 40, speed: 6.0, dmg: 11, radius: 0.75, xp: 6, mass: 3, ai: 'burrow', cost: 5.5 },
+  // Gloommire only: a walking toadstool that puffs out a poison cloud when it gets close
+  sporecap: { kind: 'sporecap', hp: 58, speed: 2.5, dmg: 10, radius: 0.8, xp: 5, mass: 2.5, ai: 'chase', cost: 4.5 },
   herald: { kind: 'herald', hp: 1100, speed: 2.9, dmg: 18, radius: 1.7, xp: 60, mass: 30, ai: 'herald', cost: 0 },
   eclipse: { kind: 'eclipse', hp: 22000, speed: 3.0, dmg: 24, radius: 2.6, xp: 0, mass: 1000, ai: 'eclipse', cost: 0 },
 };

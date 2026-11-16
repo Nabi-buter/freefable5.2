@@ -568,7 +568,8 @@ export function updateZones(sim: Sim, dt: number) {
           break;
         }
         if (z.t >= z.dur) {
-          z.len = 5;
+          // dx carries a custom cloud lifetime (sporecap puffs are shorter than the region's blooms)
+          z.len = z.dx > 0 ? z.dx : 5;
           z.tick = 0;
           sim.events.push({ t: 'explode', x: z.x, z: z.z, r: z.r, c: 0x8cff6a, hostile: true });
         }
