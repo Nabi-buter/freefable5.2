@@ -124,6 +124,8 @@ export interface Enemy {
   scale: number;
   /** visual hint: 0 none, 1 winding up attack */
   tele: number;
+  /** elite affix: 0 none, 1 swift, 2 regenerating, 3 volatile, 4 splitting, 5 armoured */
+  affix: number;
   /** boss scratch: phase, move counter, locked charge direction + length */
   phase: number;
   c1: number;

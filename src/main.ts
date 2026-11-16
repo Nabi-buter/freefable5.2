@@ -2,6 +2,7 @@ import { AudioEngine } from './audio/audio';
 import { setLang, t } from './core/i18n';
 import { Input } from './core/input';
 import { finishRun } from './core/progress';
+import { dailyInfo } from './core/daily';
 import { SaveStore } from './core/save';
 import { GameView } from './render/view';
 import { banish, choose, reroll, skip } from './sim/choices';
@@ -35,6 +36,7 @@ class App implements UIHost {
   private menuBiome = '';
   private forcedQuality = false;
   private aimCursor = false;
+  private runDaily = false;
   /** boss introduction: slow the world and swing the camera over */
   private cine: { t: number; dur: number; x: number; z: number } | null = null;
   private slowT = 0;
@@ -48,6 +50,7 @@ class App implements UIHost {
     this.input = new Input(document.body);
     this.view = new GameView(canvas, overlay);
     this.ui = new UI(document.getElementById('ui')!, this);
+    this.view.affixLabel = (a) => t('affix.' + a);
     // ?q=low|medium|high|ultra overrides the saved quality for this session (handy for testing)
     const q = new URLSearchParams(location.search).get('q');
     if (q === 'low' || q === 'medium' || q === 'high' || q === 'ultra') {
@@ -130,14 +133,18 @@ class App implements UIHost {
     }
   }
 
-  startRun() {
+  startRun(daily = false) {
     const last = this.save.data.last;
     this.state = 'loading';
+    this.runDaily = daily;
     this.showVeil(true);
     setTimeout(() => {
-      const seed = (Math.random() * 0xffffffff) >>> 0;
-      this.sim = new Sim({ seed, char: last.char, difficulty: last.difficulty, biome: last.biome, meta: this.save.data.meta });
-      this.view.loadWorld(this.sim.world, CHARS[last.char]);
+      const d = dailyInfo();
+      const cfg = daily
+        ? { seed: d.seed, char: d.char, difficulty: 0, biome: d.biome, meta: this.save.data.meta }
+        : { seed: (Math.random() * 0xffffffff) >>> 0, char: last.char, difficulty: last.difficulty, biome: last.biome, meta: this.save.data.meta };
+      this.sim = new Sim(cfg);
+      this.view.loadWorld(this.sim.world, CHARS[cfg.char]);
       this.menuBiome = '';
       this.view.setSim(this.sim);
       this.view.setMode('follow');
@@ -155,7 +162,7 @@ class App implements UIHost {
   }
 
   retry() {
-    this.startRun();
+    this.startRun(this.runDaily);
   }
 
   pauseRequest() {
@@ -217,7 +224,7 @@ class App implements UIHost {
 
   private showResult() {
     const sim = this.sim!;
-    const sum = finishRun(this.save.data, sim);
+    const sum = finishRun(this.save.data, sim, this.runDaily);
     this.save.save();
     this.state = 'result';
     this.ui.hideHud();
@@ -434,6 +441,13 @@ try {
   console.error(err);
   fatal('이 브라우저에서는 WebGL 2를 사용할 수 없어 게임을 실행할 수 없습니다.', 'CINDERWAKE needs WebGL 2, which is not available in this browser.');
   throw err;
+}
+
+// ---- offline support: cache the game after the first visit
+if ('serviceWorker' in navigator && import.meta.env.PROD && !new URLSearchParams(location.search).has('debug')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => undefined);
+  });
 }
 
 // ---- debugging hooks (only with ?debug in the URL)

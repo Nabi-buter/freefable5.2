@@ -49,6 +49,8 @@ export interface SaveData {
   settings: Settings;
   last: { char: CharId; biome: BiomeId; difficulty: number };
   tutorial: boolean;
+  /** daily vigil record for `date` (UTC) */
+  daily: { date: string; done: boolean; best: number; streak: number };
 }
 
 const KEY = 'cinderwake.save.v1';
@@ -76,6 +78,7 @@ export function defaultSave(): SaveData {
     settings: { lang: defaultLang(), quality: 'high', master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true },
     last: { char: 'kindler', biome: 'ashwood', difficulty: 0 },
     tutorial: false,
+    daily: { date: '', done: false, best: 0, streak: 0 },
   };
 }
 

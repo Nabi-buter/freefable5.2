@@ -292,6 +292,7 @@ export class Sim {
   applyDamage(e: Enemy, d: number, w: WeaponId | null, crit: boolean, kb = 0, sx = 0, sz = 0, silent = false): number {
     if (!e.alive) return 0;
     if (e.spawn < 0.35) d *= 0.5;
+    if (e.affix === 5) d *= 0.55;
     e.hp -= d;
     e.flash = 1;
     this.stats.dmgDealt += d;
@@ -374,6 +375,15 @@ export class Sim {
       if (roll < 0.006 * luck) this.spawnPickup('heal', e.x, e.z, 1);
       else if (roll < 0.0075 * luck) this.spawnPickup('magnet', e.x, e.z, 1);
       else if (roll < 0.03 * luck) this.spawnPickup('cinder', e.x, e.z, 1);
+    }
+    if (e.affix === 3) {
+      // volatile: leaves a delayed blast where it fell
+      this.zones.push({ id: this.id(), kind: 'slam', x: e.x, z: e.z, r: 5.2, t: 0, dur: 1.0, dmg: e.dmg * 1.2, tick: 0, hostile: true, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true });
+    } else if (e.affix === 4) {
+      for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * Math.PI * 2;
+        this.spawnEnemy(e.kind, e.x + Math.cos(a) * 1.3, e.z + Math.sin(a) * 1.3, false, 0.5);
+      }
     }
     if (e.kind === 'husk') {
       for (let i = 0; i < 3; i++) {
@@ -488,7 +498,7 @@ export class Sim {
       hp: def.hp * hpMul * (elite ? 9 : 1), maxHp: 0,
       r: def.radius * scale, speed: def.speed * (elite ? 1.08 : 1) * (boss ? 1 : biome.enemySpeed) * this.rng.range(0.94, 1.06), dmg: def.dmg * (elite ? 1.4 : 1),
       alive: true, elite, boss, flash: 0, burnT: 0, burnDps: 0, burnAcc: 0, chillT: 0, freezeT: 0,
-      t: 0, st: 0, stT: 0, ax: 0, az: 0, n: 0, face: 0, cdA: 0, cdB: 0, seed: this.rng.next(), spawn, scale, tele: 0, phase: 1, c1: 0, lx: 0, lz: 0, ll: 0,
+      t: 0, st: 0, stT: 0, ax: 0, az: 0, n: 0, face: 0, cdA: 0, cdB: 0, seed: this.rng.next(), spawn, scale, tele: 0, affix: 0, phase: 1, c1: 0, lx: 0, lz: 0, ll: 0,
     };
     e.maxHp = e.hp;
     if (boss) this.bigs.push(e);

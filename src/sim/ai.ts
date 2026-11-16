@@ -98,9 +98,18 @@ export function updateDirector(sim: Sim, dt: number) {
     let kind = pickKind(sim, I);
     if (kind === 'skitter' || kind === 'bomber') kind = 'shade';
     const pos = sim.ringPoint(24, 28, 1.5);
-    sim.spawnEnemy(kind, pos.x, pos.z, true);
+    const el = sim.spawnEnemy(kind, pos.x, pos.z, true);
+    // from the third minute on, elites arrive with a random affix
+    if (I >= 3) {
+      el.affix = sim.rng.int(1, 5);
+      if (el.affix === 1) {
+        el.speed *= 1.45;
+        el.hp *= 0.8;
+        el.maxHp = el.hp;
+      } else if (el.affix === 5) el.speed *= 0.85;
+    }
     sim.events.push({ t: 'spawnElite', x: pos.x, z: pos.z });
-    sim.events.push({ t: 'announce', key: 'ann.elite', tone: 'warn' });
+    sim.events.push({ t: 'announce', key: el.affix ? 'ann.elite.' + el.affix : 'ann.elite', tone: 'warn' });
   }
   // encirclement swarms
   d.swarmT -= dt;
@@ -150,6 +159,7 @@ export function updateEnemies(sim: Sim, dt: number) {
       if (e.cdA > 0) e.cdA -= dt;
       if (e.cdB > 0) e.cdB -= dt;
       if (e.spawn < 1) e.spawn = Math.min(1, e.spawn + dt * 1.9);
+      if (e.affix === 2 && e.hp < e.maxHp) e.hp = Math.min(e.maxHp, e.hp + e.maxHp * 0.022 * dt);
       // burn
       if (e.burnT > 0) {
         e.burnT -= dt;

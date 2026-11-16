@@ -106,6 +106,13 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .menu .btn { width: 100%; font-size: 1.05em; }
 .menu .btn.primary { font-size: 1.25em; min-height: 3.3em; }
 .menu .row { display: flex; gap: 0.7em; }
+.menu .btn.daily { justify-content: flex-start; gap: 0.8em; padding: 0.55em 1em; border-color: rgba(255, 210, 110, 0.45); background: linear-gradient(90deg, rgba(80, 56, 24, 0.75), rgba(20, 25, 52, 0.85)); }
+.menu .btn.daily .d-ic { width: 2.2em; height: 2.2em; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(8, 10, 24, 0.7); border: 1px solid currentColor; flex: none; }
+.menu .btn.daily .d-tx { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.25; flex: 1; min-width: 0; }
+.menu .btn.daily .d-tx small { color: var(--dim); font-weight: 400; font-size: 0.78em; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.menu .btn.daily .d-st { display: inline-flex; align-items: center; gap: 0.3em; color: var(--amber-hot); font-size: 0.9em; font-variant-numeric: tabular-nums; }
+.menu .btn.daily.done .d-st { color: var(--green); }
+.daily-tag { display: flex; align-items: center; justify-content: center; gap: 0.4em; color: var(--gold); letter-spacing: 0.3em; font-size: 0.78em; text-transform: uppercase; margin-bottom: 0.3em; }
 .menu .row .btn { flex: 1; padding-left: 0.6em; padding-right: 0.6em; }
 .title-foot { width: 100%; display: flex; align-items: center; justify-content: space-between; color: var(--mute); font-size: 0.85em; }
 .title-foot .tools { display: flex; gap: 0.6em; }

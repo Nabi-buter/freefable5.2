@@ -172,6 +172,8 @@ const FinalShader = {
     }`,
 };
 
+const AFFIX_COLOR: Record<number, string> = { 1: '#6cf2ff', 2: '#7dff9b', 3: '#ff6a5a', 4: '#ffe36b', 5: '#c8d2e6' };
+
 const WCOL: Record<WeaponId, [number, number, number]> = {
   ember: [1.0, 0.5, 0.15], wisps: [0.4, 0.9, 1.0], nova: [1.0, 0.6, 0.2], arc: [0.6, 0.8, 1.0], starfall: [1.0, 0.85, 0.45],
   lance: [1.0, 0.95, 0.7], frost: [0.55, 0.9, 1.0], darts: [0.75, 0.55, 1.0], trail: [1.0, 0.4, 0.12], aura: [1.0, 0.85, 0.5], glaive: [0.8, 0.88, 1.0],
@@ -237,6 +239,8 @@ export class GameView {
   private trauma = 0;
   shakeMul = 1;
   showDamage = true;
+  /** supplied by the app so the renderer stays free of i18n */
+  affixLabel: ((affix: number) => string) | null = null;
   private modeT = 0;
   private dawn = 0;
   private hurt = 0;
@@ -1301,8 +1305,19 @@ export class GameView {
         const f = clamp(e.hp / e.maxHp, 0, 1);
         ctx.fillStyle = 'rgba(8,6,16,0.75)';
         ctx.fillRect(o.x - w / 2 - 1, o.y - 1, w + 2, h + 2);
-        ctx.fillStyle = e.kind === 'herald' ? '#b86bff' : '#ffc23a';
+        const col = e.kind === 'herald' ? '#b86bff' : AFFIX_COLOR[e.affix] ?? '#ffc23a';
+        ctx.fillStyle = col;
         ctx.fillRect(o.x - w / 2, o.y, w * f, h);
+        if (e.affix > 0 && this.affixLabel) {
+          ctx.font = '700 11px "Trebuchet MS", system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          const label = this.affixLabel(e.affix);
+          ctx.fillStyle = 'rgba(8,6,16,0.85)';
+          ctx.fillText(label, o.x + 1, o.y - 2);
+          ctx.fillStyle = col;
+          ctx.fillText(label, o.x, o.y - 3);
+        }
       }
     }
     if (this.mode === 'follow') {

@@ -6,6 +6,7 @@ import { isTouchPrimary, type Input } from '../core/input';
 import { evoHint, fmtNum, fmtTime, getLang, passiveText, setLang, t, weaponLevelText, weaponName } from '../core/i18n';
 import { ACHIEVEMENTS, type RunSummary } from '../core/progress';
 import type { SaveStore } from '../core/save';
+import { DAILY_BONUS, dailyInfo } from '../core/daily';
 import {
   CHARS, CHAR_IDS, ENEMIES, ENEMY_KINDS, EVOLVED_LEVEL, MAX_PASSIVES, MAX_WEAPONS, MAX_WEAPON_LEVEL, META, PASSIVES, PASSIVE_IDS, RELIC_COLORS, WEAPONS, WEAPON_IDS,
   metaCost, type CharId, type MetaId,
@@ -20,7 +21,7 @@ export interface UIHost {
   audio: AudioEngine;
   input: Input;
   version: string;
-  startRun(): void;
+  startRun(daily?: boolean): void;
   resume(): void;
   abandon(): void;
   retry(): void;
@@ -249,6 +250,7 @@ export class UI {
     switch (a) {
       case 'title': au.ui('back'); this.showTitle(); break;
       case 'play': au.ui('click'); this.showSetup(); break;
+      case 'daily': au.ui('select'); this.host.startRun(true); break;
       case 'shop': au.ui('click'); this.showShop(); break;
       case 'records': au.ui('click'); this.showRecords(); break;
       case 'how': au.ui('click'); this.showHow(); break;
@@ -418,11 +420,18 @@ export class UI {
   showTitle() {
     this.hud.classList.add('hidden');
     const sv = this.save;
+    const di = dailyInfo();
+    const dailyDone = sv.daily.date === di.date && sv.daily.done;
     this.setScreen('title', `
       <div class="screen title">
         <div class="logo"><div class="logo-main">CINDERWAKE</div><div class="logo-sub">${t('title.sub')}</div></div>
         <nav class="menu">
           <button class="btn primary f" data-act="play">${icon('ember', 22)}${t('menu.play')}</button>
+          <button class="btn f daily ${dailyDone ? 'done' : ''}" data-act="daily">
+            <span class="d-ic" style="color:${hex(CHARS[di.char].accent)}">${icon(di.char, 20)}</span>
+            <span class="d-tx"><b>${t('menu.daily')}</b><small>${t('c.' + di.char)} · ${t('b.' + di.biome)}</small></span>
+            <span class="d-st">${dailyDone ? `${icon('check', 16)}${fmtTime(sv.daily.best)}` : `${icon('cinder', 14)}+${DAILY_BONUS}`}</span>
+          </button>
           <button class="btn f" data-act="shop">${icon('cinder', 18)}${t('menu.upgrades')}</button>
           <div class="row">
             <button class="btn f" data-act="records">${icon('trophy', 18)}${t('menu.records')}</button>
@@ -1051,6 +1060,7 @@ export class UI {
     for (const c of sum.unlockedChars) unlocks.push(`<div class="unlock">${icon(c, 22)}<div><small>${t('result.unlock')} · ${t('setup.char')}</small>${t('c.' + c)}</div></div>`);
     for (const b of sum.unlockedBiomes) unlocks.push(`<div class="unlock">${icon(BIOME_ICON[b], 22)}<div><small>${t('result.unlock')} · ${t('setup.stage')}</small>${t('b.' + b)}</div></div>`);
     if (sum.unlockedDiff >= 0) unlocks.push(`<div class="unlock">${icon('crown', 22)}<div><small>${t('result.unlock')} · ${t('setup.diff')}</small>${t('d.' + sum.unlockedDiff)}</div></div>`);
+    if (sum.dailyBonus > 0) unlocks.push(`<div class="unlock ach">${icon('star', 22)}<div><small>${t('menu.daily')} · +${sum.dailyBonus}</small>${t('daily.first')}</div></div>`);
     for (const a of sum.achievements) {
       const def = ACHIEVEMENTS.find((x) => x.id === a);
       unlocks.push(`<div class="unlock ach">${icon('trophy', 22)}<div><small>${t('result.ach')} · +${def?.reward ?? 0}</small>${t('a.' + a)}</div></div>`);
@@ -1058,12 +1068,12 @@ export class UI {
     const cell = (v: string, k: string) => `<div class="res-cell"><b>${v}</b><span>${k}</span></div>`;
     this.setModal('result', `
       <div class="panel result">
-        <div><div class="m-title ${sum.win ? 'gold' : 'red'}">${t(sum.win ? 'result.win' : 'result.lose')}</div><div class="m-sub">${t(sum.win ? 'result.win.sub' : 'result.lose.sub')}${sum.newBest ? ` · <b style="color:var(--gold)">${t('result.best')}</b>` : ''}</div></div>
+        <div>${sum.daily ? `<div class="daily-tag">${icon('star', 14)}${t('menu.daily')}</div>` : ''}<div class="m-title ${sum.win ? 'gold' : 'red'}">${t(sum.win ? 'result.win' : 'result.lose')}</div><div class="m-sub">${t(sum.win ? 'result.win.sub' : 'result.lose.sub')}${sum.newBest ? ` · <b style="color:var(--gold)">${t('result.best')}</b>` : ''}</div></div>
         <div class="res-grid">${cell(fmtTime(sum.time), t('result.time'))}${cell(String(sum.level), t('result.level'))}${cell(fmtNum(sum.kills), t('result.kills'))}${cell(`${sum.beacons}/${BEACON_COUNT}`, t('result.beacons'))}</div>
         <div class="res-cols scroll">
           <div><div class="group-label">${t('result.weapons')}</div><div class="wbars">${bars}</div>
             <div class="statline" style="margin-top:0.9em"><span class="k">${t('result.dmg')}</span><span class="v">${fmtNum(sum.dmgDealt)}</span><span class="k">${t('result.combo')}</span><span class="v">×${fmtNum(sum.maxCombo)}</span></div></div>
-          <div class="rewards"><div class="reward-big"><span>${t('result.cinders')}</span><b>${icon('cinder', 22)}<span data-count="${sum.cinders + sum.bonus}">0</span></b></div>${unlocks.join('')}</div>
+          <div class="rewards"><div class="reward-big"><span>${t('result.cinders')}</span><b>${icon('cinder', 22)}<span data-count="${sum.cinders + sum.bonus + sum.dailyBonus}">0</span></b></div>${unlocks.join('')}</div>
         </div>
         <div class="pause-actions"><button class="btn primary f" data-act="retry">${icon('reroll', 18)}${t('result.retry')}</button><button class="btn f" data-act="menu">${t('result.menu')}</button></div>
       </div>`, sum.win ? 'clear' : '');

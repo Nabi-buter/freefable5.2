@@ -2,6 +2,7 @@ import { CHAR_IDS, EVOLVED_LEVEL, type CharId } from '../sim/defs';
 import type { Sim } from '../sim/sim';
 import type { BiomeId } from '../sim/worldgen';
 import type { SaveData } from './save';
+import { DAILY_BONUS, dailyInfo } from './daily';
 
 export interface AchDef {
   id: string;
@@ -48,10 +49,13 @@ export interface RunSummary {
   unlockedDiff: number;
   achievements: string[];
   newBest: boolean;
+  daily: boolean;
+  /** cinders for the first daily clear of the day (0 otherwise) */
+  dailyBonus: number;
 }
 
 /** Bank a finished (or abandoned) run into the save and report what changed. */
-export function finishRun(save: SaveData, sim: Sim): RunSummary {
+export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   const st = save.stats;
   const p = sim.player;
   const win = sim.state === 'victory';
@@ -141,10 +145,31 @@ export function finishRun(save: SaveData, sim: Sim): RunSummary {
   ach('allbiomes', (['ashwood', 'frostmere', 'emberwaste'] as BiomeId[]).every((b) => (st.winsByBiome[b] ?? 0) > 0));
   save.cinders += bonus;
 
+  // ---- daily vigil
+  let dailyBonus = 0;
+  if (daily) {
+    const today = dailyInfo().date;
+    if (save.daily.date !== today) {
+      // keep the streak only if yesterday's vigil was cleared
+      const y = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      const keep = save.daily.date === y && save.daily.done;
+      save.daily = { date: today, done: false, best: 0, streak: keep ? save.daily.streak : 0 };
+    }
+    if (win) {
+      if (!save.daily.done) {
+        save.daily.done = true;
+        save.daily.streak++;
+        dailyBonus = DAILY_BONUS + Math.min(5, save.daily.streak - 1) * 20;
+        save.cinders += dailyBonus;
+      }
+      if (!save.daily.best || sim.time < save.daily.best) save.daily.best = sim.time;
+    }
+  }
+
   return {
     win, time: sim.time, level: p.level, kills: sim.stats.kills, beacons: sim.stats.beacons, maxCombo: sim.stats.maxCombo,
     dmgDealt: sim.stats.dmgDealt, cinders, bonus,
     weapons: p.weapons.map((w) => ({ id: w.id, level: w.level, dealt: w.dealt })).sort((a, b) => b.dealt - a.dealt),
-    unlockedChars, unlockedBiomes, unlockedDiff, achievements: got, newBest,
+    unlockedChars, unlockedBiomes, unlockedDiff, achievements: got, newBest, daily, dailyBonus,
   };
 }
