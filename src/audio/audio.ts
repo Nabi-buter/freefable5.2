@@ -110,8 +110,8 @@ export class AudioEngine {
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
     this.master.gain.setTargetAtTime(this.vol.master, t, 0.03);
-    this.sfxBus.gain.setTargetAtTime(this.vol.sfx, t, 0.03);
-    this.musicBus.gain.setTargetAtTime(this.vol.music * 0.55 * this.duck, t, 0.2);
+    this.sfxBus.gain.setTargetAtTime(this.vol.sfx * 1.5, t, 0.03);
+    this.musicBus.gain.setTargetAtTime(this.vol.music * 1.3 * this.duck, t, 0.2);
   }
 
   /** lower the music briefly (pause menu, big moments) */
@@ -534,13 +534,13 @@ export class Music {
     // ---- pad: re-voice at the start of each chord
     if (step % 32 === 0 && L.pad > 0.02) {
       const dur = sd * 32;
-      for (let i = 1; i < chord.length; i++) this.pad(midi(chord[i]), t, dur, 0.028 * L.pad);
-      this.pad(midi(chord[0]), t, dur, 0.04 * L.pad);
+      for (let i = 1; i < chord.length; i++) this.pad(midi(chord[i]), t, dur, 0.062 * L.pad);
+      this.pad(midi(chord[0]), t, dur, 0.085 * L.pad);
     }
     // ---- bass
     if (L.bass > 0.05) {
       const pat = m === 'boss' ? [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0] : I >= 3 ? [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0] : [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0];
-      if (pat[s16]) this.bass(midi(chord[0] + (s16 === 14 || s16 === 13 ? 7 : 0)), t, sd * 2.4, 0.16 * L.bass);
+      if (pat[s16]) this.bass(midi(chord[0] + (s16 === 14 || s16 === 13 ? 7 : 0)), t, sd * 2.4, 0.24 * L.bass);
     }
     // ---- arpeggio
     if (L.arp > 0.05) {
@@ -550,21 +550,21 @@ export class Music {
         const order = [1, 3, 2, 4, 3, 5, 4, 2];
         const idx = order[Math.floor(step / every) % order.length];
         const skip = m === 'menu' ? this.rnd() < 0.25 : this.rnd() < 0.12;
-        if (!skip) this.pluck(midi(chord[idx] + 12), t, sd * 2.5, 0.05 * L.arp * (s16 % 4 === 0 ? 1.2 : 0.8));
+        if (!skip) this.pluck(midi(chord[idx] + 12), t, sd * 2.5, 0.09 * L.arp * (s16 % 4 === 0 ? 1.2 : 0.8));
       }
     }
     // ---- drums
     if (L.drums > 0.05) {
       const four = m === 'boss' || I >= 4;
-      if (four ? s16 % 4 === 0 : s16 === 0 || s16 === 8 || s16 === 11) this.kick(t, 0.3 * L.drums);
-      if ((m === 'boss' || I >= 3) && (s16 === 4 || s16 === 12)) this.snare(t, 0.11 * L.drums);
-      if (s16 % 2 === 0 || m === 'boss') this.hat(t, (s16 % 4 === 2 ? 0.05 : 0.028) * L.drums);
+      if (four ? s16 % 4 === 0 : s16 === 0 || s16 === 8 || s16 === 11) this.kick(t, 0.34 * L.drums);
+      if ((m === 'boss' || I >= 3) && (s16 === 4 || s16 === 12)) this.snare(t, 0.14 * L.drums);
+      if (s16 % 2 === 0 || m === 'boss') this.hat(t, (s16 % 4 === 2 ? 0.065 : 0.036) * L.drums);
     }
     // ---- lead: slow wandering melody on chord tones
     if (L.lead > 0.05 && (s16 === 0 || s16 === 6 || s16 === 10) && this.rnd() < 0.75) {
       this.leadNote = (this.leadNote + (this.rnd() < 0.5 ? 1 : this.rnd() < 0.5 ? -1 : 2) + 5) % 5;
       const n = chord[1 + this.leadNote] + 24;
-      this.lead(midi(n), t, sd * (s16 === 0 ? 6 : 4), 0.035 * L.lead);
+      this.lead(midi(n), t, sd * (s16 === 0 ? 6 : 4), 0.065 * L.lead);
     }
   }
 

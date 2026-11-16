@@ -65,6 +65,8 @@ export interface Player {
   dashT: number;
   dashCdT: number;
   dashCharges: number;
+  /** seconds of movement slow remaining (frost bursts) */
+  slowT: number;
   dashX: number;
   dashZ: number;
   moving: boolean;
@@ -167,7 +169,7 @@ export interface EProj {
   alive: boolean;
 }
 
-export type ZoneKind = 'fire' | 'meteor' | 'slam' | 'crater' | 'charge';
+export type ZoneKind = 'fire' | 'meteor' | 'slam' | 'crater' | 'charge' | 'vent' | 'frost';
 
 export interface Zone {
   id: number;

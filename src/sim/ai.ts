@@ -8,10 +8,11 @@ export interface DirectorState {
   eliteT: number;
   swarmT: number;
   graceT: number;
+  hazardT: number;
 }
 
 export function initDirector(): DirectorState {
-  return { budget: 3, next: 'shade', eliteT: 55, swarmT: 95, graceT: 1.5 };
+  return { budget: 3, next: 'shade', eliteT: 55, swarmT: 95, graceT: 1.5, hazardT: 22 };
 }
 
 const UNLOCKS: { kind: EnemyKind; at: number; w: number }[] = [
@@ -25,12 +26,14 @@ const UNLOCKS: { kind: EnemyKind; at: number; w: number }[] = [
 ];
 
 function pickKind(sim: Sim, I: number): EnemyKind {
+  const bw = sim.world.biome.weights;
+  const wOf = (u: { kind: EnemyKind; w: number }) => (u.kind === 'shade' ? Math.max(4, u.w - I * 0.35) : u.w) * (bw[u.kind] ?? 1);
   let total = 0;
-  for (const u of UNLOCKS) if (I >= u.at) total += u.kind === 'shade' ? Math.max(4, u.w - I * 0.35) : u.w;
+  for (const u of UNLOCKS) if (I >= u.at) total += wOf(u);
   let r = sim.rng.next() * total;
   for (const u of UNLOCKS) {
     if (I < u.at) continue;
-    r -= u.kind === 'shade' ? Math.max(4, u.w - I * 0.35) : u.w;
+    r -= wOf(u);
     if (r <= 0) return u.kind;
   }
   return 'shade';
@@ -69,6 +72,24 @@ export function updateDirector(sim: Sim, dt: number) {
       for (let i = 0; i < n; i++) sim.spawnEnemy(kind, pos.x + sim.rng.range(-1.5, 1.5), pos.z + sim.rng.range(-1.5, 1.5));
     } else sim.spawnEnemy(kind, pos.x, pos.z);
     d.next = pickKind(sim, I);
+  }
+  // regional hazard: eruptions that threaten the player and punish the horde alike
+  const hz = sim.world.biome.hazard;
+  if (hz !== 'none') {
+    d.hazardT -= dt;
+    if (d.hazardT <= 0) {
+      d.hazardT = sim.rng.range(5.5, 9) / (1 + Math.min(1, I * 0.04));
+      const n = 1 + (I > 6 ? 1 : 0) + (I > 12 ? 1 : 0);
+      for (let i = 0; i < n; i++) {
+        const a = sim.rng.angle();
+        const dd = i === 0 ? sim.rng.range(0, 3.5) : sim.rng.range(4, 11);
+        const x = p.x + p.vx * 0.9 + Math.cos(a) * dd, z = p.z + p.vz * 0.9 + Math.sin(a) * dd;
+        sim.zones.push({
+          id: sim.id(), kind: hz, x, z, r: hz === 'vent' ? 3.6 : 4.4, t: 0, dur: 1.5 + i * 0.25, dmg: hz === 'vent' ? 16 : 7,
+          tick: 0, hostile: true, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true,
+        });
+      }
+    }
   }
   // elites
   d.eliteT -= dt;

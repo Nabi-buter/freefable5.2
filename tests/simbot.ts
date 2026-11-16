@@ -6,6 +6,7 @@ import { Sim } from '../src/sim/sim';
 import { choose } from '../src/sim/choices';
 import type { InputState } from '../src/sim/types';
 import { CHAR_IDS, type CharId } from '../src/sim/defs';
+import type { BiomeId } from '../src/sim/worldgen';
 
 export interface BotResult {
   win: boolean;
@@ -21,8 +22,8 @@ export interface BotResult {
 }
 
 /** skill 0..1: how well the bot dodges */
-export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', skill = 0.7, maxTime = 1500, verbose = false): BotResult {
-  const sim = new Sim({ seed, char, difficulty, biome: 'ashwood', meta: {} });
+export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', skill = 0.7, maxTime = 1500, verbose = false, biome: BiomeId = 'ashwood'): BotResult {
+  const sim = new Sim({ seed, char, difficulty, biome, meta: {} });
   const input: InputState = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
   const dt = 1 / 60;
   const log: string[] = [];
@@ -69,7 +70,7 @@ export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', s
     for (const e of sim.enemies) consider(e.x, e.z, e.r, e.def.ai === 'bomber' ? 2 : 1);
     for (const e of sim.bigs) consider(e.x, e.z, e.r + 2, 4);
     for (const b of sim.eprojs) consider(b.x + b.vx * 0.2, b.z + b.vz * 0.2, 0.5, 2.5);
-    for (const z of sim.zones) if (z.hostile && z.kind === 'slam') consider(z.x, z.z, z.r - 3, 6);
+    for (const z of sim.zones) if (z.hostile && (z.kind === 'slam' || z.kind === 'vent' || z.kind === 'frost')) consider(z.x, z.z, z.r - 3, 6);
     let gx = 0, gz = 0;
     let target = null as null | { x: number; z: number };
     let bd = 1e9;
@@ -160,10 +161,11 @@ if (isMain) {
   const diff = Number(process.argv[3] ?? 0);
   const charArg = process.argv[4] ?? 'kindler';
   const skill = Number(process.argv[5] ?? 0.7);
+  const biome = (process.argv[6] ?? 'ashwood') as BiomeId;
   let wins = 0;
   for (let i = 0; i < runs; i++) {
     const char = (charArg === 'all' ? CHAR_IDS[i % CHAR_IDS.length] : charArg) as CharId;
-    const r = runBot(1000 + i * 7919, diff, char, skill, 1500, runs === 1);
+    const r = runBot(1000 + i * 7919, diff, char, skill, 1500, runs === 1, biome);
     if (r.win) wins++;
     console.log(`#${i} ${char} ${r.win ? 'WIN ' : 'LOSS'} t=${(r.time / 60).toFixed(1)}m lvl=${r.level} kills=${r.kills} beacons=${r.beacons} minHp=${(r.hpLow * 100).toFixed(0)}% maxEn=${r.maxEnemies} step=${r.stepMs.toFixed(3)}ms`);
     console.log('   ' + r.weapons);

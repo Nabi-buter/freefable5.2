@@ -1007,6 +1007,24 @@ export class GameView {
           dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.16, 0.5, 1.0, k);
           break;
         }
+        case 'vent': {
+          dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.42, 0.1, 1.0, k);
+          if (Math.random() < dt * 30 * (0.3 + k)) {
+            const a = Math.random() * TAU, d = Math.sqrt(Math.random()) * z.r * 0.8;
+            const x = z.x + Math.cos(a) * d, zz = z.z + Math.sin(a) * d;
+            this.sparks.spawn(x, H(x, zz) + 0.1, zz, 0, 2 + Math.random() * 3 * k, 0, 0.5, 0.5, 2.6, 0.9, 0.15, { drag: 0.5 });
+          }
+          break;
+        }
+        case 'frost': {
+          dec.add(DECAL.telegraph, z.x, z.z, z.r, 0.35, 0.8, 1.0, 1.0, k);
+          if (Math.random() < dt * 24 * (0.3 + k)) {
+            const a = Math.random() * TAU, d = Math.sqrt(Math.random()) * z.r * 0.8;
+            const x = z.x + Math.cos(a) * d, zz = z.z + Math.sin(a) * d;
+            this.sparks.spawn(x, H(x, zz) + 0.1, zz, 0, 1 + Math.random() * 2, 0, 0.6, 0.4, 0.8, 1.6, 2.6, { drag: 0.5 });
+          }
+          break;
+        }
         case 'charge': {
           dec.addRect(DECAL.lane, z.x + z.dx * z.len * 0.5, z.z + z.dz * z.len * 0.5, z.dx, z.dz, z.len * 0.5, z.r, 1.0, 0.16, 0.3, 0.6 + k * 0.6);
           break;

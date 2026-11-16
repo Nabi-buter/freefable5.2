@@ -468,6 +468,42 @@ export function updateZones(sim: Sim, dt: number) {
         if (z.t >= z.dur) z.alive = false;
         break;
       }
+      case 'vent': {
+        // lava vent: scorches everything standing on it, friend or foe
+        if (z.t >= z.dur) {
+          z.alive = false;
+          sim.events.push({ t: 'explode', x: z.x, z: z.z, r: z.r, c: 0xff6a2a, hostile: true });
+          const I = sim.intensity();
+          const list = sim.near(z.x, z.z, z.r);
+          for (let k = 0; k < list.length; k++) {
+            const e = list[k];
+            sim.applyDamage(e, (60 + 14 * I) * (e.boss ? 0.5 : 1), null, false, 8, z.x, z.z);
+            sim.burn(e, 8 + 2 * I, 3);
+          }
+          const dx = p.x - z.x, dz = p.z - z.z;
+          if (dx * dx + dz * dz < (z.r + 0.3) * (z.r + 0.3)) sim.hurtPlayer(z.dmg, z.x, z.z);
+        }
+        break;
+      }
+      case 'frost': {
+        // frost burst: freezes the horde, numbs the bearer
+        if (z.t >= z.dur) {
+          z.alive = false;
+          sim.events.push({ t: 'explode', x: z.x, z: z.z, r: z.r, c: 0x9fe3ff, hostile: true });
+          const list = sim.near(z.x, z.z, z.r);
+          for (let k = 0; k < list.length; k++) {
+            const e = list[k];
+            sim.applyDamage(e, 12 + 3 * sim.intensity(), null, false, 0, 0, 0);
+            sim.freeze(e, 2.2);
+            sim.chill(e, 4);
+          }
+          const dx = p.x - z.x, dz = p.z - z.z;
+          if (dx * dx + dz * dz < (z.r + 0.3) * (z.r + 0.3)) {
+            if (sim.hurtPlayer(z.dmg, z.x, z.z)) p.slowT = 2.4;
+          }
+        }
+        break;
+      }
     }
   }
 }

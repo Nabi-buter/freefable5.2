@@ -24,6 +24,12 @@ describe('simulation', () => {
     expect(r.level).toBeGreaterThan(3);
     expect(Number.isFinite(r.time)).toBe(true);
   }, 60000);
+  it('runs every region with its hazards', () => {
+    for (const b of ['frostmere', 'emberwaste'] as const) {
+      const r = runBot(31, 0, 'kindler', 0.7, 120, false, b);
+      expect(r.kills).toBeGreaterThan(20);
+    }
+  }, 60000);
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);

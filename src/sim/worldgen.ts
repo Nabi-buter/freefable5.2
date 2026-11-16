@@ -44,6 +44,13 @@ export interface BiomeDef {
   props: [ObstacleKind, number][];
   treeDensity: number;
   hill: number;
+  /** multipliers applied to every enemy spawned in this region */
+  enemyHp: number;
+  enemySpeed: number;
+  /** spawn weight multipliers by enemy kind (missing = 1) */
+  weights: Record<string, number>;
+  /** environmental hazard that erupts near the player */
+  hazard: 'none' | 'vent' | 'frost';
 }
 
 export const BIOMES: Record<BiomeId, BiomeDef> = {
@@ -53,6 +60,7 @@ export const BIOMES: Record<BiomeId, BiomeDef> = {
     props: [['rock', 5], ['stump', 2], ['shroom', 2], ['crystal', 1]],
     treeDensity: 0.68,
     hill: 1,
+    enemyHp: 1, enemySpeed: 1, weights: {}, hazard: 'none',
   },
   frostmere: {
     id: 'frostmere',
@@ -60,6 +68,7 @@ export const BIOMES: Record<BiomeId, BiomeDef> = {
     props: [['rock', 4], ['ice', 4], ['crystal', 2]],
     treeDensity: 0.5,
     hill: 1.25,
+    enemyHp: 1.12, enemySpeed: 0.95, weights: { wraith: 1.6, brute: 1.4, bomber: 0.6 }, hazard: 'frost',
   },
   emberwaste: {
     id: 'emberwaste',
@@ -67,6 +76,7 @@ export const BIOMES: Record<BiomeId, BiomeDef> = {
     props: [['rock', 6], ['bone', 3], ['crystal', 2]],
     treeDensity: 0.4,
     hill: 0.8,
+    enemyHp: 0.95, enemySpeed: 1.06, weights: { bomber: 1.8, spitter: 1.5, husk: 1.3, skitter: 0.8 }, hazard: 'vent',
   },
 };
 

@@ -129,7 +129,7 @@ export class Sim {
     this.player = {
       x: 0, z: 2.5, vx: 0, vz: 0, facing: Math.PI / 2, aim: Math.PI / 2,
       hp: 1, level: 1, xp: 0, xpNext: this.xpNeed(1),
-      iframe: 0, dashT: 0, dashCdT: 0, dashCharges: 1, dashX: 0, dashZ: 1,
+      iframe: 0, dashT: 0, dashCdT: 0, dashCharges: 1, slowT: 0, dashX: 0, dashZ: 1,
       moving: false, hurtT: 0, revives: m('m_revive'),
       weapons: [], passives: [], relics: [],
       st: {} as Stats,
@@ -480,11 +480,13 @@ export class Sim {
     let hpMul = (1 + 0.11 * I + 0.011 * I * I) * this.diff.hp;
     // bosses scale with the clock only: rushing the beacons must not buy an easier fight
     if (boss) hpMul = (1 + 0.045 * (this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1) * this.diff.hp;
+    const biome = this.world.biome;
+    if (!boss) hpMul *= biome.enemyHp;
     const scale = elite ? 1.45 : 1;
     const e: Enemy = {
       id: this.id(), kind, def, x, z, kx: 0, kz: 0,
       hp: def.hp * hpMul * (elite ? 9 : 1), maxHp: 0,
-      r: def.radius * scale, speed: def.speed * (elite ? 1.08 : 1) * this.rng.range(0.94, 1.06), dmg: def.dmg * (elite ? 1.4 : 1),
+      r: def.radius * scale, speed: def.speed * (elite ? 1.08 : 1) * (boss ? 1 : biome.enemySpeed) * this.rng.range(0.94, 1.06), dmg: def.dmg * (elite ? 1.4 : 1),
       alive: true, elite, boss, flash: 0, burnT: 0, burnDps: 0, burnAcc: 0, chillT: 0, freezeT: 0,
       t: 0, st: 0, stT: 0, ax: 0, az: 0, n: 0, face: 0, cdA: 0, cdB: 0, seed: this.rng.next(), spawn, scale, tele: 0, phase: 1, c1: 0, lx: 0, lz: 0, ll: 0,
     };
@@ -634,9 +636,11 @@ export class Sim {
       }
     } else {
       const k = 1 - Math.exp(-16 * dt);
-      p.vx += (mx * st.speed - p.vx) * k;
-      p.vz += (mz * st.speed - p.vz) * k;
+      const sp = st.speed * (p.slowT > 0 ? 0.62 : 1);
+      p.vx += (mx * sp - p.vx) * k;
+      p.vz += (mz * sp - p.vz) * k;
     }
+    if (p.slowT > 0) p.slowT -= dt;
     p.x += p.vx * dt;
     p.z += p.vz * dt;
     this.world.resolve(p, 0.5);
