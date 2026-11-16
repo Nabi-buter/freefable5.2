@@ -1,4 +1,15 @@
 /** Unified keyboard / mouse / gamepad / touch input. */
+
+/** true when the device's main pointer is a finger (phones, tablets) */
+export function isTouchPrimary(): boolean {
+  try {
+    if (window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(any-pointer: fine)').matches) return true;
+    return navigator.maxTouchPoints > 0 && !window.matchMedia('(any-pointer: fine)').matches;
+  } catch {
+    return false;
+  }
+}
+
 export type Device = 'kbm' | 'gamepad' | 'touch';
 
 export interface StickView {
@@ -39,6 +50,7 @@ export class Input {
 
   constructor(el: HTMLElement) {
     this.el = el;
+    if (isTouchPrimary()) this.device = 'touch';
     window.addEventListener('keydown', (e) => this.onKey(e, true));
     window.addEventListener('keyup', (e) => this.onKey(e, false));
     window.addEventListener('blur', () => {

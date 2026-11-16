@@ -1,5 +1,5 @@
 import { AudioEngine } from './audio/audio';
-import { setLang } from './core/i18n';
+import { setLang, t } from './core/i18n';
 import { Input } from './core/input';
 import { finishRun } from './core/progress';
 import { SaveStore } from './core/save';
@@ -33,6 +33,10 @@ class App implements UIHost {
   private veil = document.getElementById('veil');
   private fps = 60;
   private menuBiome = '';
+  private forcedQuality = false;
+  private slowT = 0;
+  private fpsWin = 0;
+  private fpsWinN = 0;
 
   constructor() {
     const canvas = document.getElementById('game') as HTMLCanvasElement;
@@ -43,7 +47,10 @@ class App implements UIHost {
     this.ui = new UI(document.getElementById('ui')!, this);
     // ?q=low|medium|high|ultra overrides the saved quality for this session (handy for testing)
     const q = new URLSearchParams(location.search).get('q');
-    if (q === 'low' || q === 'medium' || q === 'high' || q === 'ultra') this.save.data.settings.quality = q;
+    if (q === 'low' || q === 'medium' || q === 'high' || q === 'ultra') {
+      this.save.data.settings.quality = q;
+      this.forcedQuality = true;
+    }
     this.view.quality = this.save.data.settings.quality;
     this.view.setQuality(this.save.data.settings.quality);
     this.settingsChanged();
@@ -309,6 +316,7 @@ class App implements UIHost {
           }
         }
         this.ui.updateHud(sim, real, this.fps);
+        this.autoQuality(real);
         break;
       }
       case 'choosing':
@@ -333,6 +341,27 @@ class App implements UIHost {
     }
     this.audio.music?.update();
     this.view.frame(fxDt, this.state === 'paused' ? 0.0001 : real);
+  }
+
+  /** step the quality down when the frame rate stays under ~27 fps for several seconds */
+  private autoQuality(real: number) {
+    const s = this.save.data.settings;
+    if (!s.autoQuality || this.forcedQuality || s.quality === 'low') return;
+    this.fpsWin += real;
+    this.fpsWinN++;
+    if (this.fpsWin < 2) return;
+    const fps = this.fpsWinN / this.fpsWin;
+    this.fpsWin = 0;
+    this.fpsWinN = 0;
+    this.slowT = fps < 27 ? this.slowT + 1 : 0;
+    if (this.slowT >= 3) {
+      this.slowT = 0;
+      s.quality = s.quality === 'ultra' ? 'high' : s.quality === 'high' ? 'medium' : 'low';
+      this.view.setQuality(s.quality);
+      this.save.save();
+      this.ui.toast(t('set.autoq'));
+      this.last = performance.now();
+    }
   }
 
   private drainEvents(sim: Sim) {

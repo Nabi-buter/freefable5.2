@@ -951,18 +951,19 @@ export class GameView {
     // --- weapons with persistent visuals
     this.iWisp.begin();
     for (const w of p.weapons) {
+      if (!p.alive) break;
       const s = wstats(w);
       const evo = w.level >= EVOLVED_LEVEL;
       if (w.id === 'wisps') {
         const n = s.count + p.st.amount;
         const R = s.area * p.st.area;
-        const size = 1.15 * Math.sqrt(p.st.area) * (evo ? 1.25 : 1);
+        const size = 0.95 * Math.sqrt(p.st.area) * (evo ? 1.25 : 1);
         for (let i = 0; i < n; i++) {
           const a = w.a + (i / n) * TAU;
           const x = p.x + Math.cos(a) * R, z = p.z + Math.sin(a) * R;
           const y = H(x, z) + 1.0 + Math.sin(time * 3 + i) * 0.12;
-          if (evo) this.iWisp.add(x, y, z, 0, size, size, size, 3.4, 2.0, 0.5);
-          else this.iWisp.add(x, y, z, 0, size, size, size, 0.6, 2.2, 3.2);
+          if (evo) this.iWisp.add(x, y, z, 0, size, size, size, 2.2, 1.2, 0.3);
+          else this.iWisp.add(x, y, z, 0, size, size, size, 0.3, 1.15, 1.8);
           if (Math.random() < dt * 34) this.sparks.spawn(x, y, z, 0, 0.3, 0, 0.32, 0.6, evo ? 3 : 0.5, evo ? 1.6 : 1.8, evo ? 0.4 : 2.8, { size1: 0.05 });
           dec.add(DECAL.glow, x, z, 1.5, evo ? 0.8 : 0.15, evo ? 0.45 : 0.5, evo ? 0.1 : 0.75, 0.5);
         }

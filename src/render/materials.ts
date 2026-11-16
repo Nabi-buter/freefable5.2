@@ -16,6 +16,8 @@ export interface WorldMatOpts {
   instFx?: boolean;
   /** dither away fragments that stand between the camera and the player */
   cutout?: boolean;
+  /** use the mesh normals instead of faceted shading (soft things like grass) */
+  smooth?: boolean;
   color?: number;
   side?: THREE.Side;
   transparent?: boolean;
@@ -31,7 +33,7 @@ export interface WorldMatOpts {
 export function makeWorldMat(o: WorldMatOpts = {}): THREE.MeshLambertMaterial {
   const mat = new THREE.MeshLambertMaterial({
     vertexColors: true,
-    flatShading: true,
+    flatShading: !o.smooth,
     color: o.color ?? 0xffffff,
     side: o.side ?? THREE.FrontSide,
     transparent: o.transparent ?? false,

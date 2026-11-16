@@ -2,7 +2,7 @@ import './style.css';
 import '@fontsource/cinzel/latin-700.css';
 import '@fontsource/cinzel/latin-900.css';
 import type { AudioEngine } from '../audio/audio';
-import type { Input } from '../core/input';
+import { isTouchPrimary, type Input } from '../core/input';
 import { evoHint, fmtNum, fmtTime, getLang, passiveText, setLang, t, weaponLevelText, weaponName } from '../core/i18n';
 import { ACHIEVEMENTS, type RunSummary } from '../core/progress';
 import type { SaveStore } from '../core/save';
@@ -103,7 +103,7 @@ export class UI {
     });
     root.addEventListener('input', (e) => this.onInput(e));
     host.input.onDevice = (d) => document.body.classList.toggle('touch', d === 'touch');
-    if (matchMedia('(pointer: coarse)').matches) document.body.classList.add('touch');
+    if (isTouchPrimary()) document.body.classList.add('touch');
   }
   private hoverEl: HTMLElement | null = null;
 
@@ -332,6 +332,8 @@ export class UI {
         const s = sv.settings as unknown as Record<string, unknown>;
         if (val === 'true' || val === 'false') s[key] = val === 'true';
         else s[key] = val;
+        // picking a quality by hand turns off the automatic step-down
+        if (key === 'quality') sv.settings.autoQuality = false;
         au.ui('click');
         this.host.settingsChanged();
         this.host.save.save();

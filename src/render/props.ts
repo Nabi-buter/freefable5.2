@@ -23,7 +23,7 @@ export function buildProps(world: World, pal: Palette, opts: { shadows: boolean;
   const rng = new RNG(world.seed + 99);
   const matSway = makeWorldMat({ sway: true, cutout: true });
   const matStatic = makeWorldMat({ cutout: true });
-  const matDecor = makeWorldMat({ sway: true, side: THREE.DoubleSide });
+  const matDecor = makeWorldMat({ sway: true, side: THREE.DoubleSide, smooth: true });
   const geos: THREE.BufferGeometry[] = [];
   const meshes: THREE.InstancedMesh[] = [];
 

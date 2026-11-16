@@ -130,6 +130,7 @@ const S: Record<string, Pair> = {
   'set.import.prompt': ['세이브 코드를 붙여넣으세요', 'Paste your save code'],
   'set.import.ok': ['세이브를 불러왔습니다', 'Save imported'],
   'set.import.bad': ['올바르지 않은 코드입니다', 'That code is not valid'],
+  'set.autoq': ['성능을 위해 그래픽 품질을 낮췄습니다', 'Graphics quality lowered for performance'],
   'set.sec.game': ['게임', 'Game'],
   'set.sec.video': ['화면', 'Video'],
   'set.sec.audio': ['소리', 'Audio'],
