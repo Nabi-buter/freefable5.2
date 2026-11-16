@@ -57,6 +57,19 @@ export const PALETTES: Record<BiomeId, Palette> = {
     moon: 0xffb4a0, sun: 0xffc890, aurora: 0xff5a3a,
     firefly: 0xffb060,
   },
+  gloommire: {
+    grassA: 0x2c5a5c, grassB: 0x3a4a72, grassC: 0x2a6a58, dirt: 0x3a3048, sand: 0x5a5a78, rock: 0x4a4868,
+    leafA: 0x3a4a7a, leafB: 0x2c3c6a, oakA: 0x6a4a9a, oakB: 0x4a5aa0, trunk: 0x2c2438, snow: 0,
+    stone: 0x7c7a9c, stoneDark: 0x4a4868, moss: 0x3a7a6a,
+    crystal: 0xb98cff, shroomCap: 0x7a4ac0, shroomGlow: 0x8cff9a, ice: 0xa8e4ff, cactus: 0x4a7a50, bone: 0xd8cdb8,
+    flowers: [0xb98cff, 0x8cffd0, 0xff8ae0, 0x8ab8ff], grassBlade: 0x3a8a80, fern: 0x4a6aa0,
+    skyTopN: 0x07041c, skyHorN: 0x2a1c58, skyTopD: 0x4a5ab8, skyHorD: 0xffa0a8,
+    fogN: 0x161236, fogD: 0xd89ab0,
+    waterDeep: 0x0a0a26, waterShallow: 0x2a6a6a,
+    hemiSkyN: 0x6a5ac0, hemiGroundN: 0x14162a, hemiSkyD: 0xc8d0ff, hemiGroundD: 0x5a4a60,
+    moon: 0xc8b0ff, sun: 0xffc0a0, aurora: 0xa06aff,
+    firefly: 0x9affc0,
+  },
 };
 
 const HM_SIZE = 256;

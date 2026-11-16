@@ -547,6 +547,33 @@ export function updateZones(sim: Sim, dt: number) {
         }
         break;
       }
+      case 'spore': {
+        // spore bloom: bursts into a cloud that lingers and eats at everything inside it
+        if (z.len > 0) {
+          z.len -= dt;
+          z.tick -= dt;
+          if (z.tick <= 0) {
+            z.tick = 0.5;
+            const I = sim.intensity();
+            const list = sim.near(z.x, z.z, z.r);
+            for (let k = 0; k < list.length; k++) {
+              const e = list[k];
+              sim.applyDamage(e, (7 + 2 * I) * (e.boss ? 0.5 : 1), null, false, 0, 0, 0, true);
+              if (e.alive) sim.chill(e, 0.8);
+            }
+            const dx = p.x - z.x, dz = p.z - z.z;
+            if (dx * dx + dz * dz < z.r * z.r) sim.hurtPlayer(z.dmg, p.x, p.z);
+          }
+          if (z.len <= 0) z.alive = false;
+          break;
+        }
+        if (z.t >= z.dur) {
+          z.len = 5;
+          z.tick = 0;
+          sim.events.push({ t: 'explode', x: z.x, z: z.z, r: z.r, c: 0x8cff6a, hostile: true });
+        }
+        break;
+      }
       case 'frost': {
         // frost burst: freezes the horde, numbs the bearer
         if (z.t >= z.dur) {

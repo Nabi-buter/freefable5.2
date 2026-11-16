@@ -74,7 +74,7 @@ export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', s
     for (const e of sim.enemies) consider(e.x, e.z, e.r, e.def.ai === 'bomber' ? 2 : 1);
     for (const e of sim.bigs) consider(e.x, e.z, e.r + 2, 4);
     for (const b of sim.eprojs) consider(b.x + b.vx * 0.2, b.z + b.vz * 0.2, 0.5, 2.5);
-    for (const z of sim.zones) if (z.hostile && (z.kind === 'slam' || z.kind === 'vent' || z.kind === 'frost')) consider(z.x, z.z, z.r - 3, 6);
+    for (const z of sim.zones) if (z.hostile && (z.kind === 'slam' || z.kind === 'vent' || z.kind === 'frost' || z.kind === 'spore')) consider(z.x, z.z, z.r - 3, 6);
     let gx = 0, gz = 0;
     let target = null as null | { x: number; z: number };
     let bd = 1e9;

@@ -27,7 +27,7 @@ describe('simulation', () => {
     expect(Number.isFinite(r.time)).toBe(true);
   }, 60000);
   it('runs every region with its hazards', () => {
-    for (const b of ['frostmere', 'emberwaste'] as const) {
+    for (const b of ['frostmere', 'emberwaste', 'gloommire'] as const) {
       const r = runBot(31, 0, 'kindler', 0.7, 120, false, b);
       expect(r.kills).toBeGreaterThan(20);
     }

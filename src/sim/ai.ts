@@ -89,7 +89,7 @@ export function updateDirector(sim: Sim, dt: number) {
         const dd = i === 0 ? sim.rng.range(0, 3.5) : sim.rng.range(4, 11);
         const x = p.x + p.vx * 0.9 + Math.cos(a) * dd, z = p.z + p.vz * 0.9 + Math.sin(a) * dd;
         sim.zones.push({
-          id: sim.id(), kind: hz, x, z, r: hz === 'vent' ? 3.6 : 4.4, t: 0, dur: 1.5 + i * 0.25, dmg: hz === 'vent' ? 16 : 7,
+          id: sim.id(), kind: hz, x, z, r: hz === 'vent' ? 3.6 : hz === 'spore' ? 4.0 : 4.4, t: 0, dur: 1.5 + i * 0.25, dmg: hz === 'vent' ? 16 : hz === 'spore' ? 8 : 7,
           tick: 0, hostile: true, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true,
         });
       }

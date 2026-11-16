@@ -122,6 +122,7 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   };
   giveBiome('frostmere', win && biome === 'ashwood');
   giveBiome('emberwaste', win && biome === 'frostmere');
+  giveBiome('gloommire', win && biome === 'emberwaste');
 
   // ---- achievements
   const got: string[] = [];
@@ -153,7 +154,7 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   ach('allchars', CHAR_IDS.every((c) => save.chars.includes(c)));
   ach('winall', CHAR_IDS.every((c) => (st.winsByChar[c] ?? 0) > 0));
   ach('endless2', sim.stats.loops >= 2);
-  ach('allbiomes', (['ashwood', 'frostmere', 'emberwaste'] as BiomeId[]).every((b) => (st.winsByBiome[b] ?? 0) > 0));
+  ach('allbiomes', (['ashwood', 'frostmere', 'emberwaste', 'gloommire'] as BiomeId[]).every((b) => (st.winsByBiome[b] ?? 0) > 0));
   save.cinders += bonus;
 
   // ---- daily vigil

@@ -1108,6 +1108,23 @@ export class GameView {
           for (let q = 0; q < 2; q++) this.sparks.spawn(mx, y, mz, (Math.random() - 0.5) * 2, 2 + Math.random() * 3, (Math.random() - 0.5) * 2, 0.4, 0.85, 3.2, 1.8, 0.4, { size1: 0.1 });
           break;
         }
+        case 'spore': {
+          if (z.len > 0) {
+            const fade = Math.min(1, z.len * 1.5) * (0.8 + Math.sin(time * 3 + z.id) * 0.2);
+            if (this.assist) dec.add(DECAL.ring, z.x, z.z, z.r, 1.0, 0.3, 1.0, fade);
+            else dec.add(DECAL.ring, z.x, z.z, z.r, 0.5, 1.4, 0.4, fade * 0.8);
+            dec.add(DECAL.glow, z.x, z.z, z.r * 1.05, this.assist ? 0.7 : 0.25, this.assist ? 0.2 : 0.75, this.assist ? 0.7 : 0.2, 0.55 * fade);
+            if (Math.random() < dt * 26) {
+              const a = Math.random() * TAU, d = Math.sqrt(Math.random()) * z.r;
+              const x = z.x + Math.cos(a) * d, zz = z.z + Math.sin(a) * d;
+              this.sparks.spawn(x, H(x, zz) + 0.2 + Math.random(), zz, (Math.random() - 0.5) * 0.6, 0.3 + Math.random() * 0.7, (Math.random() - 0.5) * 0.6, 1.2, 0.5, 0.9, 2.2, 0.6, { drag: 0.8, grav: -0.2 });
+            }
+            break;
+          }
+          if (this.assist) dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.3, 1.0, 1.0, k);
+          else dec.add(DECAL.telegraph, z.x, z.z, z.r, 0.45, 1.0, 0.3, 1.0, k);
+          break;
+        }
         case 'sigil': {
           if (z.len > 0) {
             // echo charging: the rune turns gold and tightens

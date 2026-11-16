@@ -179,7 +179,7 @@ export interface EProj {
   alive: boolean;
 }
 
-export type ZoneKind = 'fire' | 'meteor' | 'slam' | 'crater' | 'charge' | 'vent' | 'frost' | 'sigil';
+export type ZoneKind = 'fire' | 'meteor' | 'slam' | 'crater' | 'charge' | 'vent' | 'frost' | 'sigil' | 'spore';
 
 export interface Zone {
   id: number;
