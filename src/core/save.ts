@@ -1,6 +1,6 @@
 import { CHAR_IDS, META, type CharId, type MetaId } from '../sim/defs';
 import type { BiomeId } from '../sim/worldgen';
-import { BIND_ACTIONS, DEFAULT_BINDS, type KeyBinds } from './input';
+import { BIND_ACTIONS, DEFAULT_BINDS, DEFAULT_PAD, PAD_ACTIONS, type KeyBinds, type PadBinds } from './input';
 
 export type Lang = 'ko' | 'en';
 export type QualitySetting = 'low' | 'medium' | 'high' | 'ultra';
@@ -26,6 +26,8 @@ export interface Settings {
   rumble: boolean;
   /** keyboard bindings (KeyboardEvent.code) */
   keys: KeyBinds;
+  /** gamepad face-button bindings */
+  pad: PadBinds;
 }
 
 export interface LifetimeStats {
@@ -87,7 +89,7 @@ export function defaultSave(): SaveData {
       runs: 0, wins: 0, kills: 0, eliteKills: 0, beacons: 0, time: 0, maxLevel: 0, maxCombo: 0, cindersEarned: 0, evolutions: 0,
       bestTime: [0, 0, 0], winsByChar: {}, winsByBiome: {}, cleared: 0, bestLoops: 0, bestEndlessTime: 0,
     },
-    settings: { lang: defaultLang(), quality: 'high', master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true, reduceFlash: false, colorAssist: false, rumble: true, keys: { ...DEFAULT_BINDS } },
+    settings: { lang: defaultLang(), quality: 'high', master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true, reduceFlash: false, colorAssist: false, rumble: true, keys: { ...DEFAULT_BINDS }, pad: { ...DEFAULT_PAD } },
     last: { char: 'kindler', biome: 'ashwood', difficulty: 0, endless: false },
     tutorial: false,
     daily: { date: '', done: false, best: 0, streak: 0 },
@@ -156,6 +158,15 @@ export class SaveStore {
       }
     }
     s.keys = keys;
+    const pad = { ...DEFAULT_PAD };
+    if (s.pad && typeof s.pad === 'object') {
+      for (const a of PAD_ACTIONS) {
+        const v = Number((s.pad as Partial<PadBinds>)[a]);
+        if (Number.isInteger(v) && v >= 0 && v <= 7) pad[a] = v;
+      }
+    }
+    if (pad.dash === pad.skill) Object.assign(pad, DEFAULT_PAD);
+    s.pad = pad;
   }
 
   save() {

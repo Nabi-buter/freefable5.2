@@ -93,6 +93,7 @@ class App implements UIHost {
     this.view.flashMul = s.reduceFlash ? 0.25 : 1;
     this.view.assist = s.colorAssist;
     this.input.binds = s.keys;
+    this.input.pad = s.pad;
     this.input.rumbleOn = s.rumble;
     this.view.overlay.enabled = true;
     this.view.zoom = s.zoom;

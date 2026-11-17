@@ -3,7 +3,7 @@ import '@fontsource/cinzel/latin-700.css';
 import '@fontsource/cinzel/latin-900.css';
 import type { AudioEngine } from '../audio/audio';
 import { SKILLS } from '../sim/defs';
-import { BIND_ACTIONS, DEFAULT_BINDS, isTouchPrimary, keyLabel, type BindAction, type Input } from '../core/input';
+import { BIND_ACTIONS, DEFAULT_BINDS, DEFAULT_PAD, PAD_ACTIONS, isTouchPrimary, keyLabel, padLabel, type BindAction, type Input, type PadAction } from '../core/input';
 import { evoHint, fmtNum, fmtTime, getLang, passiveText, setLang, t, weaponLevelText, weaponName } from '../core/i18n';
 import { ACHIEVEMENTS, type RunSummary } from '../core/progress';
 import type { SaveStore } from '../core/save';
@@ -67,6 +67,7 @@ export class UI {
   modal: Modal = null;
   private settingsFrom: 'title' | 'pause' = 'title';
   private rebinding: BindAction | null = null;
+  private padRebinding: PadAction | null = null;
   private recTab: 'ach' | 'stats' | 'codex' = 'ach';
   private focusIdx = -1;
   private openedAt = 0;
@@ -255,6 +256,10 @@ export class UI {
       this.rebinding = null;
       this.host.input.capture = null;
     }
+    if (this.padRebinding && a !== 'padbind') {
+      this.padRebinding = null;
+      this.host.input.padCapture = null;
+    }
     switch (a) {
       case 'rebind': {
         const action = arg as BindAction;
@@ -289,6 +294,32 @@ export class UI {
         this.showSettings(true);
         break;
       }
+      case 'padbind': {
+        const action = arg as PadAction;
+        if (!PAD_ACTIONS.includes(action)) break;
+        au.ui('click');
+        this.padRebinding = action;
+        this.showSettings(true);
+        this.host.input.padCapture = (btn) => {
+          this.padRebinding = null;
+          const pad = sv.settings.pad;
+          // swap so the two actions never share a button
+          for (const o of PAD_ACTIONS) if (o !== action && pad[o] === btn) pad[o] = pad[action];
+          pad[action] = btn;
+          this.host.settingsChanged();
+          this.host.save.save();
+          au.ui('select');
+          if (this.screen === 'settings') this.showSettings(true);
+        };
+        break;
+      }
+      case 'pad-reset':
+        sv.settings.pad = { ...DEFAULT_PAD };
+        au.ui('click');
+        this.host.settingsChanged();
+        this.host.save.save();
+        this.showSettings(true);
+        break;
       case 'keys-reset':
         sv.settings.keys = { ...DEFAULT_BINDS };
         au.ui('click');
@@ -659,6 +690,9 @@ export class UI {
           ${isTouchPrimary() ? '' : `<div class="set-sec">${t('set.sec.keys')}</div>
           ${BIND_ACTIONS.map((a) => row(t(`set.key.${a}`), `<button class="keycap f ${this.rebinding === a ? 'wait' : ''}" data-act="rebind" data-arg="${a}">${this.rebinding === a ? t('set.key.press') : keyLabel(s.keys[a])}</button>`)).join('')}
           <div class="set-note">${t('set.key.note')}<button class="btn small ghost f" data-act="keys-reset">${t('set.key.reset')}</button></div>`}
+          <div class="set-sec">${t('set.sec.pad')}</div>
+          ${PAD_ACTIONS.map((a) => row(t(`set.key.${a}`), `<button class="keycap f ${this.padRebinding === a ? 'wait' : ''}" data-act="padbind" data-arg="${a}">${this.padRebinding === a ? t('set.pad.press') : padLabel(s.pad[a])}</button>`)).join('')}
+          <div class="set-note">${t('set.pad.note')}<button class="btn small ghost f" data-act="pad-reset">${t('set.key.reset')}</button></div>
           <div class="set-sec">${t('set.sec.video')}</div>
           ${row(t('set.quality'), seg('quality', [['low', t('set.q.low')], ['medium', t('set.q.medium')], ['high', t('set.q.high')], ['ultra', t('set.q.ultra')]], s.quality))}
           ${row(t('set.full'), `<button class="btn small f" data-act="full">${icon('fullscreen', 16)}${t('set.full')}</button>`)}
@@ -855,7 +889,7 @@ export class UI {
     });
     this.set('skon', p.skillT > 0 ? 1 : 0, (_, v) => this.h.skill.classList.toggle('active', v === 1));
     const dev = this.host.input.device;
-    this.set('skkey', dev === 'gamepad' ? 'X' : dev === 'touch' ? '' : keyLabel(this.save.settings.keys.skill), (el, v) => (el.textContent = String(v)));
+    this.set('skkey', dev === 'gamepad' ? padLabel(this.save.settings.pad.skill) : dev === 'touch' ? '' : keyLabel(this.save.settings.keys.skill), (el, v) => (el.textContent = String(v)));
     // build icons
     const wKey = p.weapons.map((w) => w.id + w.level).join(',');
     this.set('weapons', wKey, (el) => {
@@ -934,7 +968,9 @@ export class UI {
         this.tipStage = stage;
         const dev = this.host.input.device;
         const key = stage === 1 ? (dev === 'touch' ? 'tip.move.touch' : dev === 'gamepad' ? 'tip.move.pad' : 'tip.move') : stage === 2 ? 'tip.xp' : stage === 3 ? 'tip.beacon' : stage === 4 ? (dev === 'touch' ? 'tip.skill.touch' : dev === 'gamepad' ? 'tip.skill.pad' : 'tip.skill') : '';
-        if (key) this.h.tip.textContent = stage === 4 ? t(key, keyLabel(this.save.settings.keys.skill)) : t(key, this.moveKeys(), keyLabel(this.save.settings.keys.dash));
+        const kk = this.save.settings.keys, pp = this.save.settings.pad;
+        const pad = dev === 'gamepad';
+        if (key) this.h.tip.textContent = stage === 4 ? t(key, pad ? padLabel(pp.skill) : keyLabel(kk.skill)) : t(key, this.moveKeys(), pad ? padLabel(pp.dash) : keyLabel(kk.dash));
         this.h.tip.classList.toggle('on', key !== '');
         if (stage === 5) {
           this.save.tutorial = true;

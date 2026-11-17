@@ -25,6 +25,19 @@ export type BindAction = keyof KeyBinds;
 export const BIND_ACTIONS: BindAction[] = ['up', 'down', 'left', 'right', 'dash', 'skill', 'pause'];
 export const DEFAULT_BINDS: KeyBinds = { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', dash: 'Space', skill: 'KeyE', pause: 'KeyP' };
 
+/** remappable gamepad face buttons (standard mapping indices). Shoulders always work: RB/RT dash, LB/LT ability. */
+export interface PadBinds {
+  dash: number;
+  skill: number;
+}
+export type PadAction = keyof PadBinds;
+export const PAD_ACTIONS: PadAction[] = ['dash', 'skill'];
+export const DEFAULT_PAD: PadBinds = { dash: 0, skill: 2 };
+const PAD_NAMES = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT'];
+export function padLabel(i: number): string {
+  return PAD_NAMES[i] ?? 'B' + i;
+}
+
 /** short label for a KeyboardEvent.code */
 export function keyLabel(code: string): string {
   if (code.startsWith('Key')) return code.slice(3);
@@ -61,6 +74,9 @@ export class Input {
   stick: StickView = { active: false, ox: 0, oy: 0, x: 0, y: 0 };
   /** rebindable keyboard controls (arrow keys, Shift and Esc always work as well) */
   binds: KeyBinds = { ...DEFAULT_BINDS };
+  pad: PadBinds = { ...DEFAULT_PAD };
+  /** when set, the next gamepad button press (A–RT) is handed to this callback (button rebinding) */
+  padCapture: ((button: number) => void) | null = null;
   /** when set, the next key press is handed to this callback instead of the game (key rebinding) */
   capture: ((code: string) => void) | null = null;
   /** controller rumble / touch haptics */
@@ -258,11 +274,23 @@ export class Input {
       }
       const b = (i: number) => !!pad!.buttons[i]?.pressed;
       const edge = (i: number) => b(i) && !this.padPrev[i];
-      if (edge(0) || edge(5) || edge(7)) {
+      if (this.padCapture) {
+        for (let i = 0; i <= 7; i++) {
+          if (!edge(i)) continue;
+          const cb = this.padCapture;
+          this.padCapture = null;
+          cb(i);
+          break;
+        }
+        for (let i = 0; i < pad.buttons.length; i++) this.padPrev[i] = b(i);
+        this.moveX = this.moveY = 0;
+        return;
+      }
+      if (edge(this.pad.dash) || edge(5) || edge(7)) {
         this.dashQ = true;
         this.setDevice('gamepad');
       }
-      if (edge(2) || edge(3) || edge(4) || edge(6)) {
+      if (edge(this.pad.skill) || edge(4) || edge(6)) {
         this.skillQ = true;
         this.setDevice('gamepad');
       }
