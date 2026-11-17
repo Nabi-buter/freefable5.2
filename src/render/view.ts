@@ -175,7 +175,7 @@ const FinalShader = {
 const AFFIX_COLOR: Record<number, string> = { 1: '#6cf2ff', 2: '#7dff9b', 3: '#ff6a5a', 4: '#ffe36b', 5: '#c8d2e6' };
 
 const WCOL: Record<WeaponId, [number, number, number]> = {
-  ember: [1.0, 0.5, 0.15], wisps: [0.4, 0.9, 1.0], nova: [1.0, 0.6, 0.2], arc: [0.6, 0.8, 1.0], starfall: [1.0, 0.85, 0.45], sigil: [0.78, 0.6, 1.0],
+  ember: [1.0, 0.5, 0.15], wisps: [0.4, 0.9, 1.0], nova: [1.0, 0.6, 0.2], arc: [0.6, 0.8, 1.0], starfall: [1.0, 0.85, 0.45], sigil: [0.78, 0.6, 1.0], sprite: [1.0, 0.9, 0.55],
   lance: [1.0, 0.95, 0.7], frost: [0.55, 0.9, 1.0], darts: [0.75, 0.55, 1.0], trail: [1.0, 0.4, 0.12], aura: [1.0, 0.85, 0.5], glaive: [0.8, 0.88, 1.0],
 };
 
@@ -302,7 +302,7 @@ export class GameView {
     ])!;
     this.iGlaive = new Inst(blade, white(), 40, true);
     this.iBullet = new Inst(new THREE.IcosahedronGeometry(0.5, 1), white(), 700, true);
-    this.iWisp = new Inst(new THREE.IcosahedronGeometry(0.5, 1), white(), 24, true);
+    this.iWisp = new Inst(new THREE.IcosahedronGeometry(0.5, 1), white(), 48, true);
     this.iMeteor = new Inst(new THREE.IcosahedronGeometry(0.55, 1), white(), 40, true);
     this.pickupMat = makeWorldMat();
     this.iGem = new Inst(G.geoGem(), this.pickupMat, 700, true);
@@ -1071,6 +1071,16 @@ export class GameView {
           else this.iWisp.add(x, y, z, 0, size, size, size, 0.3, 1.15, 1.8);
           if (Math.random() < dt * 34) this.sparks.spawn(x, y, z, 0, 0.3, 0, 0.32, 0.6, evo ? 3 : 0.5, evo ? 1.6 : 1.8, evo ? 0.4 : 2.8, { size1: 0.05 });
           dec.add(DECAL.glow, x, z, 1.5, evo ? 0.8 : 0.15, evo ? 0.45 : 0.5, evo ? 0.1 : 0.75, 0.5);
+        }
+      } else if (w.id === 'sprite') {
+        for (let i = 0; i < sim.sprites.length; i++) {
+          const sp = sim.sprites[i];
+          const y = H(sp.x, sp.z) + 1.25 + Math.sin(time * 4 + i * 1.7) * 0.15;
+          const size = (sp.st === 1 ? 0.55 : 0.42) * (evo ? 1.15 : 1);
+          if (evo) this.iWisp.add(sp.x, y, sp.z, time * 3, size, size * 1.3, size, 0.3, 1.15, 0.95);
+          else this.iWisp.add(sp.x, y, sp.z, time * 3, size, size * 1.3, size, 1.3, 0.95, 0.3);
+          if (Math.random() < dt * (sp.st === 1 ? 90 : 20)) this.sparks.spawn(sp.x, y, sp.z, 0, 0.2, 0, 0.3, 0.45, evo ? 0.8 : 2.6, 2.0, evo ? 1.8 : 0.8, { size1: 0.04 });
+          dec.add(DECAL.glow, sp.x, sp.z, 1.1, evo ? 0.2 : 0.7, 0.55, evo ? 0.5 : 0.2, 0.4);
         }
       } else if (w.id === 'aura') {
         const R = s.area * p.st.area;

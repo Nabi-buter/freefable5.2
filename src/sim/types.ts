@@ -181,6 +181,21 @@ export interface EProj {
 
 export type ZoneKind = 'fire' | 'meteor' | 'slam' | 'crater' | 'charge' | 'vent' | 'frost' | 'sigil' | 'spore';
 
+/** a summoned light belonging to the 'sprite' weapon */
+export interface Sprite {
+  x: number;
+  z: number;
+  /** seconds until it may strike again */
+  cd: number;
+  /** 0 hovering by the bearer, 1 darting at a target */
+  st: number;
+  tx: number;
+  tz: number;
+  t: number;
+  /** id of the enemy it is going for */
+  e: number;
+}
+
 export interface Zone {
   id: number;
   kind: ZoneKind;

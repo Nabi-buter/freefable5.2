@@ -39,8 +39,8 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
 };
 
 // ---------------------------------------------------------------- weapons
-export type WeaponId = 'ember' | 'wisps' | 'nova' | 'arc' | 'starfall' | 'lance' | 'frost' | 'darts' | 'trail' | 'aura' | 'glaive' | 'sigil';
-export const WEAPON_IDS: WeaponId[] = ['ember', 'wisps', 'nova', 'arc', 'starfall', 'lance', 'frost', 'darts', 'trail', 'aura', 'glaive', 'sigil'];
+export type WeaponId = 'ember' | 'wisps' | 'nova' | 'arc' | 'starfall' | 'lance' | 'frost' | 'darts' | 'trail' | 'aura' | 'glaive' | 'sigil' | 'sprite';
+export const WEAPON_IDS: WeaponId[] = ['ember', 'wisps', 'nova', 'arc', 'starfall', 'lance', 'frost', 'darts', 'trail', 'aura', 'glaive', 'sigil', 'sprite'];
 
 export interface WStats {
   /** base damage per hit (or per tick) */
@@ -124,6 +124,19 @@ export const WEAPONS: Record<WeaponId, WeaponDef> = {
       L(34, 1.2, 7, 0, 8.5, 0, 0),
       L(40, 1.05, 9, 0, 9, 0, 0),
       L(52, 0.8, 14, 0, 10, 0, 0), // Tempest: forks from every hit
+    ],
+  },
+  // little lights that hover by the bearer and dart at whatever comes close
+  sprite: {
+    id: 'sprite', evo: 'plating', color: 0xffe9a0,
+    levels: [
+      L(13, 1.1, 2, 0, 1.3, 0, 22),
+      L(16, 1.05, 2, 0, 1.4, 0, 22),
+      L(19, 1.0, 3, 0, 1.4, 0, 23),
+      L(25, 0.92, 3, 0, 1.6, 0, 24),
+      L(30, 0.86, 4, 0, 1.7, 0, 25),
+      L(36, 0.78, 5, 0, 1.9, 0, 26),
+      L(46, 0.6, 7, 0, 2.6, 0, 30), // Wardens of Light: wider strikes, and they swat hostile shots out of the air
     ],
   },
   // runes on the ground that burst when something steps on them

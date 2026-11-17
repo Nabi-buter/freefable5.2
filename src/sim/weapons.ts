@@ -115,6 +115,68 @@ export function updateWeapons(sim: Sim, dt: number, input: InputState) {
         }
         break;
       }
+      case 'sprite': {
+        const n = s.count + st.amount;
+        const list = sim.sprites;
+        while (list.length < n) list.push({ x: p.x, z: p.z, cd: 0.3 + list.length * 0.17, st: 0, tx: 0, tz: 0, t: 0, e: -1 });
+        if (list.length > n) list.length = n;
+        w.a += dt * 1.5;
+        const reach = 9.5;
+        const R = s.area * st.area;
+        let taken: Set<number> | undefined;
+        for (let i = 0; i < n; i++) {
+          const sp = list[i];
+          if (sp.st === 1) (taken ??= new Set()).add(sp.e);
+        }
+        for (let i = 0; i < n; i++) {
+          const sp = list[i];
+          if (sp.st === 0) {
+            const a = w.a + (i / n) * Math.PI * 2;
+            const hx = p.x + Math.cos(a) * 2.1, hz = p.z + Math.sin(a) * 2.1;
+            const k = 1 - Math.exp(-9 * dt);
+            sp.x += (hx - sp.x) * k;
+            sp.z += (hz - sp.z) * k;
+            sp.cd -= dt;
+            if (sp.cd <= 0) {
+              // spread out over different targets when there is a choice
+              const e = sim.nearest(p.x, p.z, reach, taken) ?? sim.nearest(p.x, p.z, reach);
+              if (e) {
+                sp.st = 1;
+                sp.tx = e.x;
+                sp.tz = e.z;
+                sp.t = 0;
+                sp.e = e.id;
+                (taken ??= new Set()).add(e.id);
+              } else sp.cd = 0.12;
+            }
+          } else {
+            sp.t += dt;
+            const dx = sp.tx - sp.x, dz = sp.tz - sp.z;
+            const d = Math.hypot(dx, dz);
+            const step = s.speed * st.projSpeed * dt;
+            if (d <= step + 0.3 || sp.t > 0.9) {
+              sp.x = sp.tx;
+              sp.z = sp.tz;
+              const hit = sim.near(sp.x, sp.z, R);
+              for (let k = 0; k < hit.length; k++) sim.damageEnemy(hit[k], s.dmg, 'sprite', 4, p.x, p.z);
+              sim.events.push({ t: 'shoot', w: 'sprite', x: sp.x, z: sp.z });
+              sp.st = 0;
+              sp.cd = cd;
+            } else {
+              sp.x += (dx / d) * step;
+              sp.z += (dz / d) * step;
+            }
+          }
+          if (evo) {
+            for (const b of sim.eprojs) {
+              if (!b.alive) continue;
+              const bx = b.x - sp.x, bz = b.z - sp.z;
+              if (bx * bx + bz * bz < 1.7) b.alive = false;
+            }
+          }
+        }
+        break;
+      }
       case 'sigil': {
         w.t -= dt;
         if (w.t <= 0) {

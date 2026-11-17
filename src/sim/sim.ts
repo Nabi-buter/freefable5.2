@@ -5,7 +5,7 @@ import {
 } from './defs';
 import { World, type BiomeId } from './worldgen';
 import type {
-  Beacon, EProj, Enemy, InputState, Pending, Pickup, PickupKind, Player, Proj, RunStats, SimEvent, Stats, WeaponInst, Zone,
+  Beacon, EProj, Enemy, InputState, Pending, Pickup, PickupKind, Player, Proj, RunStats, SimEvent, Sprite, Stats, WeaponInst, Zone,
 } from './types';
 import { updateEnemies, updateDirector, initDirector, type DirectorState } from './ai';
 import { updateWeapons, updateProjs, updateZones, updateEProjs } from './weapons';
@@ -97,6 +97,8 @@ export class Sim {
   projs: Proj[] = [];
   eprojs: EProj[] = [];
   zones: Zone[] = [];
+  /** summoned lights of the 'sprite' weapon */
+  sprites: Sprite[] = [];
   pickups: Pickup[] = [];
   beacons: Beacon[];
   events: SimEvent[] = [];

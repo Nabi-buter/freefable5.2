@@ -258,6 +258,9 @@ export class AudioEngine {
                 this.noise(0.38, { freq: 2200, to: 180, vol: 0.12, rev: 0.25 });
               }
               break;
+            case 'sprite':
+              if (this.ok('s.sprite', 0.09)) this.tone(1500 + Math.random() * 500, 0.07, { type: 'triangle', to: 2400, vol: 0.022 });
+              break;
             case 'sigil':
               if (this.ok('s.sigil', 0.25)) {
                 this.tone(midi(74), 0.25, { type: 'triangle', vol: 0.035, rev: 0.5 });
