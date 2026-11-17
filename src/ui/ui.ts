@@ -277,6 +277,18 @@ export class UI {
         };
         break;
       }
+      case 'step': {
+        const [key, dir, min, max] = (arg ?? '').split(':');
+        const st = sv.settings as unknown as Record<string, number>;
+        const lo = Number(min), hi = Number(max);
+        const next = Math.max(lo, Math.min(hi, (Number(st[key]) || 0) + Number(dir) * (hi - lo) * 0.1));
+        st[key] = Math.round(next * 100) / 100;
+        au.ui('click');
+        this.host.settingsChanged();
+        this.host.save.save();
+        this.showSettings(true);
+        break;
+      }
       case 'keys-reset':
         sv.settings.keys = { ...DEFAULT_BINDS };
         au.ui('click');
@@ -625,7 +637,9 @@ export class UI {
     const s = this.save.settings;
     const prev = keepScroll ? (this.screenEl.querySelector('.scroll')?.scrollTop ?? 0) : 0;
     const seg = (key: string, opts: [string, string][], cur: string) => `<div class="seg">${opts.map(([v, l]) => `<button class="f ${cur === v ? 'on' : ''}" data-act="set" data-arg="${key}:${v}">${l}</button>`).join('')}</div>`;
-    const range = (key: string, v: number, min = 0, max = 1, step = 0.05) => `<input type="range" min="${min}" max="${max}" step="${step}" value="${v}" data-set="${key}">`;
+    // sliders get step buttons on both sides so a gamepad or keyboard can change them too
+    const range = (key: string, v: number, min = 0, max = 1, step = 0.05) => `<span class="rng"><button class="stepbtn f" data-act="step" data-arg="${key}:-1:${min}:${max}" aria-label="-">−</button><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" data-set="${key}"><button class="stepbtn f" data-act="step" data-arg="${key}:1:${min}:${max}" aria-label="+">+</button></span>`;
+    const keepFocus = keepScroll ? this.focusIdx : -1;
     const row = (label: string, ctl: string) => `<div class="set-row"><label>${label}</label>${ctl}</div>`;
     const onoff: [string, string][] = [['true', t('common.on')], ['false', t('common.off')]];
     this.setScreen('settings', `
@@ -661,6 +675,14 @@ export class UI {
         <div class="foot"><button class="btn ghost f" data-act="settings-back">${t('common.back')}</button></div>
       </div>`);
     if (keepScroll) this.screenEl.querySelector('.scroll')!.scrollTop = prev;
+    if (keepFocus >= 0) {
+      // re-rendering must not throw away the gamepad / keyboard cursor
+      const list = this.focusables();
+      if (list[keepFocus]) {
+        this.focusIdx = keepFocus;
+        list[keepFocus].classList.add('focus');
+      }
+    }
   }
 
   /** the four movement keys as one short label, e.g. "WASD" */
@@ -1136,6 +1158,9 @@ export class UI {
   private buildHtml(sim: Sim): string {
     const p = sim.player;
     const rows: string[] = [];
+    const sk = SKILLS[sim.char.skill];
+    rows.push(`<h4>${t('setup.skill')}</h4>`);
+    rows.push(`<div class="row"><span class="slot" style="--c:${hex(sk.color)}">${icon(sk.id, 22)}</span><div style="min-width:0"><div class="nm">${t('sk.' + sk.id)} · ${t('sk.cd', Math.round(sim.skillCooldown() * 10) / 10)}</div><div class="ds">${t(`sk.${sk.id}.d`)}</div></div></div>`);
     rows.push(`<h4>${t('tag.weapon')}</h4>`);
     for (const w of p.weapons) {
       const evo = w.level >= EVOLVED_LEVEL;
