@@ -89,11 +89,21 @@ export function defaultSave(): SaveData {
       runs: 0, wins: 0, kills: 0, eliteKills: 0, beacons: 0, time: 0, maxLevel: 0, maxCombo: 0, cindersEarned: 0, evolutions: 0,
       bestTime: [0, 0, 0], winsByChar: {}, winsByBiome: {}, cleared: 0, bestLoops: 0, bestEndlessTime: 0,
     },
-    settings: { lang: defaultLang(), quality: 'high', master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true, reduceFlash: false, colorAssist: false, rumble: true, keys: { ...DEFAULT_BINDS }, pad: { ...DEFAULT_PAD } },
+    settings: { lang: defaultLang(), quality: defaultQuality(), master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true, reduceFlash: false, colorAssist: false, rumble: true, keys: { ...DEFAULT_BINDS }, pad: { ...DEFAULT_PAD } },
     last: { char: 'kindler', biome: 'ashwood', difficulty: 0, endless: false },
     tutorial: false,
     daily: { date: '', done: false, best: 0, streak: 0 },
   };
+}
+
+/** phones and tablets start one step lower: their GPUs and batteries thank us, auto-quality can still go further down */
+function defaultQuality(): QualitySetting {
+  try {
+    if (navigator.maxTouchPoints > 0 && window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(any-pointer: fine)').matches) return 'medium';
+  } catch {
+    /* not in a browser (tests) */
+  }
+  return 'high';
 }
 
 /** merge loaded data over defaults so new fields survive old saves */

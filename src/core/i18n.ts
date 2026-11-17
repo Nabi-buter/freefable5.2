@@ -6,6 +6,7 @@ type Pair = [ko: string, en: string];
 const S: Record<string, Pair> = {
   // ------------------------------------------------------------ title / menu
   'title.sub': ['봉화를 밝혀, 새벽을 깨워라', 'Light the beacons. Wake the dawn.'],
+  'title.rotate': ['화면을 가로로 돌리면 더 넓게 볼 수 있어요', 'Turn your phone sideways for a wider view'],
   'menu.play': ['원정 시작', 'Begin Vigil'],
   'menu.daily': ['오늘의 도전', 'Daily Vigil'],
   'daily.first': ['오늘의 첫 새벽', "Today's first dawn"],

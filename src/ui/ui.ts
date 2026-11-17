@@ -509,6 +509,7 @@ export class UI {
     this.setScreen('title', `
       <div class="screen title">
         <div class="logo"><div class="logo-main">CINDERWAKE</div><div class="logo-sub">${t('title.sub')}</div></div>
+        ${isTouchPrimary() ? `<div class="rotate-hint">${icon('reroll', 16)}${t('title.rotate')}</div>` : ''}
         <nav class="menu">
           <button class="btn primary f" data-act="play">${icon('ember', 22)}${t('menu.play')}</button>
           <button class="btn f daily ${dailyDone ? 'done' : ''}" data-act="daily">
