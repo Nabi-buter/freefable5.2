@@ -364,7 +364,7 @@ const S: Record<string, Pair> = {
   'c.stormcaller.u': ['한 번의 원정에서 봉화 3개 밝히기', 'Light 3 beacons in one vigil'],
   'c.warden': ['수호자', 'Warden'],
   'c.warden.d': ['두꺼운 갑옷으로 적 한가운데를 버팁니다.', 'Heavy armor that holds the middle of the horde.'],
-  'c.warden.t': ['방어 +2, 체력 140', 'Armor +2, 140 health'],
+  'c.warden.t': ['방어 +3, 체력 150', 'Armor +3, 150 health'],
   'c.warden.u': ['레벨 20 도달', 'Reach level 20'],
   'c.frostweaver': ['서리직조사', 'Frostweaver'],
   'c.frostweaver.d': ['넓은 범위로 전장을 얼립니다.', 'Freezes the field with wide-reaching magic.'],

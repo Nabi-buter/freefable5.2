@@ -60,7 +60,7 @@ export function castSkill(sim: Sim): boolean {
       radius = 7.5 * area;
       p.skillT = 3;
       p.iframe = Math.max(p.iframe, 3);
-      sim.heal(p.st.maxHp * 0.22);
+      sim.heal(p.st.maxHp * 0.25);
       const list = sim.near(p.x, p.z, radius);
       for (let i = 0; i < list.length; i++) strike(sim, list[i], 25 + 5 * L, 0.3, 24);
       // hostile shots in the air are swatted away
