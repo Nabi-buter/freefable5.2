@@ -362,10 +362,27 @@ export function updateEnemies(sim: Sim, dt: number) {
                   slam(sim, p.x - Math.cos(a) * 6, p.z - Math.sin(a) * 6, 4, 1.7, e.dmg * 1.3);
                 }
               }
+              // each region's herald commands that region's own danger and its own brood
+              const hz = sim.world.biome.hazard;
+              if (hz !== 'none' && e.n % 2 === 1) {
+                const count = hpf < 0.5 ? 3 : 2;
+                const a0 = sim.rng.angle();
+                for (let k = 0; k < count; k++) {
+                  const a = a0 + (k / count) * Math.PI * 2;
+                  const dd = sim.rng.range(3, 6.5);
+                  sim.zones.push({
+                    id: sim.id(), kind: hz, x: p.x + Math.cos(a) * dd, z: p.z + Math.sin(a) * dd, r: hz === 'vent' ? 3.6 : hz === 'spore' ? 4.0 : 4.4,
+                    t: 0, dur: 1.2 + k * 0.3, dmg: hz === 'vent' ? 16 : hz === 'spore' ? 8 : 7,
+                    tick: 0, hostile: true, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true,
+                  });
+                }
+              }
               if (e.n % 4 === 0) {
-                for (let k = 0; k < 5; k++) {
+                const brood: EnemyKind = hz === 'frost' ? 'wraith' : hz === 'vent' ? 'bomber' : hz === 'spore' ? 'sporecap' : 'shade';
+                const count = brood === 'shade' ? 5 : 3;
+                for (let k = 0; k < count; k++) {
                   const a = sim.rng.angle();
-                  sim.spawnEnemy('shade', e.x + Math.cos(a) * 3, e.z + Math.sin(a) * 3);
+                  sim.spawnEnemy(brood, e.x + Math.cos(a) * 3, e.z + Math.sin(a) * 3);
                 }
               }
             }
