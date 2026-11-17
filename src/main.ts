@@ -137,7 +137,25 @@ class App implements UIHost {
     }
   }
 
+  /** phones: go fullscreen and turn the screen sideways when the browser allows it (needs a user gesture) */
+  private goLandscape() {
+    if (this.input.device !== 'touch') return;
+    const el = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => void };
+    const lock = () => {
+      const o = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
+      o?.lock?.('landscape').catch(() => undefined);
+    };
+    try {
+      if (document.fullscreenElement) lock();
+      else if (el.requestFullscreen) el.requestFullscreen().then(lock).catch(() => undefined);
+      else el.webkitRequestFullscreen?.();
+    } catch {
+      /* not supported: the portrait layout still works */
+    }
+  }
+
   startRun(daily = false) {
+    this.goLandscape();
     const last = this.save.data.last;
     this.state = 'loading';
     this.runDaily = daily;

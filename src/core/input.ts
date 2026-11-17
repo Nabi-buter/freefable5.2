@@ -155,6 +155,9 @@ export class Input {
 
   private onTouch(e: TouchEvent) {
     this.setDevice('touch');
+    // Only the playfield is ours. Touches on menus, buttons and sliders must keep their default behaviour,
+    // otherwise the browser never turns the tap into a click.
+    if (!(e.target instanceof HTMLCanvasElement)) return;
     for (let i = 0; i < e.changedTouches.length; i++) {
       const t = e.changedTouches[i];
       if (this.stickId === -1 && e.type === 'touchstart' && t.clientX < window.innerWidth * 0.55) {
@@ -181,13 +184,14 @@ export class Input {
   }
 
   private onTouchEnd(e: TouchEvent) {
+    const ours = e.target instanceof HTMLCanvasElement;
     for (let i = 0; i < e.changedTouches.length; i++) {
       if (e.changedTouches[i].identifier === this.stickId) {
         this.stickId = -1;
         this.stick.active = false;
       }
     }
-    if (e.cancelable) e.preventDefault();
+    if (ours && e.cancelable) e.preventDefault();
   }
 
   /** short haptic pulse on the active controller or phone. strong/weak 0..1 */
