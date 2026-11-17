@@ -85,6 +85,28 @@ export function castSkill(sim: Sim): boolean {
       }
       break;
     }
+    case 'starcall': {
+      // a rain of stars: elites and bosses are marked first, the rest fall on the crowd
+      radius = 15;
+      const list = sim.near(p.x, p.z, radius).slice();
+      list.sort((a, b) => (b.elite || b.boss ? 1 : 0) - (a.elite || a.boss ? 1 : 0));
+      const n = 8 + Math.floor(L / 7);
+      const dmg = 50 + 10 * L;
+      for (let i = 0; i < n; i++) {
+        let x: number, z: number;
+        const e = i < list.length ? list[i] : list.length > 0 ? list[Math.floor(sim.rng.next() * list.length)] : null;
+        if (e) {
+          x = e.x + sim.rng.range(-0.6, 0.6);
+          z = e.z + sim.rng.range(-0.6, 0.6);
+        } else {
+          const a = sim.rng.angle(), d = sim.rng.range(2, 10);
+          x = p.x + Math.cos(a) * d;
+          z = p.z + Math.sin(a) * d;
+        }
+        zone(sim, 'meteor', x, z, 3.3 * area, 0.45 + i * 0.14, dmg, null, false);
+      }
+      break;
+    }
     case 'cinderstep': {
       radius = 3;
       p.skillT = 4.5;

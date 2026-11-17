@@ -753,6 +753,13 @@ export class GameView {
               this.addShake(0.4);
               this.flash = Math.max(this.flash, 0.3);
               break;
+            case 'starcall':
+              this.ring(ev.x, ev.z, 1, ev.r, 0.7, 1.6, 1.3, 0.6);
+              this.ring(ev.x, ev.z, 0, ev.r, 1.1, 0.8, 0.65, 0.3, DECAL.glow);
+              this.burst(ev.x, y + 1.5, ev.z, 50, 6, 1.2, 0.5, 3, 2.5, 1.2, 2.4, -2, 1);
+              this.flashLight(ev.x, y + 6, ev.z, 1, 0.9, 0.6, 220, 0.8);
+              this.addShake(0.35);
+              break;
             case 'cinderstep':
               this.ring(ev.x, ev.z, 0.3, 4, 0.3, 3, 1.1, 0.3);
               this.burst(ev.x, y + 0.6, ev.z, 30, 8, 0.5, 0.5, 3, 1.2, 0.3, 0.6, 2, 2);

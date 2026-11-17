@@ -113,6 +113,7 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   giveChar('warden', p.level >= 20);
   giveChar('frostweaver', win);
   giveChar('ashwalker', win && diff >= 1);
+  giveChar('stargazer', p.weapons.filter((w) => w.level >= EVOLVED_LEVEL).length >= 2);
   const unlockedBiomes: BiomeId[] = [];
   const giveBiome = (b: BiomeId, cond: boolean) => {
     if (cond && !save.biomes.includes(b)) {

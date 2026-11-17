@@ -421,6 +421,10 @@ export class AudioEngine {
               this.noise(0.9, { type: 'bandpass', freq: 6400, to: 1800, q: 2, vol: 0.12, rev: 0.6 });
               this.tone(110, 0.6, { to: 50, vol: 0.16 });
               break;
+            case 'starcall':
+              this.chord([74, 78, 81, 86], 1.2, { type: 'triangle', vol: 0.07, strum: 0.07, rev: 0.8 });
+              this.tone(2200, 1.0, { to: 500, vol: 0.04, type: 'triangle', rev: 0.7 });
+              break;
             case 'cinderstep':
               this.noise(0.45, { type: 'bandpass', freq: 700, to: 3600, q: 1.4, vol: 0.14 });
               this.tone(180, 0.35, { to: 520, type: 'sawtooth', vol: 0.05 });

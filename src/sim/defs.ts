@@ -292,8 +292,8 @@ export const RELIC_COLORS: Record<RelicId, number> = {
 };
 
 // ---------------------------------------------------------------- characters
-export type CharId = 'kindler' | 'stormcaller' | 'warden' | 'frostweaver' | 'ashwalker';
-export const CHAR_IDS: CharId[] = ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker'];
+export type CharId = 'kindler' | 'stormcaller' | 'warden' | 'frostweaver' | 'ashwalker' | 'stargazer';
+export const CHAR_IDS: CharId[] = ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'];
 
 export interface CharDef {
   id: CharId;
@@ -314,7 +314,7 @@ export interface CharDef {
 }
 
 // ---------------------------------------------------------------- signature abilities
-export type SkillId = 'flare' | 'tempest' | 'bulwark' | 'deepfreeze' | 'cinderstep';
+export type SkillId = 'flare' | 'tempest' | 'bulwark' | 'deepfreeze' | 'cinderstep' | 'starcall';
 export interface SkillDef {
   id: SkillId;
   /** cooldown, seconds */
@@ -327,6 +327,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
   bulwark: { id: 'bulwark', cd: 26, color: 0x7de8ff },
   deepfreeze: { id: 'deepfreeze', cd: 24, color: 0xbdf0ff },
   cinderstep: { id: 'cinderstep', cd: 18, color: 0xff5a2a },
+  starcall: { id: 'starcall', cd: 25, color: 0xffe08a },
 };
 
 export const CHARS: Record<CharId, CharDef> = {
@@ -335,6 +336,7 @@ export const CHARS: Record<CharId, CharDef> = {
   warden: { id: 'warden', weapon: 'wisps', hp: 140, speed: 6.6, armor: 2, might: 1, haste: 1, area: 1, xp: 1, dashCharges: 1, skill: 'bulwark', cloak: 0x2f5a44, accent: 0x7de8ff },
   frostweaver: { id: 'frostweaver', weapon: 'frost', hp: 90, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1.18, xp: 1, dashCharges: 1, skill: 'deepfreeze', cloak: 0x3b5d7c, accent: 0xbdf0ff },
   ashwalker: { id: 'ashwalker', weapon: 'trail', hp: 95, speed: 7.7, armor: 0, might: 1.1, haste: 1, area: 1, xp: 1, dashCharges: 2, skill: 'cinderstep', cloak: 0x3a2d33, accent: 0xff5a2a },
+  stargazer: { id: 'stargazer', weapon: 'starfall', hp: 78, speed: 7.2, armor: 0, might: 0.92, haste: 1, area: 1.12, xp: 1, dashCharges: 1, skill: 'starcall', cloak: 0x2b2a5c, accent: 0xffe08a },
 };
 
 // ---------------------------------------------------------------- difficulty

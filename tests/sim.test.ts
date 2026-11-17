@@ -74,7 +74,7 @@ describe('simulation', () => {
     expect(first).toEqual(snapshot);
   }, 60000);
   it('every signature ability fires, goes on cooldown and comes back', () => {
-    for (const c of ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker'] as const) {
+    for (const c of ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
       const sim = new Sim({ seed: 21, char: c, difficulty: 0, biome: 'ashwood', meta: {} });
       const input = { mx: 1, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false, skill: false };
       const run = (secs: number) => {
@@ -99,7 +99,7 @@ describe('simulation', () => {
     }
   }, 60000);
   it('runs every character', () => {
-    for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker'] as const) {
+    for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);
       expect(r.kills).toBeGreaterThan(10);
     }
