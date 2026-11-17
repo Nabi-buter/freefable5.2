@@ -279,15 +279,16 @@ export const MAX_PASSIVES = 5;
 // ---------------------------------------------------------------- relics
 export type RelicId =
   | 'phoenix' | 'twinflame' | 'bloodember' | 'stormheart' | 'glasslantern' | 'secondwind' | 'emberbloom' | 'frozencore'
-  | 'gildedwick' | 'wideglow' | 'quickening' | 'beaconbond' | 'titanash' | 'huntersmark' | 'afterimage' | 'starmoss';
+  | 'gildedwick' | 'wideglow' | 'quickening' | 'beaconbond' | 'titanash' | 'huntersmark' | 'afterimage' | 'starmoss' | 'riteember' | 'afterglow';
 export const RELIC_IDS: RelicId[] = [
   'phoenix', 'twinflame', 'bloodember', 'stormheart', 'glasslantern', 'secondwind', 'emberbloom', 'frozencore',
-  'gildedwick', 'wideglow', 'quickening', 'beaconbond', 'titanash', 'huntersmark', 'afterimage', 'starmoss',
+  'gildedwick', 'wideglow', 'quickening', 'beaconbond', 'titanash', 'huntersmark', 'afterimage', 'starmoss', 'riteember', 'afterglow',
 ];
 export const RELIC_COLORS: Record<RelicId, number> = {
   phoenix: 0xff7a3c, twinflame: 0xffb8f0, bloodember: 0xff4d5e, stormheart: 0xa9c8ff, glasslantern: 0xe8f6ff,
   secondwind: 0x8affea, emberbloom: 0xff9a4a, frozencore: 0x9fe3ff, gildedwick: 0xffd24a, wideglow: 0x9fb4ff,
   quickening: 0xffe36b, beaconbond: 0xffc56b, titanash: 0xb9c4d6, huntersmark: 0xff6bd0, afterimage: 0xc6a2ff, starmoss: 0x7dff9b,
+  riteember: 0xffa86b, afterglow: 0xfff0a0,
 };
 
 // ---------------------------------------------------------------- characters

@@ -78,6 +78,8 @@ export interface Player {
   skillCd: number;
   skillT: number;
   skillAcc: number;
+  /** seconds of Afterglow (relic) left: bonus damage and speed after using the ability */
+  glowT: number;
   weapons: WeaponInst[];
   passives: PassiveInst[];
   relics: RelicId[];

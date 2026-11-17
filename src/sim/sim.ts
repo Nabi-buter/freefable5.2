@@ -136,7 +136,7 @@ export class Sim {
       x: 0, z: 2.5, vx: 0, vz: 0, facing: Math.PI / 2, aim: Math.PI / 2,
       hp: 1, level: 1, xp: 0, xpNext: this.xpNeed(1),
       iframe: 0, dashT: 0, dashCdT: 0, dashCharges: 1, slowT: 0, dashX: 0, dashZ: 1,
-      moving: false, hurtT: 0, revives: m('m_revive'), skillCd: 4, skillT: 0, skillAcc: 0,
+      moving: false, hurtT: 0, revives: m('m_revive'), skillCd: 4, skillT: 0, skillAcc: 0, glowT: 0,
       weapons: [], passives: [], relics: [],
       st: {} as Stats,
       rerolls: 1 + m('m_reroll'), banishes: m('m_banish'), alive: true,
@@ -304,6 +304,7 @@ export class Sim {
     }
     if ((e.chillT > 0 || e.freezeT > 0) && this.hasRelic('frozencore')) d *= 1.3;
     if ((e.elite || e.boss) && this.hasRelic('huntersmark')) d *= 1.35;
+    if (p.glowT > 0) d *= 1.3;
     return this.applyDamage(e, d, w, crit, kb, sx, sz);
   }
 
@@ -417,6 +418,8 @@ export class Sim {
       this.blasts.push({ x: e.x, z: e.z, r: 2.8, dmg: 14 + e.maxHp * 0.18, w: null, kb: 3, burn: 0, c: 0xff8a3c });
     }
     if (this.hasRelic('bloodember') && this.rng.next() < 0.07) this.heal(1, true);
+    // Rite Ember: every kill feeds the signature ability
+    if (p.skillCd > 0 && this.hasRelic('riteember')) p.skillCd = Math.max(0.01, p.skillCd - (e.elite || e.boss ? 1.5 : 0.05));
     if (e.kind === 'herald') {
       this.events.push({ t: 'bossDie', x: e.x, z: e.z, kind: e.kind });
       this.spawnPickup('chest', e.x, e.z, 1);
@@ -679,7 +682,7 @@ export class Sim {
       }
     } else {
       const k = 1 - Math.exp(-16 * dt);
-      const sp = st.speed * (p.slowT > 0 ? 0.62 : 1) * (p.skillT > 0 && this.char.skill === 'cinderstep' ? 1.45 : 1);
+      const sp = st.speed * (p.slowT > 0 ? 0.62 : 1) * (p.skillT > 0 && this.char.skill === 'cinderstep' ? 1.45 : 1) * (p.glowT > 0 ? 1.18 : 1);
       p.vx += (mx * sp - p.vx) * k;
       p.vz += (mz * sp - p.vz) * k;
     }

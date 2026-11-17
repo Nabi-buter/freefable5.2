@@ -346,6 +346,10 @@ const S: Record<string, Pair> = {
   'r.huntersmark.d': ['정예와 우두머리에게 주는 피해 +35%', 'Elites and bosses take +35% damage.'],
   'r.afterimage': ['잔상', 'Afterimage'],
   'r.afterimage.d': ['대시가 끝나는 자리에서 폭발이 일어납니다.', 'Your dash ends in an explosion.'],
+  'r.riteember': ['의식의 불씨', 'Rite Ember'],
+  'r.riteember.d': ['적을 쓰러뜨릴 때마다 고유 능력 재사용 시간이 줄어듭니다. 정예는 크게 줄입니다.', 'Every kill shaves time off your signature ability. Elites shave much more.'],
+  'r.afterglow': ['잔광', 'Afterglow'],
+  'r.afterglow.d': ['고유 능력을 쓴 뒤 6초간 피해 +30%, 이동 속도 +18%', 'For 6s after using your signature ability: damage +30%, move speed +18%.'],
   'r.starmoss': ['별이끼', 'Starmoss'],
   'r.starmoss.d': ['체력 재생 +1.2, 회복 구슬 효과 증가', 'Health regen +1.2/s and stronger healing orbs.'],
   // ------------------------------------------------------------ characters

@@ -95,6 +95,7 @@ export function castSkill(sim: Sim): boolean {
       break;
     }
   }
+  if (sim.hasRelic('afterglow')) p.glowT = 6;
   sim.events.push({ t: 'skill', id, x: p.x, z: p.z, r: radius });
   return true;
 }
@@ -109,6 +110,7 @@ export function updateSkill(sim: Sim, dt: number) {
       sim.events.push({ t: 'skillReady' });
     }
   }
+  if (p.glowT > 0) p.glowT -= dt;
   if (p.skillT > 0) {
     p.skillT -= dt;
     if (sim.char.skill === 'cinderstep') {
