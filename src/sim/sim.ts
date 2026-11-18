@@ -162,6 +162,19 @@ export class Sim {
     return SKILLS[this.char.skill].cd * (1 - cut / 100);
   }
 
+  /**
+   * Shape of the run over time: `early` at the start easing up to 1 by minute 9 (time to find a build),
+   * then rising by `late` per step of progress (minutes past 10, or beacons past two) so a finished build still has to fight.
+   */
+  curve(early: number, late: number): number {
+    const m = this.time / 60;
+    const e = Math.min(1, m / 9);
+    const k = early + (1 - early) * e * e * (3 - 2 * e);
+    // "late" is whichever comes first: the clock, or how far the beacons have been pushed
+    const prog = Math.max(m - 10, (this.stats.beacons - 3) * 1.5, this.boss || this.stats.bossKilled ? 4.5 : 0);
+    return k * (1 + late * Math.max(0, prog));
+  }
+
   /** intensity scalar driving spawn rate and enemy scaling */
   intensity(): number {
     return this.time / 60 + this.stats.beacons * 1.4;
@@ -487,7 +500,8 @@ export class Sim {
     if (!p.alive || p.iframe > 0 || this.state !== 'playing' || this.endT >= 0) return false;
     // past the 18 minute mark the night turns lethal, so no vigil can stall forever
     const late = Math.max(0, this.time / 60 - 18);
-    const mult = (1 + 0.04 * this.intensity()) * (1 + late * 0.15) * this.diff.dmg;
+    const I = this.intensity();
+    const mult = (1 + 0.04 * I) * this.curve(0.6, 0.15) * (1 + late * 0.15) * this.diff.dmg;
     const d = Math.max(1, Math.round(dmg * mult - p.st.armor));
     p.hp -= d;
     p.iframe = 0.55;
@@ -517,10 +531,10 @@ export class Sim {
     const def = ENEMIES[kind];
     const I = this.intensity();
     const boss = kind === 'herald' || kind === 'eclipse';
-    let hpMul = (1 + 0.11 * I + 0.011 * I * I) * this.diff.hp;
+    let hpMul = (1 + 0.11 * I + 0.011 * I * I) * this.curve(0.7, 0.12) * this.diff.hp;
     // bosses scale with the clock only: rushing the beacons must not buy an easier fight
     const loops = this.stats.loops;
-    if (boss) hpMul = (1 + 0.045 * (this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1 + loops + 0.25 * loops * loops) * this.diff.hp;
+    if (boss) hpMul = (1 + 0.08 * (this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1 + loops + 0.25 * loops * loops) * this.diff.hp;
     const biome = this.world.biome;
     // endless night: every cycle the horde gets tougher and faster, so no build can coast forever
     if (!boss) hpMul *= biome.enemyHp * (1 + 0.25 * loops);

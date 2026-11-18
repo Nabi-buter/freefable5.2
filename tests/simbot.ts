@@ -15,6 +15,8 @@ export interface BotResult {
   kills: number;
   beacons: number;
   hpLow: number;
+  /** lowest health fraction after minute 9 */
+  hpLowLate: number;
   weapons: string;
   log: string[];
   stepMs: number;
@@ -33,6 +35,7 @@ export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', s
   const log: string[] = [];
   let nextLog = 60;
   let hpLow = 1;
+  let hpLowLate = 1;
   let maxEnemies = 0;
   const t0 = performance.now();
   let steps = 0;
@@ -137,6 +140,7 @@ export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', s
     sim.events.length = 0;
     steps++;
     hpLow = Math.min(hpLow, p.hp / p.st.maxHp);
+    if (sim.time > 540) hpLowLate = Math.min(hpLowLate, p.hp / p.st.maxHp);
     maxEnemies = Math.max(maxEnemies, sim.enemies.length);
     if (sim.time >= nextLog) {
       nextLog += 60;
@@ -154,6 +158,7 @@ export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', s
     kills: sim.stats.kills,
     beacons: sim.stats.beacons,
     hpLow,
+    hpLowLate,
     weapons: p.weapons.map((w) => `${w.id}${w.level}`).join(',') + ' | ' + p.passives.map((w) => `${w.id}${w.level}`).join(',') + ' | ' + p.relics.join(','),
     log,
     stepMs: (performance.now() - t0) / steps,
@@ -180,7 +185,7 @@ if (isMain) {
     if (r.win) wins++;
     loops += r.loops;
     total += r.time;
-    console.log(`#${i} ${char} ${r.win ? 'WIN ' : 'LOSS'} t=${(r.time / 60).toFixed(1)}m lvl=${r.level} kills=${r.kills} beacons=${r.beacons} minHp=${(r.hpLow * 100).toFixed(0)}% loops=${r.loops} maxEn=${r.maxEnemies} step=${r.stepMs.toFixed(3)}ms`);
+    console.log(`#${i} ${char} ${r.win ? 'WIN ' : 'LOSS'} t=${(r.time / 60).toFixed(1)}m lvl=${r.level} kills=${r.kills} beacons=${r.beacons} minHp=${(r.hpLow * 100).toFixed(0)}% lateHp=${(r.hpLowLate * 100).toFixed(0)}% loops=${r.loops} maxEn=${r.maxEnemies} step=${r.stepMs.toFixed(3)}ms`);
     console.log('   ' + r.weapons);
     if (runs <= 3 && runs !== 1) r.log.forEach((l) => console.log(l));
   }
