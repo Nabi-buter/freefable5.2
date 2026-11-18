@@ -306,15 +306,16 @@ export interface CharDef {
   area: number;
   xp: number;
   dashCharges: number;
-  /** signature ability */
+  /** signature ability, and the alternative one that can be picked instead */
   skill: SkillId;
+  alt: SkillId;
   /** cloak colour / accent colour for the renderer */
   cloak: number;
   accent: number;
 }
 
 // ---------------------------------------------------------------- signature abilities
-export type SkillId = 'flare' | 'tempest' | 'bulwark' | 'deepfreeze' | 'cinderstep' | 'starcall';
+export type SkillId = 'flare' | 'tempest' | 'bulwark' | 'deepfreeze' | 'cinderstep' | 'starcall' | 'pyre' | 'blink' | 'sanctuary' | 'vortex' | 'effigy' | 'stasis';
 export interface SkillDef {
   id: SkillId;
   /** cooldown, seconds */
@@ -328,15 +329,21 @@ export const SKILLS: Record<SkillId, SkillDef> = {
   deepfreeze: { id: 'deepfreeze', cd: 24, color: 0xbdf0ff },
   cinderstep: { id: 'cinderstep', cd: 18, color: 0xff5a2a },
   starcall: { id: 'starcall', cd: 25, color: 0xffe08a },
+  pyre: { id: 'pyre', cd: 24, color: 0xff7a30 },
+  blink: { id: 'blink', cd: 12, color: 0xbfd8ff },
+  sanctuary: { id: 'sanctuary', cd: 26, color: 0x9affd0 },
+  vortex: { id: 'vortex', cd: 20, color: 0x9fd8ff },
+  effigy: { id: 'effigy', cd: 20, color: 0xff6a3a },
+  stasis: { id: 'stasis', cd: 30, color: 0xe0d0ff },
 };
 
 export const CHARS: Record<CharId, CharDef> = {
-  kindler: { id: 'kindler', weapon: 'ember', hp: 100, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1, xp: 1.1, dashCharges: 1, skill: 'flare', cloak: 0x7a3524, accent: 0xffa040 },
-  stormcaller: { id: 'stormcaller', weapon: 'arc', hp: 80, speed: 7.9, armor: 0, might: 1, haste: 1.12, area: 1, xp: 1, dashCharges: 1, skill: 'tempest', cloak: 0x2a3f7a, accent: 0x9fc4ff },
-  warden: { id: 'warden', weapon: 'wisps', hp: 150, speed: 6.8, armor: 3, might: 1, haste: 1, area: 1, xp: 1, dashCharges: 1, skill: 'bulwark', cloak: 0x2f5a44, accent: 0x7de8ff },
-  frostweaver: { id: 'frostweaver', weapon: 'frost', hp: 90, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1.18, xp: 1, dashCharges: 1, skill: 'deepfreeze', cloak: 0x3b5d7c, accent: 0xbdf0ff },
-  ashwalker: { id: 'ashwalker', weapon: 'trail', hp: 95, speed: 7.7, armor: 0, might: 1.1, haste: 1, area: 1, xp: 1, dashCharges: 2, skill: 'cinderstep', cloak: 0x3a2d33, accent: 0xff5a2a },
-  stargazer: { id: 'stargazer', weapon: 'starfall', hp: 78, speed: 7.2, armor: 0, might: 0.92, haste: 1, area: 1.12, xp: 1, dashCharges: 1, skill: 'starcall', cloak: 0x2b2a5c, accent: 0xffe08a },
+  kindler: { id: 'kindler', weapon: 'ember', hp: 100, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1, xp: 1.1, dashCharges: 1, skill: 'flare', alt: 'pyre', cloak: 0x7a3524, accent: 0xffa040 },
+  stormcaller: { id: 'stormcaller', weapon: 'arc', hp: 80, speed: 7.9, armor: 0, might: 1, haste: 1.12, area: 1, xp: 1, dashCharges: 1, skill: 'tempest', alt: 'blink', cloak: 0x2a3f7a, accent: 0x9fc4ff },
+  warden: { id: 'warden', weapon: 'wisps', hp: 150, speed: 6.8, armor: 3, might: 1, haste: 1, area: 1, xp: 1, dashCharges: 1, skill: 'bulwark', alt: 'sanctuary', cloak: 0x2f5a44, accent: 0x7de8ff },
+  frostweaver: { id: 'frostweaver', weapon: 'frost', hp: 90, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1.18, xp: 1, dashCharges: 1, skill: 'deepfreeze', alt: 'vortex', cloak: 0x3b5d7c, accent: 0xbdf0ff },
+  ashwalker: { id: 'ashwalker', weapon: 'trail', hp: 95, speed: 7.7, armor: 0, might: 1.1, haste: 1, area: 1, xp: 1, dashCharges: 2, skill: 'cinderstep', alt: 'effigy', cloak: 0x3a2d33, accent: 0xff5a2a },
+  stargazer: { id: 'stargazer', weapon: 'starfall', hp: 78, speed: 7.2, armor: 0, might: 0.92, haste: 1, area: 1.12, xp: 1, dashCharges: 1, skill: 'starcall', alt: 'stasis', cloak: 0x2b2a5c, accent: 0xffe08a },
 };
 
 // ---------------------------------------------------------------- difficulty

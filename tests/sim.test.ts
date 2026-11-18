@@ -1,3 +1,4 @@
+import { CHARS } from '../src/sim/defs';
 import { describe, expect, it } from 'vitest';
 import { runBot } from './simbot';
 import { World } from '../src/sim/worldgen';
@@ -74,8 +75,9 @@ describe('simulation', () => {
     expect(first).toEqual(snapshot);
   }, 60000);
   it('every signature ability fires, goes on cooldown and comes back', () => {
-    for (const c of ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
-      const sim = new Sim({ seed: 21, char: c, difficulty: 0, biome: 'ashwood', meta: {} });
+    for (const c of ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) for (const alt of [false, true]) {
+      const sim = new Sim({ seed: 21, char: c, difficulty: 0, biome: 'ashwood', meta: {}, skill: alt ? CHARS[c].alt : undefined });
+      expect(sim.skill).toBe(alt ? CHARS[c].alt : CHARS[c].skill);
       const input = { mx: 1, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false, skill: false };
       const run = (secs: number) => {
         for (let i = 0; i < 60 * secs; i++) {
@@ -91,10 +93,10 @@ describe('simulation', () => {
       sim.player.hp = sim.player.st.maxHp;
       sim.step(1 / 60, input);
       input.skill = false;
-      expect(sim.events.some((e) => e.t === 'skill' && e.id === sim.char.skill)).toBe(true);
+      expect(sim.events.some((e) => e.t === 'skill' && e.id === sim.skill)).toBe(true);
       expect(sim.player.skillCd).toBeGreaterThan(10);
       sim.events.length = 0;
-      run(27);
+      run(31);
       expect(sim.player.skillCd).toBe(0);
     }
   }, 60000);

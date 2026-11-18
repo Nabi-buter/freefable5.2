@@ -151,6 +151,7 @@ export function updateEnemies(sim: Sim, dt: number) {
   const p = sim.player;
   const world = sim.world;
   const I = sim.intensity();
+  const lure = sim.lure();
   const lim = world.playRadius + 4;
   const all = [sim.enemies, sim.bigs];
   for (let li = 0; li < 2; li++) {
@@ -194,7 +195,9 @@ export function updateEnemies(sim: Sim, dt: number) {
         e.kz *= f;
         if (Math.abs(e.kx) + Math.abs(e.kz) < 0.05) e.kx = e.kz = 0;
       }
-      const dx = p.x - e.x, dz = p.z - e.z;
+      // bosses always hunt the bearer; the rest follow the lure (an effigy can pull them away)
+      const tgt = e.boss ? p : lure;
+      const dx = tgt.x - e.x, dz = tgt.z - e.z;
       const dist = Math.hypot(dx, dz) || 0.001;
       const nx = dx / dist, nz = dz / dist;
       let vx = 0, vz = 0;
@@ -437,7 +440,8 @@ export function updateEnemies(sim: Sim, dt: number) {
         e.z *= s;
       }
       // contact damage
-      if (active && !e.buried && dist < e.r + 0.5 && !(e.def.ai === 'bomber')) {
+      const pd = tgt === p ? dist : Math.hypot(p.x - e.x, p.z - e.z);
+      if (active && !e.buried && pd < e.r + 0.5 && !(e.def.ai === 'bomber')) {
         if (sim.hurtPlayer(e.dmg, e.x, e.z) && !e.boss) {
           e.kx -= nx * 5;
           e.kz -= nz * 5;

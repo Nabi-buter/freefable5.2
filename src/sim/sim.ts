@@ -1,7 +1,7 @@
 import { RNG, clamp } from '../core/rng';
 import {
   CHARS, DIFFICULTIES, ENEMIES, META, PASSIVES, SKILLS, WEAPONS,
-  type CharDef, type CharId, type DifficultyDef, type EnemyKind, type MetaId, type PassiveId, type RelicId, type WeaponId,
+  type SkillId, type CharDef, type CharId, type DifficultyDef, type EnemyKind, type MetaId, type PassiveId, type RelicId, type WeaponId,
 } from './defs';
 import { World, type BiomeId } from './worldgen';
 import type {
@@ -20,6 +20,8 @@ export interface RunConfig {
   meta: Partial<Record<MetaId, number>>;
   /** endless night: the Eclipse returns stronger and the beacons go dark again */
   endless?: boolean;
+  /** which of the lightbearer's two abilities to bring (defaults to the first) */
+  skill?: SkillId;
 }
 
 /** Uniform spatial hash for enemies. Rebuilt every step. */
@@ -88,6 +90,8 @@ export class Sim {
   readonly rng: RNG;
   readonly diff: DifficultyDef;
   readonly char: CharDef;
+  /** the signature ability chosen for this run */
+  readonly skill: SkillId;
   time = 0;
   state: 'playing' | 'dead' | 'victory' = 'playing';
   player: Player;
@@ -129,6 +133,7 @@ export class Sim {
     this.world = new World(cfg.seed, cfg.biome);
     this.diff = DIFFICULTIES[clamp(cfg.difficulty, 0, DIFFICULTIES.length - 1)];
     this.char = CHARS[cfg.char];
+    this.skill = cfg.skill === this.char.alt ? this.char.alt : this.char.skill;
     this.grid = new Grid(this.world.radius + 8, 1024);
     this.beacons = this.world.beacons.map((b) => ({ x: b.x, z: b.z, progress: 0, lit: false, channeling: false, pulseT: 0, guard: false, litAt: 0 }));
     const m = (id: MetaId) => cfg.meta[id] ?? 0;
@@ -136,7 +141,7 @@ export class Sim {
       x: 0, z: 2.5, vx: 0, vz: 0, facing: Math.PI / 2, aim: Math.PI / 2,
       hp: 1, level: 1, xp: 0, xpNext: this.xpNeed(1),
       iframe: 0, dashT: 0, dashCdT: 0, dashCharges: 1, slowT: 0, dashX: 0, dashZ: 1,
-      moving: false, hurtT: 0, revives: m('m_revive'), skillCd: 4, skillT: 0, skillAcc: 0, glowT: 0,
+      moving: false, hurtT: 0, revives: m('m_revive'), skillCd: 4, skillT: 0, skillAcc: 0, glowT: 0, skillX: 0, skillZ: 0,
       weapons: [], passives: [], relics: [],
       st: {} as Stats,
       rerolls: 1 + m('m_reroll'), banishes: m('m_banish'), alive: true,
@@ -159,7 +164,7 @@ export class Sim {
   /** full cooldown of the signature ability after permanent upgrades, seconds */
   skillCooldown(): number {
     const cut = (this.cfg.meta.m_skill ?? 0) * (META.find((d) => d.id === 'm_skill')?.per ?? 0);
-    return SKILLS[this.char.skill].cd * (1 - cut / 100);
+    return SKILLS[this.skill].cd * (1 - cut / 100);
   }
 
   /**
@@ -173,6 +178,13 @@ export class Sim {
     // "late" is whichever comes first: the clock, or how far the beacons have been pushed
     const prog = Math.max(m - 10, (this.stats.beacons - 3) * 1.5, this.boss || this.stats.bossKilled ? 4.5 : 0);
     return k * (1 + late * Math.max(0, prog));
+  }
+
+  /** where the horde is drawn to: the player, or a burning effigy while one stands */
+  lure(): { x: number; z: number } {
+    const p = this.player;
+    if (this.skill === 'effigy' && p.skillT > 0) return { x: p.skillX, z: p.skillZ };
+    return p;
   }
 
   /** intensity scalar driving spawn rate and enemy scaling */
@@ -696,7 +708,7 @@ export class Sim {
       }
     } else {
       const k = 1 - Math.exp(-16 * dt);
-      const sp = st.speed * (p.slowT > 0 ? 0.62 : 1) * (p.skillT > 0 && this.char.skill === 'cinderstep' ? 1.45 : 1) * (p.glowT > 0 ? 1.18 : 1);
+      const sp = st.speed * (p.slowT > 0 ? 0.62 : 1) * (p.skillT > 0 && this.skill === 'cinderstep' ? 1.45 : 1) * (p.glowT > 0 ? 1.18 : 1);
       p.vx += (mx * sp - p.vx) * k;
       p.vz += (mz * sp - p.vz) * k;
     }

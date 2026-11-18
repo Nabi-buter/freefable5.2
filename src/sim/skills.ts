@@ -22,7 +22,7 @@ export function skillReady(sim: Sim): boolean {
 export function castSkill(sim: Sim): boolean {
   const p = sim.player;
   if (!skillReady(sim)) return false;
-  const id: SkillId = sim.char.skill;
+  const id: SkillId = sim.skill;
   const L = p.level;
   const area = p.st.area;
   p.skillCd = sim.skillCooldown();
@@ -107,6 +107,85 @@ export function castSkill(sim: Sim): boolean {
       }
       break;
     }
+    case 'pyre': {
+      // a ring of fire that travels with you
+      radius = 5.5 * area;
+      p.skillT = 6;
+      p.skillAcc = 0;
+      sim.heal(p.st.maxHp * 0.08);
+      break;
+    }
+    case 'blink': {
+      // vanish in a thunderclap and strike where you land
+      const ad = sim.aimDir({ mx: 0, mz: 0, aimX: Math.cos(p.aim), aimZ: Math.sin(p.aim), autoAim: false, dash: false });
+      const ml = Math.hypot(p.vx, p.vz);
+      const dx = ml > 0.5 ? p.vx / ml : ad.x, dz = ml > 0.5 ? p.vz / ml : ad.z;
+      const ox = p.x, oz = p.z;
+      radius = 4.2 * area;
+      const burst = (x: number, z: number) => {
+        const list = sim.near(x, z, radius);
+        for (let i = 0; i < list.length; i++) {
+          strike(sim, list[i], 55 + 11 * L, 0.5, 9);
+          if (list[i].alive) sim.chill(list[i], 2);
+        }
+      };
+      burst(ox, oz);
+      p.x += dx * 9.5;
+      p.z += dz * 9.5;
+      sim.world.resolve(p, 0.5);
+      const d = Math.hypot(p.x, p.z);
+      if (d > sim.world.playRadius) {
+        p.x *= sim.world.playRadius / d;
+        p.z *= sim.world.playRadius / d;
+      }
+      burst(p.x, p.z);
+      p.iframe = Math.max(p.iframe, 0.6);
+      sim.events.push({ t: 'lightning', pts: [ox, oz, p.x, p.z] });
+      sim.events.push({ t: 'skill', id, x: ox, z: oz, r: radius });
+      break;
+    }
+    case 'sanctuary': {
+      // holy ground: heals you while you stand in it and bogs the horde down
+      radius = 6.5 * area;
+      p.skillT = 7;
+      p.skillAcc = 0;
+      p.skillX = p.x;
+      p.skillZ = p.z;
+      break;
+    }
+    case 'vortex': {
+      // a whirlpool of frost ahead of you that drags the horde in, then bursts
+      radius = 11 * area;
+      const a = p.aim;
+      p.skillX = p.x + Math.cos(a) * 6;
+      p.skillZ = p.z + Math.sin(a) * 6;
+      p.skillT = 1.3;
+      break;
+    }
+    case 'effigy': {
+      // a burning effigy the horde cannot ignore; it bursts when its time is up
+      radius = 4.5 * area;
+      p.skillX = p.x;
+      p.skillZ = p.z;
+      p.skillT = 5;
+      p.skillAcc = 0;
+      // slip away: a moment of cover and every dash back
+      p.iframe = Math.max(p.iframe, 1.0);
+      p.dashCharges = p.st.dashMax;
+      break;
+    }
+    case 'stasis': {
+      // the stars stop: every foe in sight is held fast
+      radius = 22;
+      const list = sim.near(p.x, p.z, radius);
+      for (let i = 0; i < list.length; i++) {
+        const e = list[i];
+        if (e.boss) sim.chill(e, 6);
+        else sim.freeze(e, 3.6);
+      }
+      for (const b of sim.eprojs) b.alive = false;
+      break;
+    }
     case 'cinderstep': {
       radius = 3;
       p.skillT = 4.5;
@@ -118,7 +197,7 @@ export function castSkill(sim: Sim): boolean {
     }
   }
   if (sim.hasRelic('afterglow')) p.glowT = 6;
-  sim.events.push({ t: 'skill', id, x: p.x, z: p.z, r: radius });
+  if (id !== 'blink') sim.events.push({ t: 'skill', id, x: p.x, z: p.z, r: radius });
   return true;
 }
 
@@ -135,7 +214,76 @@ export function updateSkill(sim: Sim, dt: number) {
   if (p.glowT > 0) p.glowT -= dt;
   if (p.skillT > 0) {
     p.skillT -= dt;
-    if (sim.char.skill === 'cinderstep') {
+    const L = p.level, area = p.st.area;
+    const id = sim.skill;
+    if (id === 'pyre') {
+      p.skillAcc -= dt;
+      if (p.skillAcc <= 0) {
+        p.skillAcc = 0.45;
+        const list = sim.near(p.x, p.z, 5.5 * area);
+        for (let i = 0; i < list.length; i++) {
+          strike(sim, list[i], 9 + 2.2 * L, 0.06, 2);
+          if (list[i].alive) sim.burn(list[i], 3 + L, 2);
+        }
+      }
+    } else if (id === 'sanctuary') {
+      const R = 6.5 * area;
+      const inside = (p.x - p.skillX) ** 2 + (p.z - p.skillZ) ** 2 < R * R;
+      if (inside) {
+        p.hp = Math.min(p.st.maxHp, p.hp + p.st.maxHp * 0.03 * dt);
+      }
+      p.skillAcc -= dt;
+      if (p.skillAcc <= 0) {
+        p.skillAcc = 0.5;
+        const list = sim.near(p.skillX, p.skillZ, R);
+        for (let i = 0; i < list.length; i++) {
+          sim.chill(list[i], 0.7);
+          strike(sim, list[i], 4 + L, 0.02, 0);
+        }
+        for (const b of sim.eprojs) if ((b.x - p.skillX) ** 2 + (b.z - p.skillZ) ** 2 < R * R) b.alive = false;
+      }
+    } else if (id === 'vortex') {
+      const R = 11 * area;
+      const list = sim.near(p.skillX, p.skillZ, R);
+      for (let i = 0; i < list.length; i++) {
+        const e = list[i];
+        if (e.boss) continue;
+        const dx = p.skillX - e.x, dz = p.skillZ - e.z;
+        const d = Math.hypot(dx, dz) || 1;
+        const pull = (14 / e.def.mass) * Math.min(1, d / 2);
+        e.kx += (dx / d) * pull * dt * 6;
+        e.kz += (dz / d) * pull * dt * 6;
+        sim.chill(e, 0.5);
+      }
+      if (p.skillT <= 0) {
+        const hit = sim.near(p.skillX, p.skillZ, 4.8 * area);
+        for (let i = 0; i < hit.length; i++) {
+          strike(sim, hit[i], 60 + 12 * L, 0.55, 6);
+          if (hit[i].alive) sim.freeze(hit[i], 1.6);
+        }
+        sim.events.push({ t: 'explode', x: p.skillX, z: p.skillZ, r: 4.8 * area, c: 0x9fd8ff, hostile: false });
+      }
+    } else if (id === 'effigy') {
+      p.skillAcc -= dt;
+      if (p.skillAcc <= 0) {
+        p.skillAcc = 0.5;
+        const list = sim.near(p.skillX, p.skillZ, 2.6);
+        for (let i = 0; i < list.length; i++) {
+          strike(sim, list[i], 6 + 1.5 * L, 0.04, 3);
+          if (list[i].alive) sim.burn(list[i], 2 + L * 0.6, 2);
+        }
+      }
+      if (p.skillT <= 0) {
+        const R = 4.5 * area;
+        const hit = sim.near(p.skillX, p.skillZ, R);
+        for (let i = 0; i < hit.length; i++) {
+          strike(sim, hit[i], 70 + 13 * L, 0.6, 14);
+          if (hit[i].alive) sim.burn(hit[i], 5 + L, 3);
+        }
+        sim.events.push({ t: 'explode', x: p.skillX, z: p.skillZ, r: R, c: 0xff6a3a, hostile: false });
+      }
+    }
+    if (id === 'cinderstep') {
       // a blazing wake behind every step
       p.skillAcc += Math.hypot(p.vx, p.vz) * dt;
       if (p.skillAcc > 1.7) {

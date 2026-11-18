@@ -240,6 +240,11 @@ input[type='range']::-moz-range-thumb { width: 1.2em; height: 1.2em; border-radi
 .statline .v.sk { display: block; color: var(--c, #ffa040); line-height: 1.4; }
 .statline .v.sk .ic { vertical-align: -0.15em; margin-right: 0.35em; }
 .statline .v.sk b { color: var(--text); }
+.skpick { display: flex; flex-wrap: wrap; gap: 0.35em; margin-bottom: 0.3em; }
+.skpick button { display: inline-flex; align-items: center; gap: 0.35em; padding: 0.3em 0.75em; border-radius: 2em; border: 1px solid var(--line-strong); background: rgba(10, 12, 28, 0.6); color: var(--dim); font-weight: 700; font-size: 0.92em; pointer-events: auto; transition: all 0.12s; }
+.skpick button .ic { color: var(--c); }
+.skpick button.on { border-color: var(--c); color: var(--text); background: color-mix(in srgb, var(--c) 18%, rgba(10, 12, 28, 0.8)); box-shadow: 0 0 0.8em color-mix(in srgb, var(--c) 35%, transparent); }
+.skpick button:hover, .skpick button.focus { border-color: var(--c); }
 .statline .v.sk small { display: block; color: var(--dim); font-weight: 400; font-size: 0.9em; margin-top: 0.25em; line-height: 1.5; }
 .dashes { display: flex; gap: 0.35em; align-items: center; color: var(--cyan); font-size: 0.8em; }
 .dashes .pip { width: 2.6em; height: 0.42em; border-radius: 1em; background: rgba(6, 8, 20, 0.75); border: 1px solid rgba(127, 212, 255, 0.4); overflow: hidden; }

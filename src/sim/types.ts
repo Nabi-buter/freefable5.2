@@ -80,6 +80,9 @@ export interface Player {
   skillAcc: number;
   /** seconds of Afterglow (relic) left: bonus damage and speed after using the ability */
   glowT: number;
+  /** anchor point of a placed ability (sanctuary, vortex, effigy) */
+  skillX: number;
+  skillZ: number;
   weapons: WeaponInst[];
   passives: PassiveInst[];
   relics: RelicId[];

@@ -753,6 +753,39 @@ export class GameView {
               this.addShake(0.4);
               this.flash = Math.max(this.flash, 0.3);
               break;
+            case 'pyre':
+              this.ring(ev.x, ev.z, 0.5, ev.r, 0.4, 3, 1.2, 0.3);
+              this.burst(ev.x, y + 0.8, ev.z, 50, 7, 0.6, 0.55, 3, 1.2, 0.3, 0.8, 2, 2);
+              this.flashLight(ev.x, y + 3, ev.z, 1, 0.5, 0.2, 200, 0.6);
+              this.addShake(0.35);
+              break;
+            case 'blink':
+              this.ring(ev.x, ev.z, 0.3, ev.r, 0.35, 1.4, 1.8, 3);
+              this.burst(ev.x, y + 1, ev.z, 30, 9, 0.4, 0.45, 1.4, 1.9, 3, 0.6, 0, 2);
+              this.flashLight(ev.x, y + 3, ev.z, 0.7, 0.85, 1, 180, 0.35);
+              this.aberr = Math.max(this.aberr, 0.012);
+              this.addShake(0.3);
+              break;
+            case 'sanctuary':
+              this.ring(ev.x, ev.z, 0.5, ev.r, 0.6, 1.0, 2.6, 1.8);
+              this.burst(ev.x, y + 1, ev.z, 40, 5, 1.0, 0.5, 1.2, 3, 2.2, 2, -1.5, 1);
+              this.flashLight(ev.x, y + 4, ev.z, 0.6, 1, 0.8, 200, 0.7);
+              break;
+            case 'vortex':
+              this.ring(ev.x, ev.z, 0.5, 6, 0.4, 0.6, 1, 1.4);
+              this.addShake(0.25);
+              break;
+            case 'effigy':
+              this.ring(ev.x, ev.z, 0.5, 6, 0.5, 3, 1.1, 0.3);
+              this.burst(ev.x, y + 1, ev.z, 40, 6, 0.6, 0.5, 3, 1.2, 0.3, 1.2, 2, 2);
+              break;
+            case 'stasis':
+              this.ring(ev.x, ev.z, 1, ev.r, 0.9, 1.6, 1.4, 2.6);
+              this.ring(ev.x, ev.z, 0, ev.r, 1.2, 0.5, 0.45, 0.9, DECAL.glow);
+              this.flash = Math.max(this.flash, 0.4);
+              this.aberr = Math.max(this.aberr, 0.02);
+              this.addShake(0.3);
+              break;
             case 'starcall':
               this.ring(ev.x, ev.z, 1, ev.r, 0.7, 1.6, 1.3, 0.6);
               this.ring(ev.x, ev.z, 0, ev.r, 1.1, 0.8, 0.65, 0.3, DECAL.glow);
@@ -1026,11 +1059,45 @@ export class GameView {
 
     // --- lingering signature effects
     if (p.alive && p.skillT > 0) {
-      if (sim.char.skill === 'bulwark') {
+      if (sim.skill === 'bulwark') {
         const pulse = 0.75 + Math.sin(time * 14) * 0.15;
         dec.add(DECAL.ring, p.x, p.z, 2.1, 0.4 * pulse, 1.2 * pulse, 1.6 * pulse, Math.min(1, p.skillT * 2));
         dec.add(DECAL.glow, p.x, p.z, 2.6, 0.3, 0.8, 1.0, 0.22 * Math.min(1, p.skillT * 2));
-      } else if (sim.char.skill === 'cinderstep' && Math.random() < dt * 60) {
+      } else if (sim.skill === 'pyre') {
+        const R = 5.5 * p.st.area, f = Math.min(1, p.skillT * 2);
+        dec.add(DECAL.ring, p.x, p.z, R, 1.0, 0.4, 0.1, 0.7 * f);
+        dec.add(DECAL.glow, p.x, p.z, R, 0.9, 0.35, 0.08, 0.35 * f);
+        for (let k = 0; k < 3; k++) if (Math.random() < dt * 40) {
+          const a = Math.random() * TAU, x = p.x + Math.cos(a) * R * 0.95, z = p.z + Math.sin(a) * R * 0.95;
+          this.sparks.spawn(x, H(x, z) + 0.2, z, 0, 2 + Math.random() * 2.5, 0, 0.5, 0.55, 3, 1.2, 0.3, { drag: 1 });
+        }
+      } else if (sim.skill === 'sanctuary') {
+        const R = 6.5 * p.st.area, f = Math.min(1, p.skillT * 1.5);
+        const pulse = 0.8 + Math.sin(time * 3) * 0.2;
+        dec.add(DECAL.ring, p.skillX, p.skillZ, R, 0.35 * pulse, 0.9 * pulse, 0.65 * pulse, f);
+        dec.add(DECAL.glow, p.skillX, p.skillZ, R, 0.25, 0.7, 0.5, 0.3 * f);
+        if (Math.random() < dt * 30) {
+          const a = Math.random() * TAU, d = Math.sqrt(Math.random()) * R, x = p.skillX + Math.cos(a) * d, z = p.skillZ + Math.sin(a) * d;
+          this.sparks.spawn(x, H(x, z) + 0.1, z, 0, 1.2 + Math.random(), 0, 1.0, 0.4, 1.0, 2.6, 1.8, { drag: 0.6, grav: -0.3 });
+        }
+      } else if (sim.skill === 'vortex') {
+        const R = 11 * p.st.area, k = 1 - p.skillT / 1.3;
+        dec.add(DECAL.ring, p.skillX, p.skillZ, R * (1 - k * 0.6), 0.3, 0.6, 0.9, 0.7);
+        dec.add(DECAL.glow, p.skillX, p.skillZ, 3 + k * 2, 0.2, 0.4, 0.6, 0.35);
+        for (let q = 0; q < 2; q++) if (Math.random() < dt * 50) {
+          const a = Math.random() * TAU, d = R * (0.4 + Math.random() * 0.6), x = p.skillX + Math.cos(a) * d, z = p.skillZ + Math.sin(a) * d;
+          const tx = -Math.sin(a), tz = Math.cos(a);
+          this.sparks.spawn(x, H(x, z) + 0.4, z, (tx * 6 - Math.cos(a) * 5), 0.5, (tz * 6 - Math.sin(a) * 5), 0.6, 0.4, 1.4, 2.4, 3.2, { drag: 0.3 });
+        }
+      } else if (sim.skill === 'effigy') {
+        const y = H(p.skillX, p.skillZ);
+        const f = Math.min(1, p.skillT * 2);
+        dec.add(DECAL.glow, p.skillX, p.skillZ, 2.8, 1.0, 0.4, 0.1, 0.6 * f);
+        dec.add(DECAL.ring, p.skillX, p.skillZ, 2.6, 2.0, 0.7, 0.2, 0.7 * f);
+        for (let q = 0; q < 3; q++) if (Math.random() < dt * 60) {
+          this.sparks.spawn(p.skillX + (Math.random() - 0.5) * 0.7, y + 0.3 + Math.random() * 1.8, p.skillZ + (Math.random() - 0.5) * 0.7, 0, 2.5 + Math.random() * 2, 0, 0.6, 0.7, 3, 1.3, 0.3, { drag: 1 });
+        }
+      } else if (sim.skill === 'cinderstep' && Math.random() < dt * 60) {
         this.sparks.spawn(p.x, H(p.x, p.z) + 0.4, p.z, (Math.random() - 0.5) * 2, 1.5 + Math.random() * 2, (Math.random() - 0.5) * 2, 0.4, 0.5, 3, 1.3, 0.3, { drag: 1 });
       }
     }

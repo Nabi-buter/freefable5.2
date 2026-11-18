@@ -421,6 +421,30 @@ export class AudioEngine {
               this.noise(0.9, { type: 'bandpass', freq: 6400, to: 1800, q: 2, vol: 0.12, rev: 0.6 });
               this.tone(110, 0.6, { to: 50, vol: 0.16 });
               break;
+            case 'pyre':
+              this.noise(0.9, { freq: 900, to: 300, vol: 0.16, rev: 0.4 });
+              this.tone(110, 0.8, { to: 70, vol: 0.18 });
+              break;
+            case 'blink':
+              this.tone(2400, 0.18, { type: 'sawtooth', to: 300, vol: 0.06 });
+              this.noise(0.25, { type: 'bandpass', freq: 4800, to: 900, q: 1.5, vol: 0.14 });
+              break;
+            case 'sanctuary':
+              this.chord([67, 71, 74, 79], 1.4, { type: 'triangle', vol: 0.06, strum: 0.05, rev: 0.9 });
+              break;
+            case 'vortex':
+              this.noise(1.3, { type: 'bandpass', freq: 400, to: 3200, q: 1.2, vol: 0.12, rev: 0.4 });
+              this.tone(2000, 1.2, { to: 700, vol: 0.03, type: 'triangle' });
+              break;
+            case 'effigy':
+              this.noise(0.6, { freq: 1500, to: 400, vol: 0.13 });
+              this.tone(160, 0.5, { to: 90, vol: 0.14, type: 'triangle' });
+              break;
+            case 'stasis':
+              this.tone(1800, 1.4, { to: 1750, vol: 0.05, type: 'sine', rev: 0.9 });
+              this.tone(900, 1.4, { to: 880, vol: 0.05, type: 'triangle', rev: 0.9 });
+              this.noise(0.4, { type: 'highpass', freq: 6000, vol: 0.06, rev: 0.8 });
+              break;
             case 'starcall':
               this.chord([74, 78, 81, 86], 1.2, { type: 'triangle', vol: 0.07, strum: 0.07, rev: 0.8 });
               this.tone(2200, 1.0, { to: 500, vol: 0.04, type: 'triangle', rev: 0.7 });

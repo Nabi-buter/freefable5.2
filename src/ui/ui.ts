@@ -2,7 +2,7 @@ import './style.css';
 import '@fontsource/cinzel/latin-700.css';
 import '@fontsource/cinzel/latin-900.css';
 import type { AudioEngine } from '../audio/audio';
-import { SKILLS } from '../sim/defs';
+import { SKILLS, type SkillId } from '../sim/defs';
 import { BIND_ACTIONS, DEFAULT_BINDS, DEFAULT_PAD, PAD_ACTIONS, isTouchPrimary, keyLabel, padLabel, type BindAction, type Input, type PadAction } from '../core/input';
 import { evoHint, fmtNum, fmtTime, getLang, passiveText, setLang, t, weaponLevelText, weaponName } from '../core/i18n';
 import { ACHIEVEMENTS, type RunSummary } from '../core/progress';
@@ -353,6 +353,13 @@ export class UI {
         else if (this.screen === 'settings') this.showSettings();
         break;
       case 'full': au.ui('click'); this.host.toggleFullscreen(); break;
+      case 'pick-skill': {
+        const c = CHARS[sv.last.char];
+        if (arg === c.skill || arg === c.alt) sv.last.skills[sv.last.char] = arg as SkillId;
+        au.ui('click');
+        this.showSetup();
+        break;
+      }
       case 'pick-char':
         sv.last.char = arg as CharId;
         au.ui('click');
@@ -538,6 +545,7 @@ export class UI {
   private showSetup() {
     const sv = this.save;
     const c = CHARS[sv.last.char];
+    const pick: SkillId = sv.last.skills[sv.last.char] ?? c.skill;
     const charOk = sv.chars.includes(sv.last.char);
     const biomeOk = sv.biomes.includes(sv.last.biome);
     const diffOk = sv.last.difficulty <= sv.stats.cleared;
@@ -575,7 +583,7 @@ export class UI {
                 <span class="k">${t('setup.hp')}</span><span class="v"><span class="meter"><i style="width:${(c.hp / 140) * 100}%"></i></span>${c.hp}</span>
                 <span class="k">${t('setup.speed')}</span><span class="v"><span class="meter"><i style="width:${((c.speed - 5.5) / 2.6) * 100}%"></i></span>${c.speed.toFixed(1)}</span>
                 <span class="k">${t('setup.trait')}</span><span class="v">${t(`c.${sv.last.char}.t`)}</span>
-                <span class="k">${t('setup.skill')}</span><span class="v sk" style="--c:${hex(SKILLS[c.skill].color)}">${icon(c.skill, 15)}<b>${t('sk.' + c.skill)}</b> · ${t('sk.cd', SKILLS[c.skill].cd)}<small>${t(`sk.${c.skill}.d`)}</small></span>
+                <span class="k">${t('setup.skill')}</span><span class="v sk" style="--c:${hex(SKILLS[pick].color)}"><span class="skpick">${[c.skill, c.alt].map((id) => `<button class="f ${id === pick ? 'on' : ''}" style="--c:${hex(SKILLS[id].color)}" data-act="pick-skill" data-arg="${id}">${icon(id, 15)}${t('sk.' + id)}</button>`).join('')}</span>${t('sk.cd', SKILLS[pick].cd)}<small>${t(`sk.${pick}.d`)}</small></span>
               </div>
             </div>
           </div>
@@ -650,7 +658,7 @@ export class UI {
         ${sec(t('tag.weapon'))}${WEAPON_IDS.map((id) => item(id, hex(WEAPONS[id].color), t('w.' + id), t(`w.${id}.d`), `<div class="reward">${icon('up', 12)}${t(`w.${id}.e`)} — ${t('p.' + WEAPONS[id].evo)}</div>`)).join('')}
         ${sec(t('tag.passive'))}${PASSIVE_IDS.map((id) => item(id, hex(PASSIVES[id].color), t('p.' + id), passiveText(id, 1))).join('')}
         ${sec(t('tag.relic'))}${(Object.keys(RELIC_COLORS) as (keyof typeof RELIC_COLORS)[]).map((id) => item(id, hex(RELIC_COLORS[id]), t('r.' + id), t(`r.${id}.d`))).join('')}
-        ${sec(t('setup.skill'))}${CHAR_IDS.map((id) => { const sk = SKILLS[CHARS[id].skill]; return item(sk.id, hex(sk.color), t('sk.' + sk.id), t(`sk.${sk.id}.d`), `<div class="reward" style="color:var(--mute)">${icon(id, 12)}${t('c.' + id)} · ${t('sk.cd', sk.cd)}</div>`); }).join('')}
+        ${sec(t('setup.skill'))}${CHAR_IDS.flatMap((id) => [CHARS[id].skill, CHARS[id].alt].map((sid) => { const sk = SKILLS[sid]; return item(sk.id, hex(sk.color), t('sk.' + sk.id), t(`sk.${sk.id}.d`), `<div class="reward" style="color:var(--mute)">${icon(id, 12)}${t('c.' + id)} · ${t('sk.cd', sk.cd)}</div>`); })).join('')}
         ${sec(t('hud.kills'))}${ENEMY_KINDS.map((id) => item('skull', ENEMY_COLOR[id], t('e.' + id), t(`e.${id}.d`), `<div class="reward" style="color:var(--mute)">${icon('heart', 12)}${ENEMIES[id].hp}</div>`)).join('')}
       </div>`;
     }
@@ -869,7 +877,7 @@ export class UI {
       this.h.dashbtn.classList.toggle('empty', p.dashCharges === 0);
     });
     // signature ability
-    const sk = SKILLS[sim.char.skill];
+    const sk = SKILLS[sim.skill];
     this.set('skid', sk.id, () => {
       const col = hex(sk.color);
       this.h.skic.innerHTML = icon(sk.id, 20);
@@ -1195,7 +1203,7 @@ export class UI {
   private buildHtml(sim: Sim): string {
     const p = sim.player;
     const rows: string[] = [];
-    const sk = SKILLS[sim.char.skill];
+    const sk = SKILLS[sim.skill];
     rows.push(`<h4>${t('setup.skill')}</h4>`);
     rows.push(`<div class="row"><span class="slot" style="--c:${hex(sk.color)}">${icon(sk.id, 22)}</span><div style="min-width:0"><div class="nm">${t('sk.' + sk.id)} · ${t('sk.cd', Math.round(sim.skillCooldown() * 10) / 10)}</div><div class="ds">${t(`sk.${sk.id}.d`)}</div></div></div>`);
     rows.push(`<h4>${t('tag.weapon')}</h4>`);
