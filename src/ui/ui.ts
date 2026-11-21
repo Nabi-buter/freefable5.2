@@ -816,6 +816,7 @@ export class UI {
       <div class="banner"><div class="line" data-h="banner"></div></div>
       <div class="cine" data-h="cine"></div>
       <div class="tipline" data-h="tip"></div>
+      <div class="lore" data-h="lore"></div>
       <div class="minimap"><canvas width="190" height="190" data-h="mini"></canvas></div>
       <div class="stick" data-h="stick"><i data-h="knob"></i></div>
       <button class="dashbtn" data-h="dashbtn">${icon('dash', 34)}</button>
@@ -882,6 +883,24 @@ export class UI {
     this.h.banner.className = 'line';
   }
 
+  /** a line of the island's story, shown softly for a few seconds */
+  lore(key: string) {
+    // wait until any choice screen has closed (shown from updateHud)
+    this.pendingLore = key;
+  }
+  private pendingLore = '';
+  private showLore(key: string) {
+    const el = this.h.lore;
+    if (!el) return;
+    el.textContent = t(key);
+    el.classList.remove('on');
+    void el.offsetWidth;
+    el.classList.add('on');
+    clearTimeout(this.loreT);
+    this.loreT = window.setTimeout(() => el.classList.remove('on'), 7000);
+  }
+  private loreT = 0;
+
   announce(key: string, tone: 'info' | 'warn' | 'good') {
     const el = this.h.banner;
     el.textContent = t(key);
@@ -892,6 +911,11 @@ export class UI {
   }
 
   updateHud(sim: Sim, dt: number, fps: number) {
+    if (this.pendingLore && this.modal === null && sim.pending.length === 0) {
+      const k = this.pendingLore;
+      this.pendingLore = '';
+      this.showLore(k);
+    }
     const p = sim.player;
     const st = p.st;
     // xp

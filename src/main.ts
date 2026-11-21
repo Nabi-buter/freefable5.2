@@ -445,7 +445,10 @@ class App implements UIHost {
       else if (e.t === 'dash') this.input.rumble(0, 0.35, 70);
       else if (e.t === 'skill') this.input.rumble(0.7, 0.9, 260);
       else if (e.t === 'levelup') this.input.rumble(0.25, 0.5, 120);
-      else if (e.t === 'beaconLit') this.input.rumble(0.8, 0.8, 420);
+      else if (e.t === 'beaconLit') {
+        this.input.rumble(0.8, 0.8, 420);
+        if (sim.stats.loops === 0) this.ui.lore(`lore.${sim.world.biome.id}.${Math.min(5, e.count)}`);
+      }
       else if (e.t === 'bossPhase' || e.t === 'bossDie') this.input.rumble(1, 0.8, 600);
       else if (e.t === 'death') this.input.rumble(1, 1, 700);
       else if (e.t === 'explode' && e.hostile) {
