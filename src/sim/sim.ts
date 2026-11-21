@@ -599,7 +599,7 @@ export class Sim {
     // past the 18 minute mark the night turns lethal, so no vigil can stall forever
     const late = Math.max(0, this.time / 60 - 18);
     const I = this.intensity();
-    const mult = (1 + 0.04 * I) * this.curve(0.6, 0.2) * (1 + late * 0.15) * this.diff.dmg;
+    const mult = (1 + 0.04 * I) * this.curve(0.6, 0.2) * (1 + late * 0.15) * this.diff.dmg * (this.skill === 'reflect' && p.skillT > 0 ? 0.5 : 1);
     const d = Math.max(1, Math.round(dmg * mult - p.st.armor));
     p.hp -= d;
     p.iframe = 0.55;
@@ -796,7 +796,7 @@ export class Sim {
       }
     } else {
       const k = 1 - Math.exp(-16 * dt);
-      const sp = st.speed * (p.slowT > 0 ? 0.62 : 1) * (p.skillT > 0 && this.skill === 'cinderstep' ? 1.45 : 1) * (p.glowT > 0 ? 1.18 : 1);
+      const sp = st.speed * (p.slowT > 0 ? 0.62 : 1) * (p.skillT > 0 ? (this.skill === 'cinderstep' ? 1.45 : this.skill === 'whirl' ? 1.2 : 1) : 1) * (p.glowT > 0 ? 1.18 : 1);
       p.vx += (mx * sp - p.vx) * k;
       p.vz += (mz * sp - p.vz) * k;
     }

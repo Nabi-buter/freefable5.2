@@ -120,6 +120,7 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   giveChar('frostweaver', win);
   giveChar('ashwalker', win && diff >= 1);
   giveChar('tinker', p.level >= 30);
+  giveChar('moonknight', Object.values(st.winsByChar).filter((n) => (n ?? 0) > 0).length >= 3);
   giveChar('stargazer', p.weapons.filter((w) => w.level >= EVOLVED_LEVEL).length >= 2);
   const unlockedBiomes: BiomeId[] = [];
   const giveBiome = (b: BiomeId, cond: boolean) => {

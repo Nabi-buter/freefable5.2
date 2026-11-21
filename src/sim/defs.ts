@@ -308,8 +308,8 @@ export const RELIC_COLORS: Record<RelicId, number> = {
 };
 
 // ---------------------------------------------------------------- characters
-export type CharId = 'kindler' | 'stormcaller' | 'warden' | 'frostweaver' | 'ashwalker' | 'stargazer' | 'tinker';
-export const CHAR_IDS: CharId[] = ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer', 'tinker'];
+export type CharId = 'kindler' | 'stormcaller' | 'warden' | 'frostweaver' | 'ashwalker' | 'stargazer' | 'tinker' | 'moonknight';
+export const CHAR_IDS: CharId[] = ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer', 'tinker', 'moonknight'];
 
 export interface CharDef {
   id: CharId;
@@ -331,7 +331,7 @@ export interface CharDef {
 }
 
 // ---------------------------------------------------------------- signature abilities
-export type SkillId = 'flare' | 'tempest' | 'bulwark' | 'deepfreeze' | 'cinderstep' | 'starcall' | 'pyre' | 'blink' | 'sanctuary' | 'vortex' | 'effigy' | 'stasis' | 'overclock' | 'barrage';
+export type SkillId = 'flare' | 'tempest' | 'bulwark' | 'deepfreeze' | 'cinderstep' | 'starcall' | 'pyre' | 'blink' | 'sanctuary' | 'vortex' | 'effigy' | 'stasis' | 'overclock' | 'barrage' | 'reflect' | 'whirl';
 export interface SkillDef {
   id: SkillId;
   /** cooldown, seconds */
@@ -353,6 +353,8 @@ export const SKILLS: Record<SkillId, SkillDef> = {
   stasis: { id: 'stasis', cd: 30, color: 0xe0d0ff },
   overclock: { id: 'overclock', cd: 22, color: 0xffd070 },
   barrage: { id: 'barrage', cd: 18, color: 0xffb070 },
+  reflect: { id: 'reflect', cd: 20, color: 0xd8e8ff },
+  whirl: { id: 'whirl', cd: 16, color: 0x9feaff },
 };
 
 export const CHARS: Record<CharId, CharDef> = {
@@ -363,6 +365,7 @@ export const CHARS: Record<CharId, CharDef> = {
   ashwalker: { id: 'ashwalker', weapon: 'trail', hp: 95, speed: 7.7, armor: 0, might: 1.1, haste: 1, area: 1, xp: 1, dashCharges: 2, skill: 'cinderstep', alt: 'effigy', cloak: 0x3a2d33, accent: 0xff5a2a },
   stargazer: { id: 'stargazer', weapon: 'starfall', hp: 78, speed: 7.2, armor: 0, might: 0.92, haste: 1, area: 1.12, xp: 1, dashCharges: 1, skill: 'starcall', alt: 'stasis', cloak: 0x2b2a5c, accent: 0xffe08a },
   tinker: { id: 'tinker', weapon: 'totem', hp: 95, speed: 7.2, armor: 1, might: 1, haste: 1.08, area: 1, xp: 1, dashCharges: 1, skill: 'overclock', alt: 'barrage', cloak: 0x5a4030, accent: 0xffd070 },
+  moonknight: { id: 'moonknight', weapon: 'glaive', hp: 115, speed: 7.0, armor: 1, might: 1.05, haste: 1, area: 1, xp: 1, dashCharges: 1, skill: 'reflect', alt: 'whirl', cloak: 0x34405e, accent: 0xd8e8ff },
 };
 
 // ---------------------------------------------------------------- difficulty

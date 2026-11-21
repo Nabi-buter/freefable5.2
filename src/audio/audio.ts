@@ -427,6 +427,13 @@ export class AudioEngine {
               this.noise(0.9, { type: 'bandpass', freq: 6400, to: 1800, q: 2, vol: 0.12, rev: 0.6 });
               this.tone(110, 0.6, { to: 50, vol: 0.16 });
               break;
+            case 'reflect':
+              this.tone(1200, 0.5, { type: 'triangle', to: 1800, vol: 0.05, rev: 0.6 });
+              this.tone(1800, 0.5, { type: 'sine', to: 2400, vol: 0.03, rev: 0.6 });
+              break;
+            case 'whirl':
+              this.noise(1.0, { type: 'bandpass', freq: 600, to: 1800, q: 2, vol: 0.12 });
+              break;
             case 'overclock':
               this.tone(220, 0.6, { type: 'sawtooth', to: 880, vol: 0.05 });
               this.tone(330, 0.6, { type: 'square', to: 1320, vol: 0.025 });

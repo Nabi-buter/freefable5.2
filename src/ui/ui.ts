@@ -588,7 +588,7 @@ export class UI {
         <div class="head"><h1>${t('setup.title')}</h1><span class="purse">${icon('cinder', 18)}${fmtNum(sv.cinders)}</span></div>
         <div class="setup-body">
           <div class="setup-col">
-            <div><div class="group-label">${t('setup.char')}</div><div class="pick-grid seven">${chars}</div></div>
+            <div><div class="group-label">${t('setup.char')}</div><div class="pick-grid eight">${chars}</div></div>
             <div class="panel detail">
               <h2 style="color:${hex(c.accent)}">${icon(sv.last.char, 30)}<span style="color:var(--text)">${t('c.' + sv.last.char)}</span></h2>
               <p>${t(`c.${sv.last.char}.d`)}</p>

@@ -777,6 +777,13 @@ export class GameView {
               this.addShake(0.4);
               this.flash = Math.max(this.flash, 0.3);
               break;
+            case 'reflect':
+              this.ring(ev.x, ev.z, 0.3, ev.r, 0.4, 1.4, 1.6, 2);
+              this.burst(ev.x, y + 1, ev.z, 30, 6, 0.5, 0.45, 1.6, 1.8, 2.2, 0.8, 0, 2);
+              break;
+            case 'whirl':
+              this.ring(ev.x, ev.z, 0.3, ev.r, 0.3, 0.9, 1.8, 2);
+              break;
             case 'overclock':
               this.ring(ev.x, ev.z, 0.3, 5, 0.35, 2.2, 1.6, 0.5);
               this.burst(ev.x, y + 1, ev.z, 36, 7, 0.5, 0.45, 2.4, 1.8, 0.6, 1, 2, 2);
@@ -1135,6 +1142,16 @@ export class GameView {
         dec.add(DECAL.ring, p.skillX, p.skillZ, 2.6, 2.0, 0.7, 0.2, 0.7 * f);
         for (let q = 0; q < 3; q++) if (Math.random() < dt * 60) {
           this.sparks.spawn(p.skillX + (Math.random() - 0.5) * 0.7, y + 0.3 + Math.random() * 1.8, p.skillZ + (Math.random() - 0.5) * 0.7, 0, 2.5 + Math.random() * 2, 0, 0.6, 0.7, 3, 1.3, 0.3, { drag: 1 });
+        }
+      } else if (sim.skill === 'reflect') {
+        const R = 3.6 * p.st.area, f = Math.min(1, p.skillT * 2);
+        dec.add(DECAL.ring, p.x, p.z, R, 0.6 * f, 0.7 * f, 0.9 * f, 0.8);
+      } else if (sim.skill === 'whirl') {
+        const R = 3.8 * p.st.area, a = time * 14;
+        dec.add(DECAL.ring, p.x, p.z, R, 0.35, 0.8, 1.0, 0.7);
+        for (let q = 0; q < 2; q++) {
+          const aa = a + q * Math.PI, x = p.x + Math.cos(aa) * R * 0.85, z = p.z + Math.sin(aa) * R * 0.85;
+          this.sparks.spawn(x, H(x, z) + 0.8, z, -Math.sin(aa) * 4, 0.5, Math.cos(aa) * 4, 0.25, 0.45, 1.2, 2.4, 2.8, { drag: 2 });
         }
       } else if (sim.skill === 'overclock' && Math.random() < dt * 40) {
         this.sparks.spawn(p.x + (Math.random() - 0.5), H(p.x, p.z) + 0.6 + Math.random(), p.z + (Math.random() - 0.5), 0, 1.5, 0, 0.35, 0.4, 2.6, 2.0, 0.6, { drag: 1 });

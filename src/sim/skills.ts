@@ -202,6 +202,19 @@ export function castSkill(sim: Sim): boolean {
       p.skillX = 0;
       break;
     }
+    case 'reflect': {
+      // a mirror of moonlight: hostile shots turn back on their makers, and blows land at half strength
+      radius = 3.6 * area;
+      p.skillT = 4;
+      break;
+    }
+    case 'whirl': {
+      // spin through the horde with the moon on your blade
+      radius = 3.8 * area;
+      p.skillT = 3;
+      p.skillAcc = 0;
+      break;
+    }
     case 'cinderstep': {
       radius = 3;
       p.skillT = 4.5;
@@ -278,6 +291,25 @@ export function updateSkill(sim: Sim, dt: number) {
           if (hit[i].alive) sim.freeze(hit[i], 1.6);
         }
         sim.events.push({ t: 'explode', x: p.skillX, z: p.skillZ, r: 4.8 * area, c: 0x9fd8ff, hostile: false });
+      }
+    } else if (id === 'reflect') {
+      const R = 3.6 * area;
+      for (const b of sim.eprojs) {
+        if (!b.alive) continue;
+        if ((b.x - p.x) ** 2 + (b.z - p.z) ** 2 > R * R) continue;
+        b.alive = false;
+        const e = sim.nearest(b.x, b.z, 16);
+        const dx = e ? e.x - b.x : -b.vx, dz = e ? e.z - b.z : -b.vz;
+        const d = Math.hypot(dx, dz) || 1;
+        const dmg = (30 + 6 * L) * (sim.awakened() ? 1.3 : 1);
+        sim.projs.push({ id: sim.id(), kind: 'ember', weapon: 'glaive', x: b.x, z: b.z, vx: (dx / d) * 20, vz: (dz / d) * 20, life: 1.2, maxLife: 1.2, r: 0.5, dmg, pierce: 1, hits: [], target: null, evolved: false, phase: 0, spin: 0, alive: true });
+      }
+    } else if (id === 'whirl') {
+      p.skillAcc -= dt;
+      if (p.skillAcc <= 0) {
+        p.skillAcc = 0.25;
+        const list = sim.near(p.x, p.z, 3.8 * area);
+        for (let i = 0; i < list.length; i++) strike(sim, list[i], 12 + 2.6 * L, 0.06, 7);
       }
     } else if (id === 'barrage') {
       p.skillAcc -= dt;

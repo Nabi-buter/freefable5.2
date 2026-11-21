@@ -75,7 +75,7 @@ describe('simulation', () => {
     expect(first).toEqual(snapshot);
   }, 60000);
   it('every signature ability fires, goes on cooldown and comes back', () => {
-    for (const c of ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer', 'tinker'] as const) for (const alt of [false, true]) {
+    for (const c of ['kindler', 'stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer', 'tinker', 'moonknight'] as const) for (const alt of [false, true]) {
       const sim = new Sim({ seed: 21, char: c, difficulty: 0, biome: 'ashwood', meta: {}, skill: alt ? CHARS[c].alt : undefined });
       expect(sim.skill).toBe(alt ? CHARS[c].alt : CHARS[c].skill);
       const input = { mx: 1, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false, skill: false };
