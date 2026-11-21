@@ -175,7 +175,7 @@ const FinalShader = {
 const AFFIX_COLOR: Record<number, string> = { 1: '#6cf2ff', 2: '#7dff9b', 3: '#ff6a5a', 4: '#ffe36b', 5: '#c8d2e6' };
 
 const WCOL: Record<WeaponId, [number, number, number]> = {
-  ember: [1.0, 0.5, 0.15], wisps: [0.4, 0.9, 1.0], nova: [1.0, 0.6, 0.2], arc: [0.6, 0.8, 1.0], starfall: [1.0, 0.85, 0.45], sigil: [0.78, 0.6, 1.0], sprite: [1.0, 0.9, 0.55],
+  ember: [1.0, 0.5, 0.15], wisps: [0.4, 0.9, 1.0], nova: [1.0, 0.6, 0.2], arc: [0.6, 0.8, 1.0], starfall: [1.0, 0.85, 0.45], sigil: [0.78, 0.6, 1.0], sprite: [1.0, 0.9, 0.55], totem: [1.0, 0.7, 0.4],
   lance: [1.0, 0.95, 0.7], frost: [0.55, 0.9, 1.0], darts: [0.75, 0.55, 1.0], trail: [1.0, 0.4, 0.12], aura: [1.0, 0.85, 0.5], glaive: [0.8, 0.88, 1.0],
 };
 
@@ -304,7 +304,7 @@ export class GameView {
     this.iGlaive = new Inst(blade, white(), 40, true);
     this.iBullet = new Inst(new THREE.IcosahedronGeometry(0.5, 1), white(), 700, true);
     this.iWisp = new Inst(new THREE.IcosahedronGeometry(0.5, 1), white(), 48, true);
-    this.iMeteor = new Inst(new THREE.IcosahedronGeometry(0.55, 1), white(), 40, true);
+    this.iMeteor = new Inst(new THREE.IcosahedronGeometry(0.55, 1), white(), 64, true);
     this.pickupMat = makeWorldMat();
     this.iGem = new Inst(G.geoGem(), this.pickupMat, 700, true);
     this.iHeart = new Inst(G.geoHeart(), this.pickupMat, 40, true);
@@ -1209,6 +1209,18 @@ export class GameView {
           const y = H(z.x, z.z) + 0.8 + hgt;
           this.iMeteor.add(mx, y, mz, time * 5, 1.5, 1.5, 1.5, 3.6, 2.4, 0.8);
           for (let q = 0; q < 2; q++) this.sparks.spawn(mx, y, mz, (Math.random() - 0.5) * 2, 2 + Math.random() * 3, (Math.random() - 0.5) * 2, 0.4, 0.85, 3.2, 1.8, 0.4, { size1: 0.1 });
+          break;
+        }
+        case 'totem': {
+          // a small stone post with a flame on top; flickers out in its last second
+          const y = H(z.x, z.z);
+          const life = Math.min(1, (z.dur - z.t) * 1.2) * Math.min(1, z.t * 5);
+          dec.add(DECAL.ring, z.x, z.z, 0.9, 1.2 * life, 0.7 * life, 0.3 * life, 0.8);
+          dec.add(DECAL.glow, z.x, z.z, 2.2, 0.8, 0.45, 0.15, 0.35 * life);
+          this.iMeteor.add(z.x, y + 0.7, z.z, 0, 0.32, 0.9 * Math.max(0.2, life), 0.32, 0.5, 0.42, 0.38);
+          const fy = y + 1.5 + Math.sin(time * 9 + z.id) * 0.05;
+          this.iMeteor.add(z.x, fy, z.z, time * 3, 0.28 * life, 0.28 * life, 0.28 * life, z.evolved ? 3.2 : 2.6, z.evolved ? 2.2 : 1.4, 0.4);
+          if (Math.random() < dt * 14 * life) this.sparks.spawn(z.x, fy + 0.1, z.z, 0, 1.2 + Math.random(), 0, 0.5, 0.3, 3, 1.4, 0.4, { drag: 0.8 });
           break;
         }
         case 'spore': {

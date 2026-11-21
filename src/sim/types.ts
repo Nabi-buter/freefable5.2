@@ -184,7 +184,7 @@ export interface EProj {
   alive: boolean;
 }
 
-export type ZoneKind = 'fire' | 'meteor' | 'slam' | 'crater' | 'charge' | 'vent' | 'frost' | 'sigil' | 'spore';
+export type ZoneKind = 'fire' | 'meteor' | 'slam' | 'crater' | 'charge' | 'vent' | 'frost' | 'sigil' | 'spore' | 'totem';
 
 /** a summoned light belonging to the 'sprite' weapon */
 export interface Sprite {

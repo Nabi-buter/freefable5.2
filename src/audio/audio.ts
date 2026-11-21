@@ -258,6 +258,12 @@ export class AudioEngine {
                 this.noise(0.38, { freq: 2200, to: 180, vol: 0.12, rev: 0.25 });
               }
               break;
+            case 'totem':
+              if (this.ok('s.totem', 0.3)) {
+                this.tone(260, 0.2, { type: 'triangle', to: 180, vol: 0.06 });
+                this.noise(0.15, { type: 'bandpass', freq: 900, vol: 0.05 });
+              }
+              break;
             case 'sprite':
               if (this.ok('s.sprite', 0.09)) this.tone(1500 + Math.random() * 500, 0.07, { type: 'triangle', to: 2400, vol: 0.022 });
               break;

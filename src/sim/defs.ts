@@ -39,8 +39,8 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
 };
 
 // ---------------------------------------------------------------- weapons
-export type WeaponId = 'ember' | 'wisps' | 'nova' | 'arc' | 'starfall' | 'lance' | 'frost' | 'darts' | 'trail' | 'aura' | 'glaive' | 'sigil' | 'sprite';
-export const WEAPON_IDS: WeaponId[] = ['ember', 'wisps', 'nova', 'arc', 'starfall', 'lance', 'frost', 'darts', 'trail', 'aura', 'glaive', 'sigil', 'sprite'];
+export type WeaponId = 'ember' | 'wisps' | 'nova' | 'arc' | 'starfall' | 'lance' | 'frost' | 'darts' | 'trail' | 'aura' | 'glaive' | 'sigil' | 'sprite' | 'totem';
+export const WEAPON_IDS: WeaponId[] = ['ember', 'wisps', 'nova', 'arc', 'starfall', 'lance', 'frost', 'darts', 'trail', 'aura', 'glaive', 'sigil', 'sprite', 'totem'];
 
 export interface WStats {
   /** base damage per hit (or per tick) */
@@ -124,6 +124,19 @@ export const WEAPONS: Record<WeaponId, WeaponDef> = {
       L(34, 1.2, 7, 0, 8.5, 0, 0),
       L(40, 1.05, 9, 0, 9, 0, 0),
       L(52, 0.8, 14, 0, 10, 0, 0), // Tempest: forks from every hit
+    ],
+  },
+  // planted beacon-totems that fire bolts at whatever comes near (cd = how often one is planted)
+  totem: {
+    id: 'totem', evo: 'velocity', color: 0xffb070,
+    levels: [
+      L(12, 5.0, 1, 0, 0.35, 7, 20),
+      L(14, 4.8, 1, 0, 0.35, 8, 20),
+      L(16, 4.5, 2, 0, 0.38, 8, 21),
+      L(19, 4.2, 2, 1, 0.38, 9, 22),
+      L(22, 4.0, 2, 1, 0.42, 10, 22),
+      L(26, 3.6, 3, 1, 0.42, 10, 24),
+      L(34, 3.0, 3, 3, 0.5, 12, 28), // Watchfire: volleys twice as often and bolts pierce
     ],
   },
   // little lights that hover by the bearer and dart at whatever comes close

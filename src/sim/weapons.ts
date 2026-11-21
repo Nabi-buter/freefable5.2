@@ -115,6 +115,24 @@ export function updateWeapons(sim: Sim, dt: number, input: InputState) {
         }
         break;
       }
+      case 'totem': {
+        w.t -= dt;
+        if (w.t <= 0) {
+          w.t += cd;
+          if (w.t < 0) w.t = 0;
+          // at most three standing (more with Multishot); the oldest crumbles first
+          const cap = 3 + st.amount;
+          const mine = sim.zones.filter((z) => z.alive && z.kind === 'totem');
+          for (let i = 0; i < mine.length - cap + 1; i++) mine[i].alive = false;
+          const zn = zone(sim, 'totem', p.x, p.z, 11, s.dur * st.dur, s.dmg, 'totem', evo);
+          zn.tick = 0.4;
+          zn.dx = s.count;
+          zn.dz = s.speed * st.projSpeed;
+          zn.len = s.area;
+          sim.events.push({ t: 'shoot', w: 'totem', x: p.x, z: p.z });
+        }
+        break;
+      }
       case 'sprite': {
         const n = s.count + st.amount;
         const list = sim.sprites;
@@ -541,6 +559,26 @@ export function updateZones(sim: Sim, dt: number) {
             sim.blasts.push({ x: z.x, z: z.z, r: z.r * 1.4, dmg: z.dmg * 2.5, w: z.weapon, kb: 6, burn: z.dmg * 0.3, c: 0xff6a2a });
           }
         }
+        break;
+      }
+      case 'totem': {
+        // dx = bolts per volley, dz = bolt speed, len = bolt radius
+        z.tick -= dt;
+        if (z.tick <= 0) {
+          z.tick = z.evolved ? 0.38 : 0.75;
+          const tw = sim.weapon('totem');
+          const pierce = tw ? wstats(tw).pierce : 0;
+          let skip: Set<number> | undefined;
+          for (let k = 0; k < z.dx; k++) {
+            const e = sim.nearest(z.x, z.z, z.r, skip);
+            if (!e) break;
+            (skip ??= new Set()).add(e.id);
+            const dx = e.x - z.x, dz = e.z - z.z;
+            const d = Math.hypot(dx, dz) || 1;
+            spawnProj(sim, 'ember', 'totem', z.x + (dx / d) * 0.6, z.z + (dz / d) * 0.6, (dx / d) * z.dz, (dz / d) * z.dz, 1.0, z.len, z.dmg, pierce, false);
+          }
+        }
+        if (z.t >= z.dur) z.alive = false;
         break;
       }
       case 'sigil': {
