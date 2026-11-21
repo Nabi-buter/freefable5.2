@@ -201,6 +201,11 @@ export class Sim {
     return k * (1 + late * Math.max(0, prog));
   }
 
+  /** temporary attack-speed multiplier (Overclock) */
+  hasteBoost(): number {
+    return this.skill === 'overclock' && this.player.skillT > 0 ? (this.awakened() ? 1.9 : 1.7) : 1;
+  }
+
   /** after the third beacon the signature ability awakens: more damage and reach */
   awakened(): boolean {
     return this.stats.beacons >= 3 || this.stats.loops > 0;

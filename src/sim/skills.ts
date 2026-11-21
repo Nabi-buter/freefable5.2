@@ -187,6 +187,21 @@ export function castSkill(sim: Sim): boolean {
       for (const b of sim.eprojs) b.alive = false;
       break;
     }
+    case 'overclock': {
+      // every weapon runs hot for a while; totems and sprites included
+      radius = 3;
+      p.skillT = 7;
+      for (const w of p.weapons) w.t = Math.min(w.t, 0.05);
+      break;
+    }
+    case 'barrage': {
+      // a spiral of bolts thrown out over a second and a half
+      radius = 12;
+      p.skillT = 1.5;
+      p.skillAcc = 0;
+      p.skillX = 0;
+      break;
+    }
     case 'cinderstep': {
       radius = 3;
       p.skillT = 4.5;
@@ -263,6 +278,16 @@ export function updateSkill(sim: Sim, dt: number) {
           if (hit[i].alive) sim.freeze(hit[i], 1.6);
         }
         sim.events.push({ t: 'explode', x: p.skillX, z: p.skillZ, r: 4.8 * area, c: 0x9fd8ff, hostile: false });
+      }
+    } else if (id === 'barrage') {
+      p.skillAcc -= dt;
+      while (p.skillAcc <= 0) {
+        p.skillAcc += 0.05;
+        p.skillX += 1;
+        const a = p.skillX * 0.7;
+        const sp = 18;
+        const dmg = (24 + 5 * L) * (sim.awakened() ? 1.3 : 1);
+        sim.projs.push({ id: sim.id(), kind: 'ember', weapon: 'totem', x: p.x, z: p.z, vx: Math.cos(a) * sp, vz: Math.sin(a) * sp, life: 0.9, maxLife: 0.9, r: 0.45 * area, dmg, pierce: 2, hits: [], target: null, evolved: false, phase: 0, spin: 0, alive: true });
       }
     } else if (id === 'effigy') {
       p.skillAcc -= dt;

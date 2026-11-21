@@ -27,7 +27,7 @@ export function updateWeapons(sim: Sim, dt: number, input: InputState) {
     const w = p.weapons[wi];
     const s = wstats(w);
     const evo = w.level >= EVOLVED_LEVEL;
-    const cd = s.cd / st.haste;
+    const cd = s.cd / (st.haste * sim.hasteBoost());
     switch (w.id) {
       case 'ember': {
         w.t -= dt;

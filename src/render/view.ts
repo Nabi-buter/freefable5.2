@@ -777,6 +777,14 @@ export class GameView {
               this.addShake(0.4);
               this.flash = Math.max(this.flash, 0.3);
               break;
+            case 'overclock':
+              this.ring(ev.x, ev.z, 0.3, 5, 0.35, 2.2, 1.6, 0.5);
+              this.burst(ev.x, y + 1, ev.z, 36, 7, 0.5, 0.45, 2.4, 1.8, 0.6, 1, 2, 2);
+              this.fovKick = Math.max(this.fovKick, 2.5);
+              break;
+            case 'barrage':
+              this.ring(ev.x, ev.z, 0.3, 4, 0.3, 2.4, 1.4, 0.4);
+              break;
             case 'pyre':
               this.ring(ev.x, ev.z, 0.5, ev.r, 0.4, 3, 1.2, 0.3);
               this.burst(ev.x, y + 0.8, ev.z, 50, 7, 0.6, 0.55, 3, 1.2, 0.3, 0.8, 2, 2);
@@ -1128,6 +1136,8 @@ export class GameView {
         for (let q = 0; q < 3; q++) if (Math.random() < dt * 60) {
           this.sparks.spawn(p.skillX + (Math.random() - 0.5) * 0.7, y + 0.3 + Math.random() * 1.8, p.skillZ + (Math.random() - 0.5) * 0.7, 0, 2.5 + Math.random() * 2, 0, 0.6, 0.7, 3, 1.3, 0.3, { drag: 1 });
         }
+      } else if (sim.skill === 'overclock' && Math.random() < dt * 40) {
+        this.sparks.spawn(p.x + (Math.random() - 0.5), H(p.x, p.z) + 0.6 + Math.random(), p.z + (Math.random() - 0.5), 0, 1.5, 0, 0.35, 0.4, 2.6, 2.0, 0.6, { drag: 1 });
       } else if (sim.skill === 'cinderstep' && Math.random() < dt * 60) {
         this.sparks.spawn(p.x, H(p.x, p.z) + 0.4, p.z, (Math.random() - 0.5) * 2, 1.5 + Math.random() * 2, (Math.random() - 0.5) * 2, 0.4, 0.5, 3, 1.3, 0.3, { drag: 1 });
       }
