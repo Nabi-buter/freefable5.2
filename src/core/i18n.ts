@@ -138,6 +138,8 @@ const S: Record<string, Pair> = {
   'boon.gamble.lose': ['동전이 등을 돌렸다…', 'The coin turns away…'],
   'rec.history': ['최근 원정', 'Recent'],
   'rec.history.none': ['아직 원정 기록이 없습니다.', 'No runs yet.'],
+  'ann.awaken': ['봉화가 타오른다 — 고유 능력 각성!', 'Beacon lit — your signature awakens!'],
+  'sk.awake': ['봉화 3개를 밝히면 각성: 피해 +30%, 범위 +20%', 'Awakens after three beacons: damage +30%, area +20%'],
   'setup.pacts': ['서약', 'Pacts'],
   'pact.bloodmoon': ['핏빛 달', 'Blood Moon'],
   'pact.bloodmoon.d': ['적 체력 +35%', 'Enemy health +35%'],

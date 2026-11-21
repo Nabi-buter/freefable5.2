@@ -597,7 +597,7 @@ export class UI {
                 <span class="k">${t('setup.hp')}</span><span class="v"><span class="meter"><i style="width:${(c.hp / 140) * 100}%"></i></span>${c.hp}</span>
                 <span class="k">${t('setup.speed')}</span><span class="v"><span class="meter"><i style="width:${((c.speed - 5.5) / 2.6) * 100}%"></i></span>${c.speed.toFixed(1)}</span>
                 <span class="k">${t('setup.trait')}</span><span class="v">${t(`c.${sv.last.char}.t`)}</span>
-                <span class="k">${t('setup.skill')}</span><span class="v sk" style="--c:${hex(SKILLS[pick].color)}"><span class="skpick">${[c.skill, c.alt].map((id) => `<button class="f ${id === pick ? 'on' : ''}" style="--c:${hex(SKILLS[id].color)}" data-act="pick-skill" data-arg="${id}">${icon(id, 15)}${t('sk.' + id)}</button>`).join('')}</span>${t('sk.cd', SKILLS[pick].cd)}<small>${t(`sk.${pick}.d`)}</small></span>
+                <span class="k">${t('setup.skill')}</span><span class="v sk" style="--c:${hex(SKILLS[pick].color)}"><span class="skpick">${[c.skill, c.alt].map((id) => `<button class="f ${id === pick ? 'on' : ''}" style="--c:${hex(SKILLS[id].color)}" data-act="pick-skill" data-arg="${id}">${icon(id, 15)}${t('sk.' + id)}</button>`).join('')}</span>${t('sk.cd', SKILLS[pick].cd)}<small>${t(`sk.${pick}.d`)}</small><small style="color:var(--gold)">${t('sk.awake')}</small></span>
               </div>
             </div>
           </div>
@@ -930,6 +930,7 @@ export class UI {
       this.h.skillbtn.classList.toggle('ready', !v);
     });
     this.set('skon', p.skillT > 0 ? 1 : 0, (_, v) => this.h.skill.classList.toggle('active', v === 1));
+    this.set('skaw', sim.awakened() ? 1 : 0, (_, v) => { this.h.skill.classList.toggle('awake', v === 1); this.h.skillbtn.classList.toggle('awake', v === 1); });
     const dev = this.host.input.device;
     this.set('skkey', dev === 'gamepad' ? padLabel(this.save.settings.pad.skill) : dev === 'touch' ? '' : keyLabel(this.save.settings.keys.skill), (el, v) => (el.textContent = String(v)));
     // build icons

@@ -201,6 +201,11 @@ export class Sim {
     return k * (1 + late * Math.max(0, prog));
   }
 
+  /** after the third beacon the signature ability awakens: more damage and reach */
+  awakened(): boolean {
+    return this.stats.beacons >= 3 || this.stats.loops > 0;
+  }
+
   /** where the horde is drawn to: the player, or a burning effigy while one stands */
   lure(): { x: number; z: number } {
     const p = this.player;
@@ -956,7 +961,8 @@ export class Sim {
     for (const bp of this.eprojs) bp.alive = false;
     const pend = makeRelicPending(this);
     if (pend) this.pending.push(pend);
-    if (this.stats.beacons < this.beacons.length) this.events.push({ t: 'announce', key: 'ann.lit', tone: 'good' });
+    if (this.stats.beacons === 3 && this.stats.loops === 0) this.events.push({ t: 'announce', key: 'ann.awaken', tone: 'good' });
+    else if (this.stats.beacons < this.beacons.length) this.events.push({ t: 'announce', key: 'ann.lit', tone: 'good' });
   }
 
   /** cinders earned so far (shown on results; banked into the save) */

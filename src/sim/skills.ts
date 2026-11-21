@@ -12,7 +12,8 @@ import { zone } from './weapons';
 function strike(sim: Sim, e: Enemy, flat: number, frac: number, kb: number) {
   const p = sim.player;
   const share = e.boss ? 0.012 : e.elite ? frac * 0.3 : frac;
-  sim.applyDamage(e, flat * p.st.might + e.maxHp * share, null, false, kb, p.x, p.z);
+  const aw = sim.awakened() ? 1.3 : 1;
+  sim.applyDamage(e, (flat * p.st.might + e.maxHp * share) * aw, null, false, kb, p.x, p.z);
 }
 
 export function skillReady(sim: Sim): boolean {
@@ -24,7 +25,7 @@ export function castSkill(sim: Sim): boolean {
   if (!skillReady(sim)) return false;
   const id: SkillId = sim.skill;
   const L = p.level;
-  const area = p.st.area;
+  const area = p.st.area * (sim.awakened() ? 1.2 : 1);
   p.skillCd = sim.skillCooldown();
   let radius = 0;
   switch (id) {
@@ -214,7 +215,7 @@ export function updateSkill(sim: Sim, dt: number) {
   if (p.glowT > 0) p.glowT -= dt;
   if (p.skillT > 0) {
     p.skillT -= dt;
-    const L = p.level, area = p.st.area;
+    const L = p.level, area = p.st.area * (sim.awakened() ? 1.2 : 1);
     const id = sim.skill;
     if (id === 'pyre') {
       p.skillAcc -= dt;
