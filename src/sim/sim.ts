@@ -903,7 +903,8 @@ export class Sim {
         }
         let cap = 1;
         if (b.guard) for (const g of this.bigs) if (g.alive && g.kind === 'herald') cap = 0.9;
-        b.progress = Math.min(cap, b.progress + dt / 13);
+        // each beacon after the first takes longer to wake (13s, 14.5s, 16s...)
+        b.progress = Math.min(cap, b.progress + dt / (13 + 1.5 * (this.stats.beacons % this.beacons.length)));
         if (b.progress >= 1) this.lightBeacon(i);
       } else if (b.progress > 0) {
         b.progress = Math.max(0, b.progress - dt * 0.015);
