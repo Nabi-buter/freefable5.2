@@ -28,6 +28,8 @@ export interface Settings {
   keys: KeyBinds;
   /** gamepad face-button bindings */
   pad: PadBinds;
+  /** interface size multiplier */
+  uiScale: number;
 }
 
 export interface LifetimeStats {
@@ -112,7 +114,7 @@ export function defaultSave(): SaveData {
       runs: 0, wins: 0, kills: 0, eliteKills: 0, beacons: 0, time: 0, maxLevel: 0, maxCombo: 0, cindersEarned: 0, evolutions: 0,
       bestTime: [0, 0, 0], winsByChar: {}, winsByBiome: {}, cleared: 0, bestLoops: 0, bestEndlessTime: 0,
     },
-    settings: { lang: defaultLang(), quality: defaultQuality(), master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true, reduceFlash: false, colorAssist: false, rumble: true, keys: { ...DEFAULT_BINDS }, pad: { ...DEFAULT_PAD } },
+    settings: { lang: defaultLang(), quality: defaultQuality(), master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true, reduceFlash: false, colorAssist: false, rumble: true, keys: { ...DEFAULT_BINDS }, pad: { ...DEFAULT_PAD }, uiScale: 1 },
     last: { char: 'kindler', biome: 'ashwood', difficulty: 0, endless: false, skills: {}, pacts: [] },
     tutorial: false,
     daily: { date: '', done: false, best: 0, streak: 0 },
@@ -190,6 +192,7 @@ export class SaveStore {
     s.sfx = c01(s.sfx, 0.8);
     s.shake = Number.isFinite(s.shake) ? Math.max(0, Math.min(1.5, s.shake)) : 1;
     s.zoom = Number.isFinite(s.zoom) ? Math.max(0.75, Math.min(1.3, s.zoom)) : 1;
+    s.uiScale = Number.isFinite(s.uiScale) ? Math.max(0.8, Math.min(1.3, s.uiScale)) : 1;
     if (s.lang !== 'ko' && s.lang !== 'en') s.lang = defaultLang();
     if (!['low', 'medium', 'high', 'ultra'].includes(s.quality)) s.quality = 'high';
     s.reduceFlash = !!s.reduceFlash;

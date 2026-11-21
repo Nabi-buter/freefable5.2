@@ -295,6 +295,7 @@ const S: Record<string, Pair> = {
   'set.import.ok': ['세이브를 불러왔습니다', 'Save imported'],
   'set.import.bad': ['올바르지 않은 코드입니다', 'That code is not valid'],
   'set.autoq': ['성능을 위해 그래픽 품질을 낮췄습니다', 'Graphics quality lowered for performance'],
+  'set.uiscale': ['UI 크기', 'Interface size'],
   'set.flash': ['화면 번쩍임 줄이기', 'Reduce screen flashes'],
   'set.assist': ['색각 보조 (적 공격 강조색)', 'Colour assist (high-contrast threats)'],
   'set.rumble': ['진동 (게임패드·터치)', 'Vibration (gamepad / touch)'],

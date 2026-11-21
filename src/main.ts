@@ -97,6 +97,7 @@ class App implements UIHost {
     this.input.rumbleOn = s.rumble;
     this.view.overlay.enabled = true;
     this.view.zoom = s.zoom;
+    document.documentElement.style.setProperty('--ui-scale', String(s.uiScale || 1));
     if (this.view.quality !== s.quality) this.view.setQuality(s.quality);
   }
 

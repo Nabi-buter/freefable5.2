@@ -733,6 +733,7 @@ export class UI {
           ${row(t('set.shake'), range('shake', s.shake, 0, 1.5))}
           ${row(t('set.zoom'), range('zoom', s.zoom, 0.75, 1.3))}
           <div class="set-sec">${t('set.sec.access')}</div>
+          ${row(t('set.uiscale'), range('uiScale', s.uiScale, 0.8, 1.3))}
           ${row(t('set.flash'), seg('reduceFlash', onoff, String(s.reduceFlash)))}
           ${row(t('set.assist'), seg('colorAssist', onoff, String(s.colorAssist)))}
           ${row(t('set.rumble'), seg('rumble', onoff, String(s.rumble)))}
