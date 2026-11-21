@@ -72,7 +72,7 @@ export class UI {
   private settingsFrom: 'title' | 'pause' = 'title';
   private rebinding: BindAction | null = null;
   private padRebinding: PadAction | null = null;
-  private recTab: 'ach' | 'stats' | 'codex' = 'ach';
+  private recTab: 'ach' | 'stats' | 'history' | 'codex' = 'ach';
   private focusIdx = -1;
   private openedAt = 0;
   private banishMode = false;
@@ -660,6 +660,22 @@ export class UI {
         return `<div class="mcard ${done ? 'done' : 'undone'}" style="--c:${done ? '#ffd24a' : '#6d7396'}"><span class="pic">${icon(done ? 'trophy' : 'lock', 22)}</span>
           <div class="body"><div class="nm">${t('a.' + a.id)}</div><div class="ds">${t(`a.${a.id}.d`)}</div><div class="reward">${icon('cinder', 13)}${a.reward}</div></div></div>`;
       }).join('')}</div>`;
+    } else if (this.recTab === 'history') {
+      const hs = sv.history;
+      body = hs.length === 0 ? `<p class="empty">${t('rec.history.none')}</p>` : `<div class="history">${hs.map((r) => {
+        const c = CHARS[r.char];
+        const when = new Date(r.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        const tags = [t('d.' + r.difficulty), r.endless ? `∞ ${r.loops}` : '', r.daily ? t('menu.daily') : '', r.pacts ? `${t('setup.pacts')} ${r.pacts}` : ''].filter(Boolean).join(' · ');
+        const ws = r.weapons.map((w) => `<span class="slot small ${w.endsWith('*') ? 'evo' : ''}" style="--c:${hex(WEAPONS[w.replace('*', '') as keyof typeof WEAPONS].color)}">${icon(w.replace('*', ''), 16)}</span>`).join('');
+        return `<div class="hrow ${r.win ? 'win' : 'loss'}">
+          <span class="hres">${r.win ? icon('crown', 18) : icon('skull', 18)}</span>
+          <span class="hchar" style="color:${hex(c.accent)}">${icon(r.char, 22)}</span>
+          <span class="hmain"><b>${t('c.' + r.char)} · ${t('b.' + r.biome)}</b><small>${tags}</small></span>
+          <span class="hw">${ws}</span>
+          <span class="hnum"><b>${fmtTime(r.time)}</b><small>Lv ${r.level} · ${fmtNum(r.kills)}</small></span>
+          <span class="hwhen">${when}</span>
+        </div>`;
+      }).join('')}</div>`;
     } else if (this.recTab === 'stats') {
       const row = (k: string, v: string) => `<div class="statrow"><span>${k}</span><b>${v}</b></div>`;
       body = `<div class="statlist">
@@ -684,7 +700,7 @@ export class UI {
     this.setScreen('records', `
       <div class="screen shade">
         <div class="head"><h1>${t('rec.title')}</h1><span class="purse">${icon('trophy', 18)}${doneN}/${ACHIEVEMENTS.length}</span></div>
-        <div class="tabs">${tab('ach', t('rec.ach'))}${tab('stats', t('rec.stats'))}${tab('codex', t('rec.codex'))}</div>
+        <div class="tabs">${tab('ach', t('rec.ach'))}${tab('stats', t('rec.stats'))}${tab('history', t('rec.history'))}${tab('codex', t('rec.codex'))}</div>
         <div class="grid-body scroll">${body}</div>
         <div class="foot"><button class="btn ghost f" data-act="title">${t('common.back')}</button></div>
       </div>`);

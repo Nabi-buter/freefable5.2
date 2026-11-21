@@ -187,6 +187,13 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
     }
   }
 
+  save.history.unshift({
+    at: Date.now(), char, skill: sim.skill, biome, difficulty: diff, win, time: sim.time, level: p.level, kills: sim.stats.kills,
+    loops: sim.stats.loops, endless, daily, pacts: sim.pacts.size,
+    weapons: [...p.weapons].sort((a, b) => b.dealt - a.dealt).slice(0, 3).map((w) => w.id + (w.level >= EVOLVED_LEVEL ? '*' : '')),
+  });
+  if (save.history.length > 12) save.history.length = 12;
+
   return {
     win, time: sim.time, level: p.level, kills: sim.stats.kills, beacons: sim.stats.beacons, maxCombo: sim.stats.maxCombo,
     dmgDealt: sim.stats.dmgDealt, cinders, bonus,

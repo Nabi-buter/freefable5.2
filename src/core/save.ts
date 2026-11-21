@@ -52,6 +52,25 @@ export interface LifetimeStats {
   bestEndlessTime: number;
 }
 
+export interface RunRecord {
+  /** unix ms */
+  at: number;
+  char: CharId;
+  skill: SkillId;
+  biome: BiomeId;
+  difficulty: number;
+  win: boolean;
+  time: number;
+  level: number;
+  kills: number;
+  loops: number;
+  endless: boolean;
+  daily: boolean;
+  pacts: number;
+  /** top weapons by damage */
+  weapons: string[];
+}
+
 export interface SaveData {
   v: number;
   cinders: number;
@@ -65,6 +84,8 @@ export interface SaveData {
   tutorial: boolean;
   /** daily vigil record for `date` (UTC) */
   daily: { date: string; done: boolean; best: number; streak: number };
+  /** the most recent runs, newest first (at most 12) */
+  history: RunRecord[];
 }
 
 const KEY = 'cinderwake.save.v1';
@@ -93,6 +114,7 @@ export function defaultSave(): SaveData {
     last: { char: 'kindler', biome: 'ashwood', difficulty: 0, endless: false, skills: {}, pacts: [] },
     tutorial: false,
     daily: { date: '', done: false, best: 0, streak: 0 },
+    history: [],
   };
 }
 
@@ -155,6 +177,8 @@ export class SaveStore {
         if (v === CHARS[c].skill || v === CHARS[c].alt) picks[c] = v as SkillId;
       }
     }
+    if (!Array.isArray(d.history)) d.history = [];
+    d.history = d.history.filter((r) => r && typeof r === 'object' && CHAR_IDS.includes(r.char)).slice(0, 12);
     d.last.skills = picks;
     d.last.pacts = Array.isArray(d.last.pacts) && d.stats.wins > 0 ? [...new Set(d.last.pacts.filter((x) => PACT_IDS.includes(x)))] : [];
     const s = d.settings;

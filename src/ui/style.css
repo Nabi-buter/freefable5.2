@@ -240,6 +240,19 @@ input[type='range']::-moz-range-thumb { width: 1.2em; height: 1.2em; border-radi
 .statline .v.sk { display: block; color: var(--c, #ffa040); line-height: 1.4; }
 .statline .v.sk .ic { vertical-align: -0.15em; margin-right: 0.35em; }
 .statline .v.sk b { color: var(--text); }
+.history { display: flex; flex-direction: column; gap: 0.4em; padding-bottom: 1em; }
+.hrow { display: grid; grid-template-columns: 2em 2.2em 1fr auto auto 7.5em; align-items: center; gap: 0.7em; padding: 0.55em 0.9em; border-radius: 0.8em; background: rgba(18, 22, 48, 0.7); border: 1px solid var(--line); }
+.hrow.win { border-color: rgba(255, 200, 90, 0.45); }
+.hrow .hres { color: var(--mute); display: flex; } .hrow.win .hres { color: var(--gold); }
+.hrow .hchar { display: flex; }
+.hrow .hmain, .hrow .hnum { display: flex; flex-direction: column; min-width: 0; }
+.hrow .hmain b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hrow small { color: var(--mute); font-size: 0.78em; }
+.hrow .hnum { text-align: right; }
+.hrow .hw { display: flex; gap: 0.25em; }
+.hrow .hwhen { color: var(--mute); font-size: 0.78em; text-align: right; }
+.empty { color: var(--mute); text-align: center; margin-top: 3em; }
+@media (max-width: 720px) { .hrow { grid-template-columns: 1.6em 1.8em 1fr auto; } .hrow .hw, .hrow .hwhen { display: none; } }
 .pacts { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5em, 1fr)); gap: 0.4em; }
 .pact { display: flex; flex-direction: column; align-items: flex-start; gap: 0.05em; padding: 0.35em 0.65em; min-width: 0; border-radius: 0.7em; border: 1px solid var(--line); background: rgba(16, 20, 42, 0.6); color: var(--dim); text-align: left; pointer-events: auto; transition: all 0.12s; }
 .pact b { font-size: 0.88em; }

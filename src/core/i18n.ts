@@ -136,6 +136,8 @@ const S: Record<string, Pair> = {
   'boon.gamble.d': ['반반의 확률: 무기 하나가 2레벨 오르거나, 최대 체력의 20%를 잃습니다.', 'Even odds: one weapon gains two levels, or you lose 20% of your max health.'],
   'boon.gamble.win': ['동전이 웃었다 — 무기 강화!', 'The coin smiles — weapon empowered!'],
   'boon.gamble.lose': ['동전이 등을 돌렸다…', 'The coin turns away…'],
+  'rec.history': ['최근 원정', 'Recent'],
+  'rec.history.none': ['아직 원정 기록이 없습니다.', 'No runs yet.'],
   'setup.pacts': ['서약', 'Pacts'],
   'pact.bloodmoon': ['핏빛 달', 'Blood Moon'],
   'pact.bloodmoon.d': ['적 체력 +35%', 'Enemy health +35%'],
