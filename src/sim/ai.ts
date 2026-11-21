@@ -18,6 +18,7 @@ export function initDirector(): DirectorState {
 const UNLOCKS: { kind: EnemyKind; at: number; w: number; only?: string }[] = [
   { kind: 'shade', at: 0, w: 10 },
   { kind: 'skitter', at: 0.75, w: 6 },
+  { kind: 'thief', at: 2.0, w: 0.9 },
   { kind: 'bomber', at: 2.4, w: 2.6 },
   { kind: 'spitter', at: 3.4, w: 2.8 },
   { kind: 'brute', at: 4.6, w: 2.2 },
@@ -277,6 +278,37 @@ export function updateEnemies(sim: Sim, dt: number) {
                 e.stT = 0;
               }
             }
+            break;
+          }
+          case 'thief': {
+            // e.c1 = embers carried. Grab the nearest ember, keep away from the bearer, slip off after a while.
+            const pdx = e.x - p.x, pdz = e.z - p.z;
+            const pd = Math.hypot(pdx, pdz) || 1;
+            let gx = 0, gz = 0, best = 18 * 18;
+            let gem: (typeof sim.pickups)[number] | null = null;
+            for (const k of sim.pickups) {
+              if (!k.alive || k.kind !== 'xp') continue;
+              const d2 = (k.x - e.x) ** 2 + (k.z - e.z) ** 2;
+              if (d2 < best) { best = d2; gem = k; }
+            }
+            if (gem) {
+              const d = Math.sqrt(best) || 1;
+              gx = (gem.x - e.x) / d;
+              gz = (gem.z - e.z) / d;
+              if (d < 0.9) {
+                e.c1 += gem.v;
+                gem.alive = false;
+              }
+            }
+            const fear = pd < 8 ? (8 - pd) / 8 : 0;
+            vx = (gx * (1 - fear) + (pdx / pd) * fear * 1.6) * e.speed;
+            vz = (gz * (1 - fear) + (pdz / pd) * fear * 1.6) * e.speed;
+            if (!gem && fear === 0) {
+              vx = (pdx / pd) * e.speed * 0.6;
+              vz = (pdz / pd) * e.speed * 0.6;
+            }
+            // gone with the loot
+            if (e.t > 32) e.alive = false;
             break;
           }
           case 'bomber': {

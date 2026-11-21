@@ -120,6 +120,19 @@ export function geoShade(): THREE.BufferGeometry {
   ]);
 }
 
+export function geoThief(): THREE.BufferGeometry {
+  const cloak = 0x3a2a4a, dark = 0x1c1426, sack = 0x6a4a2a, glow = 0xffc04a;
+  return merge([
+    part(cone(0.42, 1.1, 7), cloak, { pos: [0, 0.6, 0], jitter: 0.1, sway: (x: number, y: number) => Math.max(0, 0.6 - y) * 0.8 }),
+    part(sph(0.3, 7, 5), dark, { pos: [0.05, 1.2, 0], scl: [1, 1.1, 1] }),
+    part(cone(0.3, 0.45, 6), cloak, { pos: [-0.05, 1.45, 0], rot: [0, 0, 0.35] }),
+    part(sph(0.06, 5, 3), glow, { pos: [0.3, 1.22, 0.1], glow: 3 }),
+    part(sph(0.06, 5, 3), glow, { pos: [0.3, 1.22, -0.1], glow: 3 }),
+    part(lumpy(ico(0.36, 1), 0.12, 61), sack, { pos: [-0.38, 0.95, 0], jitter: 0.12 }),
+    part(sph(0.12, 5, 3), glow, { pos: [-0.38, 1.25, 0], glow: 2.4 }),
+  ]);
+}
+
 export function geoSkitter(): THREE.BufferGeometry {
   const body = 0x12262a, leg = 0x0a1518, eye = 0x9dff5a;
   const parts = [

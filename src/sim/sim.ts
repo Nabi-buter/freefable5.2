@@ -464,6 +464,12 @@ export class Sim {
     if (e.kind === 'rime') {
       this.zones.push({ id: this.id(), kind: 'frost', x: e.x, z: e.z, r: 3.8, t: 0, dur: 0.75, dmg: 5, tick: 0, hostile: true, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true });
     }
+    if (e.kind === 'thief' && e.c1 > 0) {
+      // the loot comes back with interest
+      this.dropXp(e.x, e.z, e.c1 * 1.5);
+      if (e.c1 > 25 && this.rng.next() < 0.35) this.spawnPickup('chest', e.x, e.z, 1);
+      else this.spawnPickup('cinder', e.x, e.z, 3);
+    }
     if (e.kind === 'husk') {
       for (let i = 0; i < 3; i++) {
         const a = this.rng.angle();
@@ -574,10 +580,11 @@ export class Sim {
     const def = ENEMIES[kind];
     const I = this.intensity();
     const boss = kind === 'herald' || kind === 'eclipse';
-    let hpMul = (1 + 0.11 * I + 0.011 * I * I) * this.curve(0.7, 0.12) * this.diff.hp;
+    let hpMul = (1 + 0.11 * I + 0.011 * I * I) * this.curve(0.7, 0.15) * this.diff.hp;
     // bosses scale with the clock only: rushing the beacons must not buy an easier fight
     const loops = this.stats.loops;
-    if (boss) hpMul = (1 + 0.08 * (this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1 + loops + 0.25 * loops * loops) * this.diff.hp;
+    // rushing the beacons must not buy a weaker boss: the clock counts as at least ten minutes
+    if (boss) hpMul = (1 + 0.08 * Math.max(10, this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1 + loops + 0.25 * loops * loops) * this.diff.hp;
     const biome = this.world.biome;
     // endless night: every cycle the horde gets tougher and faster, so no build can coast forever
     if (!boss) hpMul *= biome.enemyHp * (1 + 0.1 * loops);

@@ -15,7 +15,7 @@ export interface BotResult {
   kills: number;
   beacons: number;
   hpLow: number;
-  /** lowest health fraction after minute 9 */
+  /** lowest health fraction in the late game (minute 9+, fourth beacon or the boss fight) */
   hpLowLate: number;
   weapons: string;
   log: string[];
@@ -140,7 +140,7 @@ export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', s
     sim.events.length = 0;
     steps++;
     hpLow = Math.min(hpLow, p.hp / p.st.maxHp);
-    if (sim.time > 540) hpLowLate = Math.min(hpLowLate, p.hp / p.st.maxHp);
+    if (sim.time > 540 || sim.stats.beacons >= 4 || sim.boss) hpLowLate = Math.min(hpLowLate, p.hp / p.st.maxHp);
     maxEnemies = Math.max(maxEnemies, sim.enemies.length);
     if (sim.time >= nextLog) {
       nextLog += 60;

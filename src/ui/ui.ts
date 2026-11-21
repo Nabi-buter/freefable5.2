@@ -57,7 +57,7 @@ const META_COLOR: Record<MetaId, string> = {
   m_cinder: '#ffb347', m_luck: '#ffd24a', m_skill: '#ffa040', m_reroll: '#7fd4ff', m_banish: '#ff8a80', m_revive: '#ff7a3c',
 };
 const ENEMY_COLOR: Record<string, string> = {
-  shade: '#ff4d86', skitter: '#9dff5a', brute: '#ff8a2a', spitter: '#a6ff3a', wraith: '#6cf2ff', bomber: '#ff3a6a', husk: '#ffd24a', rime: '#8fe0ff', worm: '#ff7a2a', sporecap: '#9cff8a', herald: '#b04aff', eclipse: '#ff5a3c',
+  shade: '#ff4d86', skitter: '#9dff5a', brute: '#ff8a2a', spitter: '#a6ff3a', wraith: '#6cf2ff', bomber: '#ff3a6a', husk: '#ffd24a', rime: '#8fe0ff', worm: '#ff7a2a', sporecap: '#9cff8a', thief: '#ffc04a', herald: '#b04aff', eclipse: '#ff5a3c',
 };
 
 export class UI {
