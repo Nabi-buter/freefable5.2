@@ -268,6 +268,10 @@ input[type='range']::-moz-range-thumb { width: 1.2em; height: 1.2em; border-radi
 .pact.on small { color: var(--dim); }
 .pact:hover, .pact.focus { border-color: var(--c); }
 .pact-mul { margin-left: 0.6em; color: var(--amber-hot); letter-spacing: 0.05em; font-weight: 800; }
+.skins { margin-left: auto; display: inline-flex; gap: 0.4em; }
+.skin { width: 1.7em; height: 1.7em; border-radius: 50%; border: 2px solid var(--line-strong); background: linear-gradient(135deg, var(--sk1) 50%, var(--sk2) 50%); pointer-events: auto; display: inline-flex; align-items: center; justify-content: center; color: #fff; }
+.skin.on { border-color: var(--gold); box-shadow: 0 0 0.6em rgba(255, 200, 80, 0.5); }
+.skin.locked { filter: grayscale(0.8) brightness(0.6); }
 .skpick { display: flex; flex-wrap: wrap; gap: 0.35em; margin-bottom: 0.3em; }
 .skpick button { display: inline-flex; align-items: center; gap: 0.35em; padding: 0.3em 0.75em; border-radius: 2em; border: 1px solid var(--line-strong); background: rgba(10, 12, 28, 0.6); color: var(--dim); font-weight: 700; font-size: 0.92em; pointer-events: auto; transition: all 0.12s; }
 .skpick button .ic { color: var(--c); }

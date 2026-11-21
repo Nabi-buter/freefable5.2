@@ -207,6 +207,7 @@ const S: Record<string, Pair> = {
   'epi.frostmere': ['얼음이 녹아 호수가 하늘을 비춘다. 오래된 이름들이 다시 불린다.', 'The ice gives way and the lake mirrors the sky. Old names are spoken again.'],
   'epi.emberwaste': ['붉은 사막에 처음으로 시원한 아침 바람이 분다.', 'For the first time, a cool morning wind crosses the red waste.'],
   'epi.gloommire': ['안개가 걷히고, 늪은 수백 년 만에 진짜 아침을 맞는다.', 'The fog lifts, and the mire sees a true morning for the first time in centuries.'],
+  'skin.locked': ['이 등불지기로 새벽을 맞이하면 해금됩니다', 'Reach dawn with this lightbearer to unlock'],
   'setup.pacts': ['서약', 'Pacts'],
   'pact.bloodmoon': ['핏빛 달', 'Blood Moon'],
   'pact.bloodmoon.d': ['적 체력 +35%', 'Enemy health +35%'],

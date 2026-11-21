@@ -368,6 +368,18 @@ export const CHARS: Record<CharId, CharDef> = {
   moonknight: { id: 'moonknight', weapon: 'glaive', hp: 125, speed: 7.2, armor: 2, might: 1.12, haste: 1, area: 1, xp: 1, dashCharges: 1, skill: 'reflect', alt: 'whirl', cloak: 0x34405e, accent: 0xd8e8ff },
 };
 
+/** alternative cloak / accent colours, unlocked by reaching dawn with that lightbearer */
+export const ALT_SKINS: Record<CharId, [number, number]> = {
+  kindler: [0x2a4a7a, 0x7fd4ff],
+  stormcaller: [0x5a2a6a, 0xd08aff],
+  warden: [0x6a5a2a, 0xffd070],
+  frostweaver: [0x2a2a3a, 0xff8aa0],
+  ashwalker: [0x2a3a2a, 0x9dff5a],
+  stargazer: [0x5a2a3a, 0xff9a6a],
+  tinker: [0x2a4a4a, 0x6cf2ff],
+  moonknight: [0x5a1a2a, 0xff6a6a],
+};
+
 // ---------------------------------------------------------------- difficulty
 export interface DifficultyDef {
   id: number;

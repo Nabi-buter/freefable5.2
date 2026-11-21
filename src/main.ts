@@ -6,7 +6,7 @@ import { dailyInfo } from './core/daily';
 import { SaveStore } from './core/save';
 import { GameView } from './render/view';
 import { banish, choose, reroll, skip } from './sim/choices';
-import { CHARS } from './sim/defs';
+import { ALT_SKINS, CHARS } from './sim/defs';
 import { Sim } from './sim/sim';
 import type { InputState } from './sim/types';
 import { World } from './sim/worldgen';
@@ -168,7 +168,9 @@ class App implements UIHost {
         ? { seed: d.seed, char: d.char, difficulty: 0, biome: d.biome, meta: this.save.data.meta, skill: d.skill, pacts: [d.pact] }
         : { seed: (Math.random() * 0xffffffff) >>> 0, char: last.char, difficulty: last.difficulty, biome: last.biome, meta: this.save.data.meta, endless: last.endless && this.save.data.stats.wins > 0, skill: last.skills[last.char], pacts: this.save.data.stats.wins > 0 ? last.pacts : [] };
       this.sim = new Sim(cfg);
-      this.view.loadWorld(this.sim.world, CHARS[cfg.char]);
+      const base = CHARS[cfg.char];
+      const alt = !daily && this.save.data.last.skins[cfg.char] === 1 ? ALT_SKINS[cfg.char] : null;
+      this.view.loadWorld(this.sim.world, alt ? { ...base, cloak: alt[0], accent: alt[1] } : base);
       this.menuBiome = '';
       this.view.setSim(this.sim);
       this.view.setMode('follow');

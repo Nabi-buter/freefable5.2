@@ -2,7 +2,7 @@ import './style.css';
 import '@fontsource/cinzel/latin-700.css';
 import '@fontsource/cinzel/latin-900.css';
 import type { AudioEngine } from '../audio/audio';
-import { PACTS, PACT_IDS, SKILLS, SYNERGIES, SYNERGY_IDS, SYNERGY_LEVEL, type PactId, type SkillId } from '../sim/defs';
+import { ALT_SKINS, PACTS, PACT_IDS, SKILLS, SYNERGIES, SYNERGY_IDS, SYNERGY_LEVEL, type PactId, type SkillId } from '../sim/defs';
 import { BIND_ACTIONS, DEFAULT_BINDS, DEFAULT_PAD, PAD_ACTIONS, isTouchPrimary, keyLabel, padLabel, type BindAction, type Input, type PadAction } from '../core/input';
 import { evoHint, fmtNum, fmtTime, getLang, passiveText, setLang, t, weaponLevelText, weaponName } from '../core/i18n';
 import { ACHIEVEMENTS, type RunSummary } from '../core/progress';
@@ -369,6 +369,18 @@ export class UI {
         this.showSetup();
         break;
       }
+      case 'pick-skin': {
+        const k = Number(arg);
+        if (k === 1 && !((sv.stats.winsByChar[sv.last.char] ?? 0) > 0)) {
+          au.ui('deny');
+          this.toast(t('skin.locked'));
+          break;
+        }
+        sv.last.skins[sv.last.char] = k === 1 ? 1 : 0;
+        au.ui('click');
+        this.showSetup();
+        break;
+      }
       case 'pick-skill': {
         const c = CHARS[sv.last.char];
         if (arg === c.skill || arg === c.alt) sv.last.skills[sv.last.char] = arg as SkillId;
@@ -595,7 +607,7 @@ export class UI {
           <div class="setup-col">
             <div><div class="group-label">${t('setup.char')}</div><div class="pick-grid eight">${chars}</div></div>
             <div class="panel detail">
-              <h2 style="color:${hex(c.accent)}">${icon(sv.last.char, 30)}<span style="color:var(--text)">${t('c.' + sv.last.char)}</span></h2>
+              <h2 style="color:${hex(c.accent)}">${icon(sv.last.char, 30)}<span style="color:var(--text)">${t('c.' + sv.last.char)}</span>${charOk ? `<span class="skins">${[0, 1].map((k) => { const ok = k === 0 || (sv.stats.winsByChar[sv.last.char] ?? 0) > 0; const col = k === 0 ? [c.cloak, c.accent] : ALT_SKINS[sv.last.char]; return `<button class="skin f ${(sv.last.skins[sv.last.char] ?? 0) === k ? 'on' : ''} ${ok ? '' : 'locked'}" style="--sk1:${hex(col[0])};--sk2:${hex(col[1])}" data-act="pick-skin" data-arg="${k}" title="${ok ? '' : t('skin.locked')}">${ok ? '' : icon('lock', 12)}</button>`; }).join('')}</span>` : ''}</h2>
               <p>${t(`c.${sv.last.char}.d`)}</p>
               ${charOk ? '' : lock(`c.${sv.last.char}.u`)}
               <div class="statline">
