@@ -407,6 +407,9 @@ export class Sim {
     if ((e.elite || e.boss) && this.hasRelic('huntersmark')) d *= 1.35;
     if (p.glowT > 0) d *= 1.3;
     if (w && this.synergies.size) d *= this.synergyMul(w, e);
+    // Resonance: every active synergy sharpens everything; Oathbrand: every pact sworn
+    if (this.synergies.size && this.hasRelic('resonance')) d *= 1 + 0.1 * this.synergies.size;
+    if (this.pacts.size && this.hasRelic('oathbrand')) d *= 1 + 0.08 * this.pacts.size;
     return this.applyDamage(e, d, w, crit, kb, sx, sz);
   }
 
