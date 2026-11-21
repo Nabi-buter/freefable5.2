@@ -767,7 +767,7 @@ export class GameView {
               this.addShake(0.3);
               break;
             case 'sanctuary':
-              this.ring(ev.x, ev.z, 0.5, ev.r, 0.6, 1.0, 2.6, 1.8);
+              this.ring(ev.x, ev.z, 0.5, ev.r, 0.6, 0.6, 1.5, 1.05);
               this.burst(ev.x, y + 1, ev.z, 40, 5, 1.0, 0.5, 1.2, 3, 2.2, 2, -1.5, 1);
               this.flashLight(ev.x, y + 4, ev.z, 0.6, 1, 0.8, 200, 0.7);
               break;
@@ -780,9 +780,9 @@ export class GameView {
               this.burst(ev.x, y + 1, ev.z, 40, 6, 0.6, 0.5, 3, 1.2, 0.3, 1.2, 2, 2);
               break;
             case 'stasis':
-              this.ring(ev.x, ev.z, 1, ev.r, 0.9, 1.6, 1.4, 2.6);
-              this.ring(ev.x, ev.z, 0, ev.r, 1.2, 0.5, 0.45, 0.9, DECAL.glow);
-              this.flash = Math.max(this.flash, 0.4);
+              this.ring(ev.x, ev.z, 1, ev.r, 0.9, 0.8, 0.7, 1.3);
+              this.ring(ev.x, ev.z, 0, ev.r, 1.2, 0.25, 0.22, 0.45, DECAL.glow);
+              this.flash = Math.max(this.flash, 0.2);
               this.aberr = Math.max(this.aberr, 0.02);
               this.addShake(0.3);
               break;
