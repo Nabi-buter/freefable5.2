@@ -169,9 +169,9 @@ export const KIND_COLOR: Record<EnemyKind, [number, number, number]> = {
 };
 
 const BOSS_TINT: Record<string, [number, number, number]> = {
-  frostmere: [0.72, 0.9, 1.15],
-  emberwaste: [1.2, 0.82, 0.62],
-  gloommire: [0.82, 1.08, 0.86],
+  frostmere: [0.5, 0.85, 1.45],
+  emberwaste: [1.5, 0.7, 0.4],
+  gloommire: [0.65, 1.35, 0.7],
 };
 
 export class EnemyRenderer {
