@@ -259,7 +259,7 @@ export type Choice =
   | { type: 'boon'; id: BoonId };
 
 /** shrine bargains */
-export type BoonId = 'blood' | 'ward' | 'fury' | 'swift' | 'tithe' | 'renew' | 'gamble';
+export type BoonId = 'blood' | 'ward' | 'fury' | 'swift' | 'tithe' | 'renew' | 'gamble' | 'forge' | 'oath' | 'insight';
 
 export interface Pending {
   type: 'levelup' | 'relic' | 'chest' | 'shrine';

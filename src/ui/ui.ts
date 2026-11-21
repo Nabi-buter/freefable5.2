@@ -42,6 +42,7 @@ type Modal = null | 'pending' | 'pause' | 'result' | 'confirm';
 const BOON_LOOK: Record<string, [string, string]> = {
   blood: ['bloodember', '#ff4d5e'], ward: ['vigor', '#ff8aa0'], fury: ['might', '#ff7a3c'], swift: ['dash', '#7fd4ff'],
   tithe: ['cinder', '#ffb347'], renew: ['heart', '#7dff9b'], gamble: ['reroll', '#c6a2ff'],
+  forge: ['sword', '#ffb070'], oath: ['oathbrand', '#ff4d5e'], insight: ['banish', '#7fd4ff'],
 };
 const hex = (n: number) => '#' + n.toString(16).padStart(6, '0');
 const BIOMES: BiomeId[] = ['ashwood', 'frostmere', 'emberwaste', 'gloommire'];

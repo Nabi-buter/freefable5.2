@@ -1,7 +1,7 @@
 import type { Sim } from './sim';
 import type { BoonId, Choice, Pending } from './types';
 import {
-  EVOLVED_LEVEL, MAX_PASSIVES, MAX_WEAPONS, MAX_WEAPON_LEVEL, PASSIVES, PASSIVE_IDS, RELIC_IDS, WEAPONS, WEAPON_IDS,
+  PACT_IDS, EVOLVED_LEVEL, MAX_PASSIVES, MAX_WEAPONS, MAX_WEAPON_LEVEL, PASSIVES, PASSIVE_IDS, RELIC_IDS, WEAPONS, WEAPON_IDS,
 } from './defs';
 
 interface Weighted {
@@ -126,11 +126,11 @@ export function applyChoice(sim: Sim, c: Choice) {
   if (c.type === 'relic' && c.id === 'secondwind') p.dashCharges = p.st.dashMax;
 }
 
-const BOONS: BoonId[] = ['blood', 'ward', 'fury', 'swift', 'tithe', 'renew', 'gamble'];
+const BOONS: BoonId[] = ['blood', 'ward', 'fury', 'swift', 'tithe', 'renew', 'gamble', 'forge', 'oath', 'insight'];
 
 /** a shrine offers three bargains; picking one is optional (skip) */
 export function makeShrinePending(sim: Sim): Pending {
-  const list = BOONS.filter((b) => b !== 'blood' || RELIC_IDS.some((r) => !sim.hasRelic(r)));
+  const list = BOONS.filter((b) => (b !== 'blood' || RELIC_IDS.some((r) => !sim.hasRelic(r))) && (b !== 'forge' || sim.player.weapons.some((w) => w.level < MAX_WEAPON_LEVEL)) && (b !== 'oath' || sim.pacts.size < PACT_IDS.length));
   sim.rng.shuffle(list);
   return { type: 'shrine', choices: list.slice(0, 3).map((id) => ({ type: 'boon', id }) as Choice) };
 }
@@ -148,6 +148,24 @@ function applyBoon(sim: Sim, id: BoonId) {
     case 'fury': sim.boons.might += 0.15; sim.spawnBoost *= 1.12; break;
     case 'swift': sim.boons.dashCd += 0.2; sim.boons.speed += 0.06; break;
     case 'tithe': sim.stats.cinders += 45; break;
+    case 'forge': {
+      const ups = p.weapons.filter((w) => w.level < MAX_WEAPON_LEVEL);
+      if (ups.length) ups[Math.floor(sim.rng.next() * ups.length)].level++;
+      sim.boons.hp -= 10;
+      break;
+    }
+    case 'oath': {
+      const left = PACT_IDS.filter((x) => !sim.pacts.has(x));
+      if (left.length) {
+        const id = left[Math.floor(sim.rng.next() * left.length)];
+        sim.addPact(id);
+        sim.events.push({ t: 'announce', key: 'ann.pact.' + id, tone: 'warn' });
+      }
+      sim.stats.cinders += 30;
+      sim.heal(p.st.maxHp * 0.3);
+      break;
+    }
+    case 'insight': p.rerolls += 2; p.banishes += 1; break;
     case 'renew': p.hp = p.st.maxHp; p.slowT = 0; break;
     case 'gamble': {
       const ups = p.weapons.filter((w) => w.level < MAX_WEAPON_LEVEL);
