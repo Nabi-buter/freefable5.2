@@ -574,8 +574,8 @@ export class Sim {
     if (boss) hpMul = (1 + 0.08 * (this.time / 60)) * (kind === 'herald' ? 1 + 0.35 * this.stats.beacons : 1 + loops + 0.25 * loops * loops) * this.diff.hp;
     const biome = this.world.biome;
     // endless night: every cycle the horde gets tougher and faster, so no build can coast forever
-    if (!boss) hpMul *= biome.enemyHp * (1 + 0.25 * loops);
-    const loopSpeed = boss ? 1 : 1 + Math.min(0.5, 0.07 * loops);
+    if (!boss) hpMul *= biome.enemyHp * (1 + 0.1 * loops);
+    const loopSpeed = boss ? 1 : 1 + Math.min(0.3, 0.04 * loops);
     const scale = elite ? 1.45 : 1;
     const e: Enemy = {
       id: this.id(), kind, def, x, z, kx: 0, kz: 0,
