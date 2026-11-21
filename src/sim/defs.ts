@@ -259,8 +259,8 @@ export const WEAPONS: Record<WeaponId, WeaponDef> = {
 };
 
 // ---------------------------------------------------------------- passives
-export type PassiveId = 'vigor' | 'mending' | 'plating' | 'swift' | 'might' | 'haste' | 'reach' | 'multishot' | 'focus' | 'magnet' | 'wisdom' | 'velocity' | 'fortune';
-export const PASSIVE_IDS: PassiveId[] = ['vigor', 'mending', 'plating', 'swift', 'might', 'haste', 'reach', 'multishot', 'focus', 'magnet', 'wisdom', 'velocity', 'fortune'];
+export type PassiveId = 'vigor' | 'mending' | 'plating' | 'swift' | 'might' | 'haste' | 'reach' | 'multishot' | 'focus' | 'magnet' | 'wisdom' | 'velocity' | 'fortune' | 'rite';
+export const PASSIVE_IDS: PassiveId[] = ['vigor', 'mending', 'plating', 'swift', 'might', 'haste', 'reach', 'multishot', 'focus', 'magnet', 'wisdom', 'velocity', 'fortune', 'rite'];
 
 export interface PassiveDef {
   id: PassiveId;
@@ -284,6 +284,7 @@ export const PASSIVES: Record<PassiveId, PassiveDef> = {
   wisdom: { id: 'wisdom', max: 5, per: 9, color: 0xc7a2ff },
   velocity: { id: 'velocity', max: 5, per: 12, color: 0xb2ff7d },
   fortune: { id: 'fortune', max: 5, per: 12, color: 0xffd24a },
+  rite: { id: 'rite', max: 5, per: 8, color: 0xffa86b },
 };
 
 export const MAX_WEAPONS = 5;

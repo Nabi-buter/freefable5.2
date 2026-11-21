@@ -370,6 +370,8 @@ const S: Record<string, Pair> = {
   'p.wisdom.d': ['경험치 +{0}%', 'Experience +{0}%'],
   'p.velocity': ['탄속', 'Velocity'],
   'p.velocity.d': ['투사체 속도·지속 +{0}%', 'Projectile speed & duration +{0}%'],
+  'p.rite': ['의식의 숙련', 'Ritecraft'],
+  'p.rite.d': ['고유 능력 재사용 -{0}%', 'Signature ability cooldown -{0}%'],
   'p.fortune': ['행운', 'Fortune'],
   'p.fortune.d': ['행운 +{0}% (드롭·상자·재)', 'Luck +{0}% (drops, chests, cinders)'],
   // ------------------------------------------------------------ relics

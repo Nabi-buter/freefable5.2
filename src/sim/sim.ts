@@ -184,7 +184,8 @@ export class Sim {
   /** full cooldown of the signature ability after permanent upgrades, seconds */
   skillCooldown(): number {
     const cut = (this.cfg.meta.m_skill ?? 0) * (META.find((d) => d.id === 'm_skill')?.per ?? 0);
-    return SKILLS[this.skill].cd * (1 - cut / 100);
+    const rite = this.passiveLevel('rite') * PASSIVES.rite.per;
+    return SKILLS[this.skill].cd * (1 - cut / 100) * (1 - rite / 100);
   }
 
   /**
