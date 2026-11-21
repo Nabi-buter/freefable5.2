@@ -131,6 +131,19 @@ describe('simulation', () => {
     sim.step(1 / 60, input);
     expect(sim.pending.some((p) => p.type === 'shrine')).toBe(false);
   });
+  it('two weapons at level 3 form a synergy', () => {
+    const sim = new Sim({ seed: 8, char: 'frostweaver', difficulty: 0, biome: 'ashwood', meta: {} });
+    sim.player.weapons = [{ id: 'frost', level: 3, t: 0, a: 0, b: 0, dealt: 0 }, { id: 'arc', level: 2, t: 0, a: 0, b: 0, dealt: 0 }];
+    sim.recalc();
+    expect(sim.synergies.has('superconduct')).toBe(false);
+    sim.player.weapons[1].level = 3;
+    sim.recalc();
+    expect(sim.synergies.has('superconduct')).toBe(true);
+    const e = sim.spawnEnemy('brute', 3, 3, false, 1);
+    expect(sim.synergyMul('arc', e)).toBe(1);
+    sim.chill(e, 2);
+    expect(sim.synergyMul('arc', e)).toBeCloseTo(1.4);
+  });
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);

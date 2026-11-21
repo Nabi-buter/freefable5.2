@@ -379,6 +379,19 @@ export const DIFFICULTIES: DifficultyDef[] = [
   { id: 2, hp: 2.7, dmg: 2.0, spawn: 1.6, cinder: 2.4 },
 ];
 
+// ---------------------------------------------------------------- weapon synergies: two weapons at level 3+ work together
+export type SynergyId = 'superconduct' | 'wildfire' | 'vigil' | 'judgement' | 'bladeorbit' | 'shatter';
+export const SYNERGIES: Record<SynergyId, { a: WeaponId; b: WeaponId; color: number }> = {
+  superconduct: { a: 'frost', b: 'arc', color: 0x9fd8ff },
+  wildfire: { a: 'ember', b: 'trail', color: 0xff7a30 },
+  vigil: { a: 'totem', b: 'sprite', color: 0xffd070 },
+  judgement: { a: 'starfall', b: 'sigil', color: 0xe0c0ff },
+  bladeorbit: { a: 'glaive', b: 'wisps', color: 0x9feaff },
+  shatter: { a: 'lance', b: 'darts', color: 0xc8ff9a },
+};
+export const SYNERGY_IDS = Object.keys(SYNERGIES) as SynergyId[];
+export const SYNERGY_LEVEL = 3;
+
 // ---------------------------------------------------------------- pacts: optional burdens for a bigger cinder reward
 export type PactId = 'bloodmoon' | 'swarm' | 'frailty' | 'famine' | 'haste';
 export const PACT_IDS: PactId[] = ['bloodmoon', 'swarm', 'frailty', 'famine', 'haste'];

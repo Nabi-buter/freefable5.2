@@ -1,7 +1,7 @@
 import { RNG, clamp } from '../core/rng';
 import {
   CHARS, DIFFICULTIES, ENEMIES, META, PASSIVES, SKILLS, WEAPONS,
-  PACTS, PACT_IDS, type PactId, type SkillId, type CharDef, type CharId, type DifficultyDef, type EnemyKind, type MetaId, type PassiveId, type RelicId, type WeaponId,
+  PACTS, PACT_IDS, SYNERGIES, SYNERGY_IDS, SYNERGY_LEVEL, type SynergyId, type PactId, type SkillId, type CharDef, type CharId, type DifficultyDef, type EnemyKind, type MetaId, type PassiveId, type RelicId, type WeaponId,
 } from './defs';
 import { World, type BiomeId } from './worldgen';
 import type {
@@ -95,6 +95,8 @@ export class Sim {
   readonly pacts: Set<PactId>;
   /** shrine state for this run (parallel to world.shrines) */
   shrines: { x: number; z: number; used: boolean }[] = [];
+  /** active weapon synergies */
+  synergies = new Set<SynergyId>();
   /** lasting gifts from shrine bargains */
   boons = { hp: 0, might: 0, dashCd: 0, speed: 0 };
   /** extra spawn pressure accepted at a shrine (Fury) */
@@ -201,6 +203,32 @@ export class Sim {
     return k * (1 + late * Math.max(0, prog));
   }
 
+  /** extra damage a weapon gets from its active synergies */
+  synergyMul(w: WeaponId, e: Enemy): number {
+    const s = this.synergies;
+    let m = 1;
+    if (s.has('superconduct') && (w === 'arc' || w === 'frost') && (e.chillT > 0 || e.freezeT > 0)) m *= 1.4;
+    if (s.has('wildfire') && (w === 'trail' || w === 'ember') && e.burnT > 0) m *= 1.3;
+    if (s.has('vigil') && (w === 'totem' || w === 'sprite')) m *= 1.3;
+    if (s.has('judgement') && (w === 'starfall' || w === 'sigil')) m *= 1.3;
+    if (s.has('bladeorbit') && (w === 'wisps' || w === 'glaive')) m *= 1.3;
+    if (s.has('shatter') && (w === 'lance' || w === 'darts') && (e.elite || e.boss)) m *= 1.45;
+    return m;
+  }
+
+  /** re-check which synergies the current weapons form; announce new ones */
+  private refreshSynergies() {
+    for (const id of SYNERGY_IDS) {
+      const d = SYNERGIES[id];
+      const wa = this.weapon(d.a), wb = this.weapon(d.b);
+      const on = !!wa && !!wb && wa.level >= SYNERGY_LEVEL && wb.level >= SYNERGY_LEVEL;
+      if (on && !this.synergies.has(id)) {
+        this.synergies.add(id);
+        this.events.push({ t: 'announce', key: 'syn.' + id + '.on', tone: 'good' });
+      } else if (!on) this.synergies.delete(id);
+    }
+  }
+
   /** take on a pact mid-run (Endless Night cycles) */
   addPact(id: PactId) {
     if (this.pacts.has(id)) return;
@@ -288,6 +316,7 @@ export class Sim {
         default: break;
       }
     }
+    this.refreshSynergies();
     const bn = this.boons;
     st.maxHp += bn.hp;
     st.might *= 1 + bn.might;
@@ -377,6 +406,7 @@ export class Sim {
     if ((e.chillT > 0 || e.freezeT > 0) && this.hasRelic('frozencore')) d *= 1.3;
     if ((e.elite || e.boss) && this.hasRelic('huntersmark')) d *= 1.35;
     if (p.glowT > 0) d *= 1.3;
+    if (w && this.synergies.size) d *= this.synergyMul(w, e);
     return this.applyDamage(e, d, w, crit, kb, sx, sz);
   }
 

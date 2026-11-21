@@ -2,7 +2,7 @@ import './style.css';
 import '@fontsource/cinzel/latin-700.css';
 import '@fontsource/cinzel/latin-900.css';
 import type { AudioEngine } from '../audio/audio';
-import { PACTS, PACT_IDS, SKILLS, type PactId, type SkillId } from '../sim/defs';
+import { PACTS, PACT_IDS, SKILLS, SYNERGIES, SYNERGY_IDS, SYNERGY_LEVEL, type PactId, type SkillId } from '../sim/defs';
 import { BIND_ACTIONS, DEFAULT_BINDS, DEFAULT_PAD, PAD_ACTIONS, isTouchPrimary, keyLabel, padLabel, type BindAction, type Input, type PadAction } from '../core/input';
 import { evoHint, fmtNum, fmtTime, getLang, passiveText, setLang, t, weaponLevelText, weaponName } from '../core/i18n';
 import { ACHIEVEMENTS, type RunSummary } from '../core/progress';
@@ -691,6 +691,7 @@ export class UI {
         ${sec(t('tag.weapon'))}${WEAPON_IDS.map((id) => item(id, hex(WEAPONS[id].color), t('w.' + id), t(`w.${id}.d`), `<div class="reward">${icon('up', 12)}${t(`w.${id}.e`)} — ${t('p.' + WEAPONS[id].evo)}</div>`)).join('')}
         ${sec(t('tag.passive'))}${PASSIVE_IDS.map((id) => item(id, hex(PASSIVES[id].color), t('p.' + id), passiveText(id, 1))).join('')}
         ${sec(t('tag.relic'))}${(Object.keys(RELIC_COLORS) as (keyof typeof RELIC_COLORS)[]).map((id) => item(id, hex(RELIC_COLORS[id]), t('r.' + id), t(`r.${id}.d`))).join('')}
+        ${sec(t('syn.title'))}${SYNERGY_IDS.map((id) => item(SYNERGIES[id].a, hex(SYNERGIES[id].color), t('syn.' + id), t(`syn.${id}.d`))).join('')}
         ${sec(t('setup.skill'))}${CHAR_IDS.flatMap((id) => [CHARS[id].skill, CHARS[id].alt].map((sid) => { const sk = SKILLS[sid]; return item(sk.id, hex(sk.color), t('sk.' + sk.id), t(`sk.${sk.id}.d`), `<div class="reward" style="color:var(--mute)">${icon(id, 12)}${t('c.' + id)} · ${t('sk.cd', sk.cd)}</div>`); })).join('')}
         ${sec(t('hud.kills'))}${ENEMY_KINDS.map((id) => item('skull', ENEMY_COLOR[id], t('e.' + id), t(`e.${id}.d`), `<div class="reward" style="color:var(--mute)">${icon('heart', 12)}${ENEMIES[id].hp}</div>`)).join('')}
       </div>`;
@@ -1161,6 +1162,12 @@ export class UI {
         tag = c.isNew ? `<span class="tag new">${t('common.new')}</span>` : `<span class="tag">${t('tag.weapon')}</span>`;
         if (c.level <= MAX_WEAPON_LEVEL) evo = `<div class="evo">${icon('up', 12)}${t('p.' + WEAPONS[c.id].evo)}${sim.passiveLevel(WEAPONS[c.id].evo) > 0 ? ' ✓' : ''}</div>`;
         if (c.isNew) cls = 'sheen';
+        // owning the partner weapon: point out the synergy this weapon belongs to
+        for (const sid of SYNERGY_IDS) {
+          const sd = SYNERGIES[sid];
+          const other = sd.a === c.id ? sd.b : sd.b === c.id ? sd.a : null;
+          if (other && sim.weapon(other) && !sim.synergies.has(sid)) evo += `<div class="evo syn" style="color:${hex(sd.color)}">${icon(other, 12)}${t('syn.hint', t('syn.' + sid), SYNERGY_LEVEL)}</div>`;
+        }
         // this pick finishes an evolution recipe: say so
         if (c.level === MAX_WEAPON_LEVEL && sim.passiveLevel(WEAPONS[c.id].evo) > 0) {
           cls = 'ready';
@@ -1252,6 +1259,10 @@ export class UI {
   private buildHtml(sim: Sim): string {
     const p = sim.player;
     const rows: string[] = [];
+    if (sim.synergies.size) {
+      rows.push(`<h4>${t('syn.title')}</h4>`);
+      for (const id of sim.synergies) rows.push(`<div class="row"><span class="slot" style="--c:${hex(SYNERGIES[id].color)}">${icon(SYNERGIES[id].a, 14)}${icon(SYNERGIES[id].b, 14)}</span><div style="min-width:0"><div class="nm">${t('syn.' + id)}</div><div class="ds">${t(`syn.${id}.d`)}</div></div></div>`);
+    }
     const sk = SKILLS[sim.skill];
     rows.push(`<h4>${t('setup.skill')}</h4>`);
     rows.push(`<div class="row"><span class="slot" style="--c:${hex(sk.color)}">${icon(sk.id, 22)}</span><div style="min-width:0"><div class="nm">${t('sk.' + sk.id)} · ${t('sk.cd', Math.round(sim.skillCooldown() * 10) / 10)}</div><div class="ds">${t(`sk.${sk.id}.d`)}</div></div></div>`);
