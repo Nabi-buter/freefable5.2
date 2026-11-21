@@ -32,6 +32,8 @@ export const ACHIEVEMENTS: AchDef[] = [
   { id: 'allbiomes', reward: 250 },
   { id: 'endless2', reward: 250 },
   { id: 'pact3', reward: 300 },
+  { id: 'shrines', reward: 120 },
+  { id: 'skills12', reward: 250 },
   { id: 'gloom', reward: 200 },
   { id: 'evolve5', reward: 300 },
   { id: 'relics10', reward: 150 },
@@ -160,6 +162,12 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   ach('winall', CHAR_IDS.every((c) => (st.winsByChar[c] ?? 0) > 0));
   ach('endless2', sim.stats.loops >= 2);
   ach('pact3', win && sim.pacts.size >= 3);
+  ach('shrines', sim.shrines.length > 0 && sim.shrines.every((s) => s.used));
+  if (win) {
+    st.winsBySkill = st.winsBySkill ?? {};
+    st.winsBySkill[sim.skill] = (st.winsBySkill[sim.skill] ?? 0) + 1;
+  }
+  ach('skills12', Object.keys(st.winsBySkill ?? {}).length >= 12);
   ach('gloom', win && biome === 'gloommire');
   ach('evolve5', evolved >= 5);
   ach('relics10', p.relics.length >= 10);

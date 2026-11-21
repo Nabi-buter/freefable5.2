@@ -49,6 +49,8 @@ export interface LifetimeStats {
   cleared: number;
   /** endless night records */
   bestLoops: number;
+  /** wins per signature ability */
+  winsBySkill?: Partial<Record<SkillId, number>>;
   bestEndlessTime: number;
 }
 
