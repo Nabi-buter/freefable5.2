@@ -536,7 +536,7 @@ export class UI {
           <button class="btn primary f" data-act="play">${icon('ember', 22)}${t('menu.play')}</button>
           <button class="btn f daily ${dailyDone ? 'done' : ''}" data-act="daily">
             <span class="d-ic" style="color:${hex(CHARS[di.char].accent)}">${icon(di.char, 20)}</span>
-            <span class="d-tx"><b>${t('menu.daily')}</b><small>${t('c.' + di.char)} · ${t('b.' + di.biome)}</small></span>
+            <span class="d-tx"><b>${t('menu.daily')}</b><small>${t('c.' + di.char)} · ${t('b.' + di.biome)}</small><small>${t('sk.' + di.skill)} · ${t('pact.' + di.pact)}</small></span>
             <span class="d-st">${dailyDone ? `${icon('check', 16)}${fmtTime(sv.daily.best)}` : `${icon('cinder', 14)}+${DAILY_BONUS}`}</span>
           </button>
           <button class="btn f" data-act="shop">${icon('cinder', 18)}${t('menu.upgrades')}</button>
