@@ -662,7 +662,7 @@ export class UI {
       }).join('')}</div>`;
     } else if (this.recTab === 'history') {
       const hs = sv.history;
-      body = hs.length === 0 ? `<p class="empty">${t('rec.history.none')}</p>` : `<div class="history">${hs.map((r) => {
+      body = hs.length === 0 ? `<p class="hist-empty">${t('rec.history.none')}</p>` : `<div class="history">${hs.map((r) => {
         const c = CHARS[r.char];
         const when = new Date(r.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
         const tags = [t('d.' + r.difficulty), r.endless ? `∞ ${r.loops}` : '', r.daily ? t('menu.daily') : '', r.pacts ? `${t('setup.pacts')} ${r.pacts}` : ''].filter(Boolean).join(' · ');

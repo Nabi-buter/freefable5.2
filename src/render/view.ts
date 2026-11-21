@@ -216,7 +216,7 @@ export class GameView {
   private flashes: FlashLight[] = [];
   private siteLights: THREE.PointLight[] = [];
   private beaconDyn: BeaconDyn[] = [];
-  private shrineDyn: { crystal: THREE.Mesh; y: number; fade: number }[] = [];
+  private shrineDyn: { crystal: THREE.Mesh; beam: THREE.Mesh; y: number; fade: number }[] = [];
   private hearthFlame = 0;
   private bossHalo: THREE.Mesh;
   private bossRing: THREE.Mesh;
@@ -436,14 +436,22 @@ export class GameView {
       this.worldGroup.add(crystal, pillar);
       return { crystal, pillar, lit: 0, y };
     });
+    const shrineBeamGeo = new THREE.CylinderGeometry(0.25, 0.6, 26, 10, 1, true).translate(0, 13, 0);
     // shrine crystals hover over their altars until the bargain is struck
     this.shrineDyn = world.shrines.map((s) => {
       const y = world.height(s.x, s.z);
       const crystal = new THREE.Mesh(crystalGeo, glowMat(0.8, 0.5, 1.6));
       crystal.scale.setScalar(0.6);
       crystal.position.set(s.x, y + 2.2, s.z);
-      this.worldGroup.add(crystal);
-      return { crystal, y, fade: 1 };
+      // a thin violet shaft so a shrine can be spotted over the treetops
+      const beam = new THREE.Mesh(shrineBeamGeo, pillarMat());
+      const bm = beam.material as THREE.ShaderMaterial;
+      (bm.uniforms.uCol.value as THREE.Color).setRGB(0.62, 0.42, 1.0);
+      bm.uniforms.uPow.value = 0.35;
+      beam.position.set(s.x, y + 1.5, s.z);
+      beam.frustumCulled = false;
+      this.worldGroup.add(crystal, beam);
+      return { crystal, beam, y, fade: 1 };
     });
     this.sparks.clear();
     this.smoke.clear();
@@ -477,7 +485,11 @@ export class GameView {
       }
     }
     this.beaconDyn = [];
-    for (const s of this.shrineDyn) (s.crystal.material as THREE.Material).dispose();
+    if (this.shrineDyn.length) this.shrineDyn[0].beam.geometry.dispose();
+    for (const s of this.shrineDyn) {
+      (s.crystal.material as THREE.Material).dispose();
+      (s.beam.material as THREE.Material).dispose();
+    }
     this.shrineDyn = [];
     this.env = null;
     this.terrain = null;
@@ -1385,6 +1397,8 @@ export class GameView {
       sd.crystal.rotation.y = time * 1.2 + i;
       sd.crystal.position.y = sd.y + 2.2 + Math.sin(time * 2 + i) * 0.15;
       sd.crystal.scale.setScalar(0.6 * sd.fade);
+      sd.beam.visible = sd.fade > 0.02;
+      ((sd.beam.material as THREE.ShaderMaterial).uniforms.uPow.value as number) = (0.3 + Math.sin(time * 2.2 + i) * 0.06) * sd.fade;
       const d = Math.hypot(cam.x - s.x, cam.z - s.z);
       if (d < 70 && sd.fade > 0.05) {
         dec.add(DECAL.glow, s.x, s.z, 3.2, 0.6, 0.35, 1.0, 0.35 * sd.fade);
