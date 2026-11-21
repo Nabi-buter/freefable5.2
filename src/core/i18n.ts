@@ -208,6 +208,8 @@ const S: Record<string, Pair> = {
   'epi.emberwaste': ['붉은 사막에 처음으로 시원한 아침 바람이 분다.', 'For the first time, a cool morning wind crosses the red waste.'],
   'epi.gloommire': ['안개가 걷히고, 늪은 수백 년 만에 진짜 아침을 맞는다.', 'The fog lifts, and the mire sees a true morning for the first time in centuries.'],
   'skin.locked': ['이 등불지기로 새벽을 맞이하면 해금됩니다', 'Reach dawn with this lightbearer to unlock'],
+  'setup.seed': ['시드', 'Seed'],
+  'setup.seed.random': ['비워 두면 무작위 섬', 'Leave empty for a random island'],
   'setup.pacts': ['서약', 'Pacts'],
   'pact.bloodmoon': ['핏빛 달', 'Blood Moon'],
   'pact.bloodmoon.d': ['적 체력 +35%', 'Enemy health +35%'],

@@ -166,7 +166,7 @@ class App implements UIHost {
       const d = dailyInfo();
       const cfg = daily
         ? { seed: d.seed, char: d.char, difficulty: 0, biome: d.biome, meta: this.save.data.meta, skill: d.skill, pacts: [d.pact] }
-        : { seed: (Math.random() * 0xffffffff) >>> 0, char: last.char, difficulty: last.difficulty, biome: last.biome, meta: this.save.data.meta, endless: last.endless && this.save.data.stats.wins > 0, skill: last.skills[last.char], pacts: this.save.data.stats.wins > 0 ? last.pacts : [] };
+        : { seed: last.seed ? Number(last.seed) >>> 0 : (Math.random() * 0xffffffff) >>> 0, char: last.char, difficulty: last.difficulty, biome: last.biome, meta: this.save.data.meta, endless: last.endless && this.save.data.stats.wins > 0, skill: last.skills[last.char], pacts: this.save.data.stats.wins > 0 ? last.pacts : [] };
       this.sim = new Sim(cfg);
       const base = CHARS[cfg.char];
       const alt = !daily && this.save.data.last.skins[cfg.char] === 1 ? ALT_SKINS[cfg.char] : null;

@@ -214,6 +214,11 @@ export class UI {
 
   private onInput(e: Event) {
     const el = e.target as HTMLInputElement;
+    if (el.dataset.seed !== undefined) {
+      this.save.last.seed = el.value.replace(/[^0-9]/g, '').slice(0, 10);
+      if (el.value !== this.save.last.seed) el.value = this.save.last.seed;
+      return;
+    }
     const key = el.dataset.set;
     if (!key) return;
     const s = this.save.settings as unknown as Record<string, number>;
@@ -629,6 +634,7 @@ export class UI {
               <button class="pick row f ${endless ? 'sel' : ''} ${endlessOk ? '' : 'locked'}" style="--c:#b98cff" data-act="pick-mode" data-arg="endless"><span class="pic">${icon(endlessOk ? 'reroll' : 'lock', 22)}</span><span class="nm">${t('mode.endless')}</span></button>
             </div></div>
             <div class="panel detail slim"><p>${t(endless ? 'mode.endless.d' : 'mode.dawn.d')}</p>${endless && !endlessOk ? lock('mode.endless.u') : ''}${endless && endlessOk && sv.stats.bestLoops > 0 ? `<p>${icon('trophy', 16)} ${t('rec.loops')}: <b style="color:var(--amber-hot)">${sv.stats.bestLoops}</b></p>` : ''}</div>
+            <div class="seed-row"><span class="group-label">${t('setup.seed')}</span><input class="seed-in" data-seed inputmode="numeric" maxlength="10" placeholder="${t('setup.seed.random')}" value="${sv.last.seed}"></div>
             <div><div class="group-label">${t('setup.pacts')}${sv.stats.wins > 0 ? ` <span class="pact-mul">${icon('cinder', 12)} ×${(1 + sv.last.pacts.reduce((a, id) => a + PACTS[id].reward, 0)).toFixed(2)}</span>` : ''}</div>
               ${sv.stats.wins > 0 ? `<div class="pacts">${PACT_IDS.map((id) => `<button class="pact f ${sv.last.pacts.includes(id) ? 'on' : ''}" style="--c:${hex(PACTS[id].color)}" data-act="toggle-pact" data-arg="${id}" title="${t(`pact.${id}.d`)}"><b>${t('pact.' + id)}</b><small>${t(`pact.${id}.d`)} · +${Math.round(PACTS[id].reward * 100)}%</small></button>`).join('')}</div>` : `<div class="panel detail slim">${lock('mode.endless.u')}</div>`}
             </div>
@@ -1354,7 +1360,7 @@ export class UI {
     const cell = (v: string, k: string) => `<div class="res-cell"><b>${v}</b><span>${k}</span></div>`;
     this.setModal('result', `
       <div class="panel result">
-        <div>${sum.daily ? `<div class="daily-tag">${icon('star', 14)}${t('menu.daily')}</div>` : ''}${sum.endless ? `<div class="daily-tag" style="color:var(--violet)">${icon('reroll', 14)}${t('result.endless')}</div>` : ''}<div class="m-title ${sum.win ? 'gold' : 'red'}">${t(sum.win ? 'result.win' : 'result.lose')}</div><div class="m-sub">${t(sum.win ? 'result.win.sub' : 'result.lose.sub')}${sum.newBest ? ` · <b style="color:var(--gold)">${t('result.best')}</b>` : ''}</div>${sum.win && !sum.endless ? `<div class="epilogue">${t('epi.' + sum.biome)}</div>` : ''}</div>
+        <div>${sum.daily ? `<div class="daily-tag">${icon('star', 14)}${t('menu.daily')}</div>` : ''}${sum.endless ? `<div class="daily-tag" style="color:var(--violet)">${icon('reroll', 14)}${t('result.endless')}</div>` : ''}<div class="m-title ${sum.win ? 'gold' : 'red'}">${t(sum.win ? 'result.win' : 'result.lose')}</div><div class="m-sub">${t(sum.win ? 'result.win.sub' : 'result.lose.sub')}${sum.newBest ? ` · <b style="color:var(--gold)">${t('result.best')}</b>` : ''}</div>${sum.win && !sum.endless ? `<div class="epilogue">${t('epi.' + sum.biome)}</div>` : ''}${sum.daily ? '' : `<div class="seed-tag">${t('setup.seed')} ${sum.seed}</div>`}</div>
         <div class="res-grid">${cell(fmtTime(sum.time), t('result.time'))}${cell(String(sum.level), t('result.level'))}${cell(fmtNum(sum.kills), t('result.kills'))}${sum.endless ? cell(String(sum.loops), t('result.loops')) : cell(`${sum.beacons}/${BEACON_COUNT}`, t('result.beacons'))}</div>
         <div class="res-cols scroll">
           <div><div class="group-label">${t('result.weapons')}</div><div class="wbars">${bars}</div>
