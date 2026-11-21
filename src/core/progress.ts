@@ -1,4 +1,4 @@
-import { CHAR_IDS, EVOLVED_LEVEL, type CharId } from '../sim/defs';
+import { CHAR_IDS, EVOLVED_LEVEL, SKILLS, type CharId, type SkillId } from '../sim/defs';
 import type { Sim } from '../sim/sim';
 import type { BiomeId } from '../sim/worldgen';
 import type { SaveData } from './save';
@@ -168,7 +168,7 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
     st.winsBySkill = st.winsBySkill ?? {};
     st.winsBySkill[sim.skill] = (st.winsBySkill[sim.skill] ?? 0) + 1;
   }
-  ach('skills12', Object.keys(st.winsBySkill ?? {}).length >= 12);
+  ach('skills12', (Object.keys(SKILLS) as SkillId[]).every((k) => (st.winsBySkill?.[k] ?? 0) > 0));
   ach('gloom', win && biome === 'gloommire');
   ach('evolve5', evolved >= 5);
   ach('relics10', p.relics.length >= 10);
