@@ -1,7 +1,7 @@
 import { RNG, clamp } from '../core/rng';
 import {
   CHARS, DIFFICULTIES, ENEMIES, META, PASSIVES, SKILLS, WEAPONS,
-  type SkillId, type CharDef, type CharId, type DifficultyDef, type EnemyKind, type MetaId, type PassiveId, type RelicId, type WeaponId,
+  PACTS, type PactId, type SkillId, type CharDef, type CharId, type DifficultyDef, type EnemyKind, type MetaId, type PassiveId, type RelicId, type WeaponId,
 } from './defs';
 import { World, type BiomeId } from './worldgen';
 import type {
@@ -22,6 +22,8 @@ export interface RunConfig {
   endless?: boolean;
   /** which of the lightbearer's two abilities to bring (defaults to the first) */
   skill?: SkillId;
+  /** optional burdens taken for a bigger cinder reward */
+  pacts?: PactId[];
 }
 
 /** Uniform spatial hash for enemies. Rebuilt every step. */
@@ -90,6 +92,7 @@ export class Sim {
   readonly rng: RNG;
   readonly diff: DifficultyDef;
   readonly char: CharDef;
+  readonly pacts: Set<PactId>;
   /** the signature ability chosen for this run */
   readonly skill: SkillId;
   time = 0;
@@ -131,7 +134,17 @@ export class Sim {
     this.cfg = cfg;
     this.rng = new RNG(cfg.seed ^ 0x5bd1e995);
     this.world = new World(cfg.seed, cfg.biome);
-    this.diff = DIFFICULTIES[clamp(cfg.difficulty, 0, DIFFICULTIES.length - 1)];
+    const pacts = new Set(cfg.pacts ?? []);
+    this.pacts = pacts;
+    const base = DIFFICULTIES[clamp(cfg.difficulty, 0, DIFFICULTIES.length - 1)];
+    let reward = 1;
+    for (const id of pacts) reward += PACTS[id]?.reward ?? 0;
+    this.diff = {
+      ...base,
+      hp: base.hp * (pacts.has('bloodmoon') ? 1.35 : 1),
+      spawn: base.spawn * (pacts.has('swarm') ? 1.3 : 1),
+      cinder: base.cinder * reward,
+    };
     this.char = CHARS[cfg.char];
     this.skill = cfg.skill === this.char.alt ? this.char.alt : this.char.skill;
     this.grid = new Grid(this.world.radius + 8, 1024);
@@ -214,8 +227,8 @@ export class Sim {
     const pl = (id: PassiveId) => this.passiveLevel(id) * PASSIVES[id].per;
     const old = p.st.maxHp || 0;
     const st: Stats = {
-      maxHp: c.hp * (1 + m('m_hp') / 100 + pl('vigor') / 100),
-      regen: m('m_regen') + pl('mending'),
+      maxHp: Math.round(c.hp * (1 + m('m_hp') / 100 + pl('vigor') / 100) * (this.pacts.has('frailty') ? 0.7 : 1)),
+      regen: (m('m_regen') + pl('mending')) * (this.pacts.has('famine') ? 0.5 : 1),
       armor: c.armor + m('m_armor') + pl('plating'),
       speed: c.speed * (1 + m('m_speed') / 100 + pl('swift') / 100),
       might: c.might * (1 + m('m_might') / 100 + pl('might') / 100),
@@ -417,7 +430,7 @@ export class Sim {
       for (let i = 0; i < 3; i++) this.spawnPickup('cinder', e.x + this.rng.range(-1, 1), e.z + this.rng.range(-1, 1), 3);
     } else if (!e.boss) {
       const roll = this.rng.next();
-      if (roll < 0.006 * luck) this.spawnPickup('heal', e.x, e.z, 1);
+      if (roll < 0.006 * luck && !this.pacts.has('famine')) this.spawnPickup('heal', e.x, e.z, 1);
       else if (roll < 0.0075 * luck) this.spawnPickup('magnet', e.x, e.z, 1);
       else if (roll < 0.03 * luck) this.spawnPickup('cinder', e.x, e.z, 1);
     }
@@ -555,7 +568,7 @@ export class Sim {
     const e: Enemy = {
       id: this.id(), kind, def, x, z, kx: 0, kz: 0,
       hp: def.hp * hpMul * (elite ? 9 : 1), maxHp: 0,
-      r: def.radius * scale, speed: def.speed * (elite ? 1.08 : 1) * (boss ? 1 : biome.enemySpeed) * loopSpeed * this.rng.range(0.94, 1.06), dmg: def.dmg * (elite ? 1.4 : 1),
+      r: def.radius * scale, speed: def.speed * (elite ? 1.08 : 1) * (boss ? 1 : biome.enemySpeed) * loopSpeed * (this.pacts.has('haste') ? 1.15 : 1) * this.rng.range(0.94, 1.06), dmg: def.dmg * (elite ? 1.4 : 1),
       alive: true, elite, boss, flash: 0, burnT: 0, burnDps: 0, burnAcc: 0, chillT: 0, freezeT: 0,
       t: 0, st: 0, stT: 0, ax: 0, az: 0, n: 0, face: 0, cdA: 0, cdB: 0, seed: this.rng.next(), spawn, scale, tele: 0, buried: false, affix: 0, phase: 1, c1: 0, lx: 0, lz: 0, ll: 0,
     };

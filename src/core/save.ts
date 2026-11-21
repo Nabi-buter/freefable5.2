@@ -1,4 +1,4 @@
-import { CHARS, CHAR_IDS, META, type CharId, type MetaId, type SkillId } from '../sim/defs';
+import { CHARS, CHAR_IDS, META, PACT_IDS, type CharId, type MetaId, type PactId, type SkillId } from '../sim/defs';
 import type { BiomeId } from '../sim/worldgen';
 import { BIND_ACTIONS, DEFAULT_BINDS, DEFAULT_PAD, PAD_ACTIONS, type KeyBinds, type PadBinds } from './input';
 
@@ -61,7 +61,7 @@ export interface SaveData {
   achievements: Record<string, number>;
   stats: LifetimeStats;
   settings: Settings;
-  last: { char: CharId; biome: BiomeId; difficulty: number; endless: boolean; skills: Partial<Record<CharId, SkillId>> };
+  last: { char: CharId; biome: BiomeId; difficulty: number; endless: boolean; skills: Partial<Record<CharId, SkillId>>; pacts: PactId[] };
   tutorial: boolean;
   /** daily vigil record for `date` (UTC) */
   daily: { date: string; done: boolean; best: number; streak: number };
@@ -90,7 +90,7 @@ export function defaultSave(): SaveData {
       bestTime: [0, 0, 0], winsByChar: {}, winsByBiome: {}, cleared: 0, bestLoops: 0, bestEndlessTime: 0,
     },
     settings: { lang: defaultLang(), quality: defaultQuality(), master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true, reduceFlash: false, colorAssist: false, rumble: true, keys: { ...DEFAULT_BINDS }, pad: { ...DEFAULT_PAD } },
-    last: { char: 'kindler', biome: 'ashwood', difficulty: 0, endless: false, skills: {} },
+    last: { char: 'kindler', biome: 'ashwood', difficulty: 0, endless: false, skills: {}, pacts: [] },
     tutorial: false,
     daily: { date: '', done: false, best: 0, streak: 0 },
   };
@@ -156,6 +156,7 @@ export class SaveStore {
       }
     }
     d.last.skills = picks;
+    d.last.pacts = Array.isArray(d.last.pacts) && d.stats.wins > 0 ? [...new Set(d.last.pacts.filter((x) => PACT_IDS.includes(x)))] : [];
     const s = d.settings;
     const c01 = (v: number, def: number) => (Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : def);
     s.master = c01(s.master, 0.8);

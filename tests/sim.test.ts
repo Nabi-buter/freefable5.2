@@ -100,6 +100,17 @@ describe('simulation', () => {
       expect(sim.player.skillCd).toBe(0);
     }
   }, 60000);
+  it('pacts make the night harder and the reward bigger', () => {
+    const plain = new Sim({ seed: 3, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {} });
+    const sworn = new Sim({ seed: 3, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {}, pacts: ['bloodmoon', 'swarm', 'frailty', 'famine', 'haste'] });
+    expect(sworn.diff.hp).toBeCloseTo(plain.diff.hp * 1.35);
+    expect(sworn.diff.spawn).toBeCloseTo(plain.diff.spawn * 1.3);
+    expect(sworn.diff.cinder).toBeCloseTo(plain.diff.cinder * 2.1);
+    expect(sworn.player.st.maxHp).toBe(Math.round(plain.player.st.maxHp * 0.7));
+    const a = plain.spawnEnemy('shade', 5, 5), b = sworn.spawnEnemy('shade', 5, 5);
+    expect(b.hp / a.hp).toBeCloseTo(1.35);
+    expect(b.speed / a.speed).toBeGreaterThan(1.05);
+  });
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);

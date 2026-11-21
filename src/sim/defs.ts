@@ -360,6 +360,17 @@ export const DIFFICULTIES: DifficultyDef[] = [
   { id: 2, hp: 2.7, dmg: 2.0, spawn: 1.6, cinder: 2.4 },
 ];
 
+// ---------------------------------------------------------------- pacts: optional burdens for a bigger cinder reward
+export type PactId = 'bloodmoon' | 'swarm' | 'frailty' | 'famine' | 'haste';
+export const PACT_IDS: PactId[] = ['bloodmoon', 'swarm', 'frailty', 'famine', 'haste'];
+export const PACTS: Record<PactId, { reward: number; color: number }> = {
+  bloodmoon: { reward: 0.25, color: 0xff4d5e },
+  swarm: { reward: 0.25, color: 0x9dff5a },
+  frailty: { reward: 0.2, color: 0xff8a80 },
+  famine: { reward: 0.2, color: 0xffd24a },
+  haste: { reward: 0.2, color: 0x6cf2ff },
+};
+
 // ---------------------------------------------------------------- meta upgrades (bought with cinders between runs)
 export type MetaId = 'm_hp' | 'm_might' | 'm_haste' | 'm_speed' | 'm_regen' | 'm_armor' | 'm_magnet' | 'm_xp' | 'm_cinder' | 'm_revive' | 'm_reroll' | 'm_banish' | 'm_luck' | 'm_skill';
 export interface MetaDef {

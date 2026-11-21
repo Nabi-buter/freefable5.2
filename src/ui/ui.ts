@@ -2,7 +2,7 @@ import './style.css';
 import '@fontsource/cinzel/latin-700.css';
 import '@fontsource/cinzel/latin-900.css';
 import type { AudioEngine } from '../audio/audio';
-import { SKILLS, type SkillId } from '../sim/defs';
+import { PACTS, PACT_IDS, SKILLS, type PactId, type SkillId } from '../sim/defs';
 import { BIND_ACTIONS, DEFAULT_BINDS, DEFAULT_PAD, PAD_ACTIONS, isTouchPrimary, keyLabel, padLabel, type BindAction, type Input, type PadAction } from '../core/input';
 import { evoHint, fmtNum, fmtTime, getLang, passiveText, setLang, t, weaponLevelText, weaponName } from '../core/i18n';
 import { ACHIEVEMENTS, type RunSummary } from '../core/progress';
@@ -353,6 +353,16 @@ export class UI {
         else if (this.screen === 'settings') this.showSettings();
         break;
       case 'full': au.ui('click'); this.host.toggleFullscreen(); break;
+      case 'toggle-pact': {
+        const id = arg as PactId;
+        if (!PACT_IDS.includes(id) || sv.stats.wins < 1) break;
+        const i = sv.last.pacts.indexOf(id);
+        if (i >= 0) sv.last.pacts.splice(i, 1);
+        else sv.last.pacts.push(id);
+        au.ui('click');
+        this.showSetup();
+        break;
+      }
       case 'pick-skill': {
         const c = CHARS[sv.last.char];
         if (arg === c.skill || arg === c.alt) sv.last.skills[sv.last.char] = arg as SkillId;
@@ -597,6 +607,9 @@ export class UI {
               <button class="pick row f ${endless ? 'sel' : ''} ${endlessOk ? '' : 'locked'}" style="--c:#b98cff" data-act="pick-mode" data-arg="endless"><span class="pic">${icon(endlessOk ? 'reroll' : 'lock', 22)}</span><span class="nm">${t('mode.endless')}</span></button>
             </div></div>
             <div class="panel detail slim"><p>${t(endless ? 'mode.endless.d' : 'mode.dawn.d')}</p>${endless && !endlessOk ? lock('mode.endless.u') : ''}${endless && endlessOk && sv.stats.bestLoops > 0 ? `<p>${icon('trophy', 16)} ${t('rec.loops')}: <b style="color:var(--amber-hot)">${sv.stats.bestLoops}</b></p>` : ''}</div>
+            <div><div class="group-label">${t('setup.pacts')}${sv.stats.wins > 0 ? ` <span class="pact-mul">${icon('cinder', 12)} ×${(1 + sv.last.pacts.reduce((a, id) => a + PACTS[id].reward, 0)).toFixed(2)}</span>` : ''}</div>
+              ${sv.stats.wins > 0 ? `<div class="pacts">${PACT_IDS.map((id) => `<button class="pact f ${sv.last.pacts.includes(id) ? 'on' : ''}" style="--c:${hex(PACTS[id].color)}" data-act="toggle-pact" data-arg="${id}" title="${t(`pact.${id}.d`)}"><b>${t('pact.' + id)}</b><small>${t(`pact.${id}.d`)} · +${Math.round(PACTS[id].reward * 100)}%</small></button>`).join('')}</div>` : `<div class="panel detail slim">${lock('mode.endless.u')}</div>`}
+            </div>
           </div>
         </div>
         <div class="foot">
