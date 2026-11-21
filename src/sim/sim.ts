@@ -1,7 +1,7 @@
 import { RNG, clamp } from '../core/rng';
 import {
   CHARS, DIFFICULTIES, ENEMIES, META, PASSIVES, SKILLS, WEAPONS,
-  PACTS, type PactId, type SkillId, type CharDef, type CharId, type DifficultyDef, type EnemyKind, type MetaId, type PassiveId, type RelicId, type WeaponId,
+  PACTS, PACT_IDS, type PactId, type SkillId, type CharDef, type CharId, type DifficultyDef, type EnemyKind, type MetaId, type PassiveId, type RelicId, type WeaponId,
 } from './defs';
 import { World, type BiomeId } from './worldgen';
 import type {
@@ -199,6 +199,17 @@ export class Sim {
     // "late" is whichever comes first: the clock, or how far the beacons have been pushed
     const prog = Math.max(m - 10, (this.stats.beacons - 3) * 1.5, this.boss || this.stats.bossKilled ? 6 : 0);
     return k * (1 + late * Math.max(0, prog));
+  }
+
+  /** take on a pact mid-run (Endless Night cycles) */
+  addPact(id: PactId) {
+    if (this.pacts.has(id)) return;
+    this.pacts.add(id);
+    const d = this.diff as { hp: number; spawn: number; cinder: number };
+    if (id === 'bloodmoon') d.hp *= 1.35;
+    if (id === 'swarm') d.spawn *= 1.3;
+    d.cinder *= 1 + PACTS[id].reward;
+    this.recalc();
   }
 
   /** temporary attack-speed multiplier (Overclock) */
@@ -928,6 +939,13 @@ export class Sim {
         }
         this.heal(p.st.maxHp * 0.4);
         this.events.push({ t: 'loop', n: this.stats.loops });
+        // from the second cycle on, each night brings a fresh burden of its own (and its reward)
+        const left = PACT_IDS.filter((x) => !this.pacts.has(x));
+        if (left.length && this.stats.loops >= 2) {
+          const id = left[Math.floor(this.rng.next() * left.length)];
+          this.addPact(id);
+          this.events.push({ t: 'announce', key: 'ann.pact.' + id, tone: 'warn' });
+        }
         this.events.push({ t: 'announce', key: 'ann.loop', tone: 'warn' });
         const pend = makeRelicPending(this);
         if (pend) this.pending.push(pend);
