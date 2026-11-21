@@ -216,6 +216,7 @@ export class GameView {
   private flashes: FlashLight[] = [];
   private siteLights: THREE.PointLight[] = [];
   private beaconDyn: BeaconDyn[] = [];
+  private shrineDyn: { crystal: THREE.Mesh; y: number; fade: number }[] = [];
   private hearthFlame = 0;
   private bossHalo: THREE.Mesh;
   private bossRing: THREE.Mesh;
@@ -435,6 +436,15 @@ export class GameView {
       this.worldGroup.add(crystal, pillar);
       return { crystal, pillar, lit: 0, y };
     });
+    // shrine crystals hover over their altars until the bargain is struck
+    this.shrineDyn = world.shrines.map((s) => {
+      const y = world.height(s.x, s.z);
+      const crystal = new THREE.Mesh(crystalGeo, glowMat(0.8, 0.5, 1.6));
+      crystal.scale.setScalar(0.6);
+      crystal.position.set(s.x, y + 2.2, s.z);
+      this.worldGroup.add(crystal);
+      return { crystal, y, fade: 1 };
+    });
     this.sparks.clear();
     this.smoke.clear();
     this.ribbons.clear();
@@ -467,6 +477,8 @@ export class GameView {
       }
     }
     this.beaconDyn = [];
+    for (const s of this.shrineDyn) (s.crystal.material as THREE.Material).dispose();
+    this.shrineDyn = [];
     this.env = null;
     this.terrain = null;
     this.props = null;
@@ -799,6 +811,13 @@ export class GameView {
               this.fovKick = Math.max(this.fovKick, 3);
               break;
           }
+          break;
+        }
+        case 'shrine': {
+          const y = H(ev.x, ev.z);
+          this.ring(ev.x, ev.z, 0.5, 7, 0.6, 1.2, 0.7, 2);
+          this.burst(ev.x, y + 2.2, ev.z, 50, 6, 0.9, 0.5, 1.6, 1.0, 3, 1.4, -1, 1.2);
+          this.flashLight(ev.x, y + 3, ev.z, 0.8, 0.5, 1, 160, 0.6);
           break;
         }
         case 'beaconPulse': {
@@ -1344,6 +1363,23 @@ export class GameView {
       dec.add(DECAL.glow, 0, 0, 7, 0.9, 0.45, 0.14, 0.35 + Math.sin(time * 9) * 0.03);
     }
     sites.push({ x: 0, y: hy + 1.6, z: 0, d: hd, r: 1, g: 0.6, b: 0.28, power: 36 + Math.sin(time * 11) * 3 });
+
+    for (let i = 0; i < this.shrineDyn.length; i++) {
+      const sd = this.shrineDyn[i];
+      const ss = sim ? sim.shrines[i] : null;
+      sd.fade = damp(sd.fade, ss && ss.used ? 0 : 1, 3, dt);
+      const s = world.shrines[i];
+      sd.crystal.visible = sd.fade > 0.02;
+      sd.crystal.rotation.y = time * 1.2 + i;
+      sd.crystal.position.y = sd.y + 2.2 + Math.sin(time * 2 + i) * 0.15;
+      sd.crystal.scale.setScalar(0.6 * sd.fade);
+      const d = Math.hypot(cam.x - s.x, cam.z - s.z);
+      if (d < 70 && sd.fade > 0.05) {
+        dec.add(DECAL.glow, s.x, s.z, 3.2, 0.6, 0.35, 1.0, 0.35 * sd.fade);
+        dec.add(DECAL.ring, s.x, s.z, 2.4, 0.7, 0.45, 1.2, (0.4 + Math.sin(time * 3 + i) * 0.15) * sd.fade);
+        if (Math.random() < dt * 8 * sd.fade) this.sparks.spawn(s.x + (Math.random() - 0.5), sd.y + 1.6, s.z + (Math.random() - 0.5), 0, 1 + Math.random(), 0, 1.2, 0.3, 1.6, 1.0, 2.6, { drag: 0.5, grav: -0.4 });
+      }
+    }
 
     for (let i = 0; i < world.beacons.length; i++) {
       const b = world.beacons[i];

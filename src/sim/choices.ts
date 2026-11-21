@@ -1,5 +1,5 @@
 import type { Sim } from './sim';
-import type { Choice, Pending } from './types';
+import type { BoonId, Choice, Pending } from './types';
 import {
   EVOLVED_LEVEL, MAX_PASSIVES, MAX_WEAPONS, MAX_WEAPON_LEVEL, PASSIVES, PASSIVE_IDS, RELIC_IDS, WEAPONS, WEAPON_IDS,
 } from './defs';
@@ -118,9 +118,50 @@ export function applyChoice(sim: Sim, c: Choice) {
     case 'cinder':
       sim.stats.cinders += 25;
       break;
+    case 'boon':
+      applyBoon(sim, c.id);
+      break;
   }
   sim.recalc();
   if (c.type === 'relic' && c.id === 'secondwind') p.dashCharges = p.st.dashMax;
+}
+
+const BOONS: BoonId[] = ['blood', 'ward', 'fury', 'swift', 'tithe', 'renew', 'gamble'];
+
+/** a shrine offers three bargains; picking one is optional (skip) */
+export function makeShrinePending(sim: Sim): Pending {
+  const list = BOONS.filter((b) => b !== 'blood' || RELIC_IDS.some((r) => !sim.hasRelic(r)));
+  sim.rng.shuffle(list);
+  return { type: 'shrine', choices: list.slice(0, 3).map((id) => ({ type: 'boon', id }) as Choice) };
+}
+
+function applyBoon(sim: Sim, id: BoonId) {
+  const p = sim.player;
+  switch (id) {
+    case 'blood': {
+      p.hp = Math.max(1, p.hp - p.hp * 0.25);
+      const avail = RELIC_IDS.filter((r) => !sim.hasRelic(r));
+      if (avail.length) applyChoice(sim, { type: 'relic', id: avail[Math.floor(sim.rng.next() * avail.length)] });
+      break;
+    }
+    case 'ward': sim.boons.hp += 25; p.hp += 25; break;
+    case 'fury': sim.boons.might += 0.15; sim.spawnBoost *= 1.12; break;
+    case 'swift': sim.boons.dashCd += 0.2; sim.boons.speed += 0.06; break;
+    case 'tithe': sim.stats.cinders += 45; break;
+    case 'renew': p.hp = p.st.maxHp; p.slowT = 0; break;
+    case 'gamble': {
+      const ups = p.weapons.filter((w) => w.level < MAX_WEAPON_LEVEL);
+      if (sim.rng.next() < 0.5 && ups.length) {
+        const w = ups[Math.floor(sim.rng.next() * ups.length)];
+        w.level = Math.min(MAX_WEAPON_LEVEL, w.level + 2);
+        sim.events.push({ t: 'announce', key: 'boon.gamble.win', tone: 'good' });
+      } else {
+        p.hp = Math.max(1, p.hp - p.st.maxHp * 0.2);
+        sim.events.push({ t: 'announce', key: 'boon.gamble.lose', tone: 'warn' });
+      }
+      break;
+    }
+  }
 }
 
 /** Chests apply their rewards immediately; the pending entry only drives the reveal screen. */

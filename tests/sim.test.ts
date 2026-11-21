@@ -111,6 +111,26 @@ describe('simulation', () => {
     expect(b.hp / a.hp).toBeCloseTo(1.35);
     expect(b.speed / a.speed).toBeGreaterThan(1.05);
   });
+  it('shrines offer a bargain once', () => {
+    let total = 0;
+    for (let seed = 1; seed <= 12; seed++) total += new Sim({ seed, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {} }).shrines.length;
+    expect(total).toBeGreaterThan(24);
+    const sim = new Sim({ seed: 4, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {} });
+    const s = sim.shrines[0];
+    const input = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
+    sim.player.x = s.x;
+    sim.player.z = s.z;
+    sim.step(1 / 60, input);
+    expect(sim.pending[0]?.type).toBe('shrine');
+    expect(sim.pending[0].choices).toHaveLength(3);
+    const hp = sim.player.st.maxHp;
+    sim.pending[0].choices[0] = { type: 'boon', id: 'ward' };
+    choose(sim, 0);
+    expect(sim.player.st.maxHp).toBe(hp + 25);
+    expect(s.used).toBe(true);
+    sim.step(1 / 60, input);
+    expect(sim.pending.some((p) => p.type === 'shrine')).toBe(false);
+  });
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);

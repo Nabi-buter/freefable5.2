@@ -455,6 +455,9 @@ export class AudioEngine {
               break;
           }
           break;
+        case 'shrine':
+          this.chord([62, 69, 74, 78], 1.6, { type: 'triangle', vol: 0.07, strum: 0.09, rev: 0.9 });
+          break;
         case 'skillReady':
           this.tone(midi(81), 0.12, { type: 'triangle', vol: 0.05, rev: 0.4 });
           this.tone(midi(88), 0.2, { type: 'triangle', vol: 0.05, rev: 0.5, delay: 0.07 });

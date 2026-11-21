@@ -121,6 +121,8 @@ export class World {
   readonly radius = WORLD_RADIUS;
   readonly playRadius = PLAY_RADIUS;
   readonly beacons: BeaconSite[] = [];
+  /** wayside shrines that offer a bargain once per run */
+  readonly shrines: BeaconSite[] = [];
   readonly obstacles: Obstacle[] = [];
   readonly decor: Decor[] = [];
   readonly paths: PathSeg[] = [];
@@ -150,6 +152,7 @@ export class World {
       for (let gz = z0; gz <= z1; gz++) for (let gx = x0; gx <= x1; gx++) buckets[gz * this.gridN + gx].push(i);
     });
     this.grid = buckets.map((b) => Int32Array.from(b));
+    this.placeShrines();
   }
 
   private gi(v: number): number {
@@ -314,6 +317,20 @@ export class World {
       else if (roll > 0.8) kind = 4;
       if (kind === 0 && rng.next() > n * 1.25) continue;
       this.decor.push({ x, z, kind, s: rng.range(0.7, 1.4), rot: rng.angle(), tint: rng.next() });
+    }
+  }
+
+  /** a separate random stream so adding shrines never reshuffles the rest of the island */
+  private placeShrines() {
+    const rng = new RNG((this.seed ^ 0x5a17e) >>> 0);
+    for (let tries = 0; tries < 400 && this.shrines.length < 3; tries++) {
+      const a = rng.angle(), d = rng.range(28, this.playRadius - 14);
+      const x = Math.cos(a) * d, z = Math.sin(a) * d;
+      if (this.height(x, z) < SEA_LEVEL + 0.6) continue;
+      if (this.blocked(x, z, 2.2)) continue;
+      if (this.beacons.some((b) => Math.hypot(b.x - x, b.z - z) < 18)) continue;
+      if (this.shrines.some((s) => Math.hypot(s.x - x, s.z - z) < 40)) continue;
+      this.shrines.push({ x, z });
     }
   }
 

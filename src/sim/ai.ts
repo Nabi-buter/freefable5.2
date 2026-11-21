@@ -56,7 +56,7 @@ export function updateDirector(sim: Sim, dt: number) {
   let channeling = false;
   for (const b of sim.beacons) if (b.channeling) channeling = true;
   // gentle opening, steep late game: fewer foes in the first minutes, a real horde once the build is online
-  let rate = (1.1 + 0.6 * I + 0.09 * I * I) * sim.curve(0.65, 0.08) * sim.diff.spawn;
+  let rate = (1.1 + 0.6 * I + 0.09 * I * I) * sim.curve(0.65, 0.08) * sim.diff.spawn * sim.spawnBoost;
   if (channeling) rate *= 1.6;
   if (sim.boss) rate *= 0.4;
   const maxAlive = Math.min(440, 50 + 30 * I);

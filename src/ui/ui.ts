@@ -39,6 +39,10 @@ export interface UIHost {
 type Screen = 'none' | 'title' | 'setup' | 'shop' | 'records' | 'settings' | 'how';
 type Modal = null | 'pending' | 'pause' | 'result' | 'confirm';
 
+const BOON_LOOK: Record<string, [string, string]> = {
+  blood: ['bloodember', '#ff4d5e'], ward: ['vigor', '#ff8aa0'], fury: ['might', '#ff7a3c'], swift: ['dash', '#7fd4ff'],
+  tithe: ['cinder', '#ffb347'], renew: ['heart', '#7dff9b'], gamble: ['reroll', '#c6a2ff'],
+};
 const hex = (n: number) => '#' + n.toString(16).padStart(6, '0');
 const BIOMES: BiomeId[] = ['ashwood', 'frostmere', 'emberwaste', 'gloommire'];
 const BIOME_COLOR: Record<BiomeId, string> = { ashwood: '#5fd39a', frostmere: '#9ad8ff', emberwaste: '#ff7a4a', gloommire: '#b98cff' };
@@ -1069,6 +1073,17 @@ export class UI {
       const e = sim.enemies[i];
       c.fillRect(e.x * k - 1, e.z * k - 1, 2, 2);
     }
+    // unused shrines: small violet diamonds
+    c.fillStyle = '#c6a2ff';
+    for (const s of sim.shrines) {
+      if (s.used) continue;
+      c.beginPath();
+      c.moveTo(s.x * k, s.z * k - 4);
+      c.lineTo(s.x * k + 3.5, s.z * k);
+      c.lineTo(s.x * k, s.z * k + 4);
+      c.lineTo(s.x * k - 3.5, s.z * k);
+      c.fill();
+    }
     for (const kx of sim.pickups) {
       if (kx.kind !== 'chest') continue;
       c.fillStyle = '#ffd24a';
@@ -1174,6 +1189,9 @@ export class UI {
       case 'cinder':
         color = '#ffb347'; ic = 'cinder'; name = t('choice.cinder'); ds = t('choice.cinder.d'); tag = `<span class="tag">${t('tag.bonus')}</span>`;
         break;
+      case 'boon':
+        color = BOON_LOOK[c.id][1]; ic = BOON_LOOK[c.id][0]; name = t('boon.' + c.id); ds = t(`boon.${c.id}.d`); tag = `<span class="tag">${t('tag.shrine')}</span>`; cls = 'sheen';
+        break;
     }
     return `<button class="card f ${cls}" style="--c:${color}" data-act="choose" data-arg="${i}"><span class="key">${i + 1}</span>${tag}
       <span class="pic">${icon(ic, 40)}</span><span class="nm">${name}</span>${lv ? `<span class="lv">${lv}</span>` : ''}<span class="ds">${ds}</span>${evo}</button>`;
@@ -1199,7 +1217,8 @@ export class UI {
         <div class="m-actions"><button class="btn primary f" data-act="chest-ok">${t('common.continue')}</button></div></div>`, 'clear');
       return;
     }
-    const relic = pend.type === 'relic';
+    const relic = pend.type === 'relic' || pend.type === 'shrine';
+    const shrine = pend.type === 'shrine';
     const cards = pend.choices.map((c, i) => this.choiceCard(c, i, sim)).join('');
     const actions = relic
       ? `<button class="btn ghost small f" data-act="skip">${icon('skip', 14)}${t('levelup.skip')}</button>`
@@ -1207,8 +1226,8 @@ export class UI {
          <button class="btn small f" data-act="banish" ${p.banishes > 0 ? '' : 'disabled'}>${icon('banish', 15)}${t('levelup.banish')} <span class="n">${p.banishes}</span></button>
          <button class="btn ghost small f" data-act="skip">${icon('skip', 14)}${t('levelup.skip')}</button>`;
     this.setModal('pending', `
-      <div class="m-title ${relic ? 'gold' : 'lv'}">${t(relic ? 'relic.title' : 'levelup.title')}</div>
-      <div class="m-sub">${t(relic ? 'relic.sub' : 'levelup.sub')}</div>
+      <div class="m-title ${shrine ? 'shrine' : relic ? 'gold' : 'lv'}">${t(shrine ? 'shrine.title' : relic ? 'relic.title' : 'levelup.title')}</div>
+      <div class="m-sub">${t(shrine ? 'shrine.sub' : relic ? 'relic.sub' : 'levelup.sub')}</div>
       <div class="choices">${cards}</div>
       <div class="m-actions">${actions}</div>`, 'clear');
   }

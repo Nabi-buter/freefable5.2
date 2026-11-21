@@ -607,6 +607,18 @@ export function geoBeacon(stone: number, dark: number): THREE.BufferGeometry {
   return merge(parts);
 }
 
+/** wayside shrine: a low stone altar between two weathered posts (the floating crystal is drawn separately) */
+export function geoShrine(stone: number, dark: number): THREE.BufferGeometry {
+  return merge([
+    part(cyl(1.7, 1.95, 0.3, 8), stone, { pos: [0, 0.15, 0], jitter: 0.1 }),
+    part(box(1.5, 0.9, 1.0), dark, { pos: [0, 0.75, 0], jitter: 0.08 }),
+    part(box(1.8, 0.18, 1.25), stone, { pos: [0, 1.28, 0], jitter: 0.06 }),
+    part(box(0.36, 2.4, 0.36), stone, { pos: [-1.25, 1.2, 0], rot: [0, 0, 0.05], jitter: 0.12, grad: [0.8, 1.05] }),
+    part(box(0.36, 2.1, 0.36), stone, { pos: [1.25, 1.05, 0], rot: [0, 0, -0.08], jitter: 0.12, grad: [0.8, 1.05] }),
+    part(box(3.0, 0.24, 0.42), dark, { pos: [0, 2.45, 0], rot: [0, 0, -0.04], jitter: 0.08 }),
+  ]);
+}
+
 export function geoHearth(stone: number, wood: number): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = [part(cyl(1.5, 1.7, 0.2, 10), 0x2a2622, { pos: [0, 0.1, 0] })];
   for (let i = 0; i < 9; i++) {

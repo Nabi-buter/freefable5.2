@@ -152,6 +152,26 @@ export function buildProps(world: World, pal: Palette, opts: { shadows: boolean;
   group.add(bm);
   meshes.push(bm);
 
+  // wayside shrines
+  if (world.shrines.length) {
+    const shrineGeo = G.geoShrine(pal.stone, pal.stoneDark);
+    geos.push(shrineGeo);
+    const sm = new THREE.InstancedMesh(shrineGeo, matStatic, world.shrines.length);
+    world.shrines.forEach((s, i) => {
+      _p.set(s.x, world.height(s.x, s.z) - 0.1, s.z);
+      _q.setFromAxisAngle(_up, Math.atan2(-s.x, -s.z));
+      _s.set(1, 1, 1);
+      _m.compose(_p, _q, _s);
+      sm.setMatrixAt(i, _m);
+      sm.setColorAt(i, _c.setRGB(1, 1, 1));
+    });
+    sm.castShadow = opts.shadows;
+    sm.receiveShadow = true;
+    sm.frustumCulled = false;
+    group.add(sm);
+    meshes.push(sm);
+  }
+
   const hearthGeo = G.geoHearth(pal.stone, pal.trunk);
   geos.push(hearthGeo);
   const hearth = new THREE.Mesh(hearthGeo, matStatic);

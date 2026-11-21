@@ -9,7 +9,7 @@ import type {
 } from './types';
 import { updateEnemies, updateDirector, initDirector, type DirectorState } from './ai';
 import { updateWeapons, updateProjs, updateZones, updateEProjs } from './weapons';
-import { makeChestPending, makeLevelPending, makeRelicPending } from './choices';
+import { makeChestPending, makeLevelPending, makeRelicPending, makeShrinePending } from './choices';
 import { castSkill, updateSkill } from './skills';
 
 export interface RunConfig {
@@ -93,6 +93,12 @@ export class Sim {
   readonly diff: DifficultyDef;
   readonly char: CharDef;
   readonly pacts: Set<PactId>;
+  /** shrine state for this run (parallel to world.shrines) */
+  shrines: { x: number; z: number; used: boolean }[] = [];
+  /** lasting gifts from shrine bargains */
+  boons = { hp: 0, might: 0, dashCd: 0, speed: 0 };
+  /** extra spawn pressure accepted at a shrine (Fury) */
+  spawnBoost = 1;
   /** the signature ability chosen for this run */
   readonly skill: SkillId;
   time = 0;
@@ -160,6 +166,7 @@ export class Sim {
       rerolls: 1 + m('m_reroll'), banishes: m('m_banish'), alive: true,
     };
     this.player.weapons.push({ id: this.char.weapon, level: 1, t: 0.4, a: 0, b: 0, dealt: 0 });
+    this.shrines = this.world.shrines.map((w) => ({ x: w.x, z: w.z, used: false }));
     this.recalc();
     this.player.hp = this.player.st.maxHp;
     this.player.dashCharges = this.player.st.dashMax;
@@ -259,6 +266,11 @@ export class Sim {
         default: break;
       }
     }
+    const bn = this.boons;
+    st.maxHp += bn.hp;
+    st.might *= 1 + bn.might;
+    st.dashCd *= 1 - bn.dashCd;
+    st.speed *= 1 + bn.speed;
     st.maxHp = Math.round(st.maxHp);
     p.st = st;
     if (old > 0 && st.maxHp > old) p.hp += st.maxHp - old;
@@ -623,6 +635,7 @@ export class Sim {
     this.flushBlasts();
     this.updatePickups(dt);
     this.updateBeacons(dt);
+    this.updateShrines();
     if (this.comboT > 0) {
       this.comboT -= dt;
       if (this.comboT <= 0) this.combo = 0;
@@ -755,6 +768,19 @@ export class Sim {
       p.xpNext = this.xpNeed(p.level);
       this.events.push({ t: 'levelup', level: p.level });
       this.pending.push(makeLevelPending(this));
+    }
+  }
+
+  private updateShrines() {
+    const p = this.player;
+    if (!p.alive || this.endT >= 0 || this.pending.length > 0) return;
+    for (const s of this.shrines) {
+      if (s.used) continue;
+      if ((p.x - s.x) ** 2 + (p.z - s.z) ** 2 > 2.4 * 2.4) continue;
+      s.used = true;
+      this.pending.push(makeShrinePending(this));
+      this.events.push({ t: 'shrine', x: s.x, z: s.z });
+      return;
     }
   }
 

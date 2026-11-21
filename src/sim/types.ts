@@ -255,10 +255,14 @@ export type Choice =
   | { type: 'passive'; id: PassiveId; level: number; isNew: boolean }
   | { type: 'relic'; id: RelicId }
   | { type: 'heal' }
-  | { type: 'cinder' };
+  | { type: 'cinder' }
+  | { type: 'boon'; id: BoonId };
+
+/** shrine bargains */
+export type BoonId = 'blood' | 'ward' | 'fury' | 'swift' | 'tithe' | 'renew' | 'gamble';
 
 export interface Pending {
-  type: 'levelup' | 'relic' | 'chest';
+  type: 'levelup' | 'relic' | 'chest' | 'shrine';
   choices: Choice[];
   /** chest: rewards are applied automatically, list is for presentation */
   cinders?: number;
@@ -292,6 +296,7 @@ export type SimEvent =
   | { t: 'loop'; n: number }
   | { t: 'skill'; id: SkillId; x: number; z: number; r: number }
   | { t: 'skillReady' }
+  | { t: 'shrine'; x: number; z: number }
   | { t: 'spawnElite'; x: number; z: number }
   | { t: 'freeze'; x: number; z: number };
 
