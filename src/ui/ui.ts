@@ -1341,7 +1341,7 @@ export class UI {
     const cell = (v: string, k: string) => `<div class="res-cell"><b>${v}</b><span>${k}</span></div>`;
     this.setModal('result', `
       <div class="panel result">
-        <div>${sum.daily ? `<div class="daily-tag">${icon('star', 14)}${t('menu.daily')}</div>` : ''}${sum.endless ? `<div class="daily-tag" style="color:var(--violet)">${icon('reroll', 14)}${t('result.endless')}</div>` : ''}<div class="m-title ${sum.win ? 'gold' : 'red'}">${t(sum.win ? 'result.win' : 'result.lose')}</div><div class="m-sub">${t(sum.win ? 'result.win.sub' : 'result.lose.sub')}${sum.newBest ? ` · <b style="color:var(--gold)">${t('result.best')}</b>` : ''}</div></div>
+        <div>${sum.daily ? `<div class="daily-tag">${icon('star', 14)}${t('menu.daily')}</div>` : ''}${sum.endless ? `<div class="daily-tag" style="color:var(--violet)">${icon('reroll', 14)}${t('result.endless')}</div>` : ''}<div class="m-title ${sum.win ? 'gold' : 'red'}">${t(sum.win ? 'result.win' : 'result.lose')}</div><div class="m-sub">${t(sum.win ? 'result.win.sub' : 'result.lose.sub')}${sum.newBest ? ` · <b style="color:var(--gold)">${t('result.best')}</b>` : ''}</div>${sum.win && !sum.endless ? `<div class="epilogue">${t('epi.' + sum.biome)}</div>` : ''}</div>
         <div class="res-grid">${cell(fmtTime(sum.time), t('result.time'))}${cell(String(sum.level), t('result.level'))}${cell(fmtNum(sum.kills), t('result.kills'))}${sum.endless ? cell(String(sum.loops), t('result.loops')) : cell(`${sum.beacons}/${BEACON_COUNT}`, t('result.beacons'))}</div>
         <div class="res-cols scroll">
           <div><div class="group-label">${t('result.weapons')}</div><div class="wbars">${bars}</div>
