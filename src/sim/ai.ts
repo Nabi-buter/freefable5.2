@@ -108,7 +108,8 @@ export function updateDirector(sim: Sim, dt: number) {
     const el = sim.spawnEnemy(kind, pos.x, pos.z, true);
     // from the third minute on, elites arrive with a random affix
     if (I >= 3) {
-      el.affix = sim.rng.int(1, 5);
+      el.affix = sim.rng.int(1, 6);
+      if (el.affix === 6) el.ll = 4;
       if (el.affix === 1) {
         el.speed *= 1.45;
         el.hp *= 0.8;
@@ -168,6 +169,22 @@ export function updateEnemies(sim: Sim, dt: number) {
       if (e.cdB > 0) e.cdB -= dt;
       if (e.spawn < 1) e.spawn = Math.min(1, e.spawn + dt * 1.9);
       if (e.affix === 2 && e.hp < e.maxHp) e.hp = Math.min(e.maxHp, e.hp + e.maxHp * 0.022 * dt);
+      // phasing elites step through the dark to cut you off (ll = timer)
+      if (e.affix === 6 && e.spawn >= 1 && e.freezeT <= 0) {
+        e.ll -= dt;
+        const pdx = p.x - e.x, pdz = p.z - e.z;
+        if (e.ll <= 0 && pdx * pdx + pdz * pdz > 49) {
+          e.ll = sim.rng.range(4.5, 6);
+          sim.events.push({ t: 'nova', x: e.x, z: e.z, r: 2.2, c: 0xb98cff });
+          const ml = Math.hypot(p.vx, p.vz);
+          const a = ml > 0.5 ? Math.atan2(p.vz, p.vx) + sim.rng.range(-0.6, 0.6) : sim.rng.angle();
+          e.x = p.x + Math.cos(a) * 4.5;
+          e.z = p.z + Math.sin(a) * 4.5;
+          e.kx = e.kz = 0;
+          e.spawn = 0.75;
+          sim.events.push({ t: 'nova', x: e.x, z: e.z, r: 2.2, c: 0xb98cff });
+        }
+      }
       // burn
       if (e.burnT > 0) {
         e.burnT -= dt;

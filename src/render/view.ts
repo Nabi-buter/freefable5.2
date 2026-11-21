@@ -172,7 +172,7 @@ const FinalShader = {
     }`,
 };
 
-const AFFIX_COLOR: Record<number, string> = { 1: '#6cf2ff', 2: '#7dff9b', 3: '#ff6a5a', 4: '#ffe36b', 5: '#c8d2e6' };
+const AFFIX_COLOR: Record<number, string> = { 1: '#6cf2ff', 2: '#7dff9b', 3: '#ff6a5a', 4: '#ffe36b', 5: '#c8d2e6', 6: '#c6a2ff' };
 
 const WCOL: Record<WeaponId, [number, number, number]> = {
   ember: [1.0, 0.5, 0.15], wisps: [0.4, 0.9, 1.0], nova: [1.0, 0.6, 0.2], arc: [0.6, 0.8, 1.0], starfall: [1.0, 0.85, 0.45], sigil: [0.78, 0.6, 1.0], sprite: [1.0, 0.9, 0.55], totem: [1.0, 0.7, 0.4],
