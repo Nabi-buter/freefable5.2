@@ -204,6 +204,16 @@ class App implements UIHost {
     this.last = performance.now();
   }
 
+  /** give up this vigil and start a fresh one at once (embers earned so far are still banked) */
+  restart() {
+    if (!this.sim) return;
+    finishRun(this.save.data, this.sim, this.runDaily);
+    this.save.save();
+    this.audio.setDuck(1);
+    this.ui.closeModal();
+    this.startRun(this.runDaily);
+  }
+
   abandon() {
     if (!this.sim) return;
     this.audio.setDuck(1);

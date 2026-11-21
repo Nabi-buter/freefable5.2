@@ -179,6 +179,8 @@ const S: Record<string, Pair> = {
   'syn.bladeorbit.on': ['시너지 — 칼날 궤도!', 'Synergy — Blade Orbit!'],
   'syn.shatter.on': ['시너지 — 관통 사격!', 'Synergy — Shatter!'],
   'syn.hint': ['시너지: {0} (둘 다 Lv{1})', 'Synergy: {0} (both Lv{1})'],
+  'pause.restart': ['다시 시작', 'Restart'],
+  'pause.restart.confirm': ['이번 원정을 포기하고 같은 설정으로 다시 시작할까요? 지금까지 모은 불씨는 저장됩니다.', 'Abandon this vigil and start again with the same setup? Cinders earned so far are kept.'],
   'setup.pacts': ['서약', 'Pacts'],
   'pact.bloodmoon': ['핏빛 달', 'Blood Moon'],
   'pact.bloodmoon.d': ['적 체력 +35%', 'Enemy health +35%'],

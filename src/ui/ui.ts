@@ -25,6 +25,7 @@ export interface UIHost {
   startRun(daily?: boolean): void;
   resume(): void;
   abandon(): void;
+  restart(): void;
   retry(): void;
   toMenu(): void;
   settingsChanged(): void;
@@ -478,6 +479,10 @@ export class UI {
       // ---- in-run
       case 'pause': this.host.pauseRequest(); break;
       case 'resume': au.ui('back'); this.closeModal(); this.host.resume(); break;
+      case 'restart':
+        au.ui('click');
+        this.confirm(t('pause.restart.confirm'), () => this.host.restart(), () => this.host.pauseRequest());
+        break;
       case 'quit':
         au.ui('click');
         this.confirm(t('pause.confirm'), () => {
@@ -1290,6 +1295,7 @@ export class UI {
         <div class="pause-actions">
           <button class="btn primary f" data-act="resume">${icon('play', 18)}${t('pause.resume')}</button>
           <button class="btn f" data-act="pause-settings">${icon('gear', 18)}${t('menu.settings')}</button>
+          <button class="btn f" data-act="restart">${icon('reroll', 18)}${t('pause.restart')}</button>
           <button class="btn ghost danger f" data-act="quit">${t('pause.quit')}</button>
         </div>
       </div>`);
