@@ -776,7 +776,7 @@ export class UI {
       <div class="screen shade">
         <div class="head"><h1>${t('how.title')}</h1></div>
         <div class="grid-body scroll"><div class="how-grid">
-          ${card(1, 'glasslantern')}${card(2, 'beacon')}${card(3, 'up')}${card(4, 'crown')}
+          ${card(1, 'glasslantern')}${card(2, 'beacon')}${card(3, 'up')}${card(4, 'crown')}${card(5, 'flare')}${card(6, 'resonance')}${card(7, 'sanctuary')}${card(8, 'oathbrand')}
           <div class="how-card wide"><h3>${icon('info', 22)}${t('how.controls')}</h3><ul><li>${t('how.c.kbm', this.moveKeys(), keyLabel(this.save.settings.keys.dash))}</li><li>${t('how.c.pad')}</li><li>${t('how.c.skill', keyLabel(this.save.settings.keys.skill))}</li><li>${t('how.c.touch')}</li></ul></div>
         </div></div>
         <div class="foot"><button class="btn ghost f" data-act="title">${t('common.back')}</button><button class="btn primary f" data-act="play">${t('menu.play')}</button></div>
