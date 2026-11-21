@@ -176,6 +176,7 @@ class App implements UIHost {
       this.hitStopT = 0;
       this.cine = null;
       this.view.focusW = 0;
+      if (this.audio.music) this.audio.music.region = cfg.biome;
       this.audio.music?.setMood('run', 0);
       this.audio.setDuck(1);
       this.state = 'playing';

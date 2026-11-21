@@ -498,6 +498,33 @@ const PROG_MINOR = [
   [41, 53, 57, 60, 65, 69], // F
   [36, 48, 55, 60, 64, 67], // C
 ];
+/** each region plays the run in its own colour (the boss and dawn themes stay shared) */
+const PROG_REGION: Record<string, number[][]> = {
+  ashwood: [
+    [38, 50, 57, 62, 65, 69], // Dm
+    [34, 46, 53, 58, 62, 65], // Bb
+    [41, 53, 57, 60, 65, 69], // F
+    [36, 48, 55, 60, 64, 67], // C
+  ],
+  frostmere: [
+    [40, 52, 59, 64, 67, 71], // Em(add9 feel)
+    [36, 48, 55, 60, 64, 71], // Cmaj7
+    [43, 55, 59, 62, 67, 74], // G
+    [38, 50, 57, 62, 66, 69], // D
+  ],
+  emberwaste: [
+    [33, 45, 52, 57, 60, 64], // Am
+    [34, 46, 53, 58, 62, 65], // Bb (phrygian bite)
+    [33, 45, 52, 57, 60, 64], // Am
+    [31, 43, 50, 55, 59, 62], // G
+  ],
+  gloommire: [
+    [37, 49, 56, 61, 64, 68], // C#m
+    [33, 45, 52, 57, 61, 64], // A
+    [35, 47, 54, 59, 63, 66], // B
+    [32, 44, 51, 56, 60, 63], // G#
+  ],
+};
 const PROG_BOSS = [
   [38, 50, 57, 62, 65, 68], // Dm(b5 colour)
   [39, 51, 58, 63, 67, 70], // Eb
@@ -527,6 +554,8 @@ export class Music {
   private seed = 1;
   private leadNote = 0;
 
+  /** region of the current run: picks the chord colour */
+  region = 'ashwood';
   constructor(ctx: AudioContext, out: GainNode, rev: GainNode) {
     this.ctx = ctx;
     this.out = out;
@@ -605,7 +634,7 @@ export class Music {
   private tick(step: number, t: number, sd: number) {
     const m = this.mood;
     if (m === 'silent') return;
-    const prog = m === 'boss' ? PROG_BOSS : m === 'victory' ? PROG_MAJOR : PROG_MINOR;
+    const prog = m === 'boss' ? PROG_BOSS : m === 'victory' ? PROG_MAJOR : m === 'run' ? (PROG_REGION[this.region] ?? PROG_MINOR) : PROG_MINOR;
     const s16 = step % 16;
     const bar = Math.floor(step / 16);
     const chord = prog[Math.floor(bar / 2) % 4];
