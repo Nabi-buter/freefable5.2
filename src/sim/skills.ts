@@ -309,7 +309,7 @@ export function updateSkill(sim: Sim, dt: number) {
       if (p.skillAcc <= 0) {
         p.skillAcc = 0.25;
         const list = sim.near(p.x, p.z, 3.8 * area);
-        for (let i = 0; i < list.length; i++) strike(sim, list[i], 12 + 2.6 * L, 0.06, 7);
+        for (let i = 0; i < list.length; i++) strike(sim, list[i], 16 + 3.2 * L, 0.07, 7);
       }
     } else if (id === 'barrage') {
       p.skillAcc -= dt;

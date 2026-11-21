@@ -364,8 +364,8 @@ export const CHARS: Record<CharId, CharDef> = {
   frostweaver: { id: 'frostweaver', weapon: 'frost', hp: 90, speed: 7.2, armor: 0, might: 1, haste: 1, area: 1.18, xp: 1, dashCharges: 1, skill: 'deepfreeze', alt: 'vortex', cloak: 0x3b5d7c, accent: 0xbdf0ff },
   ashwalker: { id: 'ashwalker', weapon: 'trail', hp: 95, speed: 7.7, armor: 0, might: 1.1, haste: 1, area: 1, xp: 1, dashCharges: 2, skill: 'cinderstep', alt: 'effigy', cloak: 0x3a2d33, accent: 0xff5a2a },
   stargazer: { id: 'stargazer', weapon: 'starfall', hp: 78, speed: 7.2, armor: 0, might: 0.92, haste: 1, area: 1.12, xp: 1, dashCharges: 1, skill: 'starcall', alt: 'stasis', cloak: 0x2b2a5c, accent: 0xffe08a },
-  tinker: { id: 'tinker', weapon: 'totem', hp: 95, speed: 7.2, armor: 1, might: 1, haste: 1.08, area: 1, xp: 1, dashCharges: 1, skill: 'overclock', alt: 'barrage', cloak: 0x5a4030, accent: 0xffd070 },
-  moonknight: { id: 'moonknight', weapon: 'glaive', hp: 115, speed: 7.0, armor: 1, might: 1.05, haste: 1, area: 1, xp: 1, dashCharges: 1, skill: 'reflect', alt: 'whirl', cloak: 0x34405e, accent: 0xd8e8ff },
+  tinker: { id: 'tinker', weapon: 'totem', hp: 105, speed: 7.3, armor: 1, might: 1.05, haste: 1.12, area: 1, xp: 1, dashCharges: 1, skill: 'overclock', alt: 'barrage', cloak: 0x5a4030, accent: 0xffd070 },
+  moonknight: { id: 'moonknight', weapon: 'glaive', hp: 125, speed: 7.2, armor: 2, might: 1.12, haste: 1, area: 1, xp: 1, dashCharges: 1, skill: 'reflect', alt: 'whirl', cloak: 0x34405e, accent: 0xd8e8ff },
 };
 
 // ---------------------------------------------------------------- difficulty
