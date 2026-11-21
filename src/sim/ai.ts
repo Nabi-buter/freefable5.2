@@ -488,7 +488,8 @@ function updateEclipse(sim: Sim, e: Enemy, dt: number, dist: number, nx: number,
       // idle / approach, then choose a move
       if (e.stT >= 1.5 * pace) {
         e.n++;
-        const moves = phase === 1 ? [1, 2, 3] : phase === 2 ? [1, 4, 2, 5, 3] : [4, 2, 5, 1, 5, 3];
+        // move 6 is the region's own signature attack
+        const moves = phase === 1 ? [1, 2, 6, 3] : phase === 2 ? [1, 4, 6, 2, 5, 3] : [4, 6, 2, 5, 1, 6, 3];
         e.st = moves[e.n % moves.length];
         e.stT = 0;
         e.c1 = 0;
@@ -604,5 +605,54 @@ function updateEclipse(sim: Sim, e: Enemy, dt: number, dist: number, nx: number,
       }
       break;
     }
+    case 6: {
+      // regional signature: the Eclipse wields the island's own danger
+      e.ax *= 0.3;
+      e.az *= 0.3;
+      e.tele = 1;
+      const hz = sim.world.biome.hazard;
+      const waves = phase === 1 ? 2 : 3;
+      const idx = Math.floor(e.stT / 0.7);
+      if (idx > e.c1 && idx <= waves) {
+        e.c1 = idx;
+        if (hz === 'none') {
+          // shadow volley: a fan of bolts aimed at the bearer
+          const base = Math.atan2(p.z - e.z, p.x - e.x);
+          const n = phase === 3 ? 9 : 7;
+          for (let k = 0; k < n; k++) {
+            const a = base + (k - (n - 1) / 2) * 0.16;
+            sim.eprojs.push({ id: sim.id(), x: e.x + Math.cos(a) * e.r, z: e.z + Math.sin(a) * e.r, vx: Math.cos(a) * 12, vz: Math.sin(a) * 12, life: 4, r: 0.42, dmg: e.dmg * 0.55, kind: 1, alive: true });
+          }
+        } else if (hz === 'vent') {
+          // magma line from the boss to where the bearer is heading
+          const tx = p.x + p.vx * 0.6, tz = p.z + p.vz * 0.6;
+          for (let k = 1; k <= 5; k++) {
+            const f = k / 5;
+            bossHazard(sim, 'vent', e.x + (tx - e.x) * f, e.z + (tz - e.z) * f, 0.9 + k * 0.12, e.dmg * 0.8);
+          }
+        } else {
+          // frost or spore blooms closing in around the bearer
+          const n = phase === 3 ? 5 : 4;
+          const a0 = sim.rng.angle();
+          for (let k = 0; k < n; k++) {
+            const a = a0 + (k / n) * Math.PI * 2;
+            const d = idx === waves ? 2.5 : 6;
+            bossHazard(sim, hz, p.x + Math.cos(a) * d, p.z + Math.sin(a) * d, 1.1 + k * 0.08, hz === 'frost' ? e.dmg * 0.35 : e.dmg * 0.3);
+          }
+        }
+      }
+      if (e.stT > 0.7 * waves + 1.0) {
+        e.st = 0;
+        e.stT = 0;
+      }
+      break;
+    }
   }
+}
+
+function bossHazard(sim: Sim, kind: 'vent' | 'frost' | 'spore', x: number, z: number, delay: number, dmg: number) {
+  sim.zones.push({
+    id: sim.id(), kind, x, z, r: kind === 'vent' ? 3.2 : kind === 'spore' ? 3.4 : 3.8, t: 0, dur: delay, dmg,
+    tick: 0, hostile: true, weapon: null, evolved: false, dx: kind === 'spore' ? 3 : 0, dz: 0, len: 0, alive: true,
+  });
 }

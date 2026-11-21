@@ -196,7 +196,7 @@ export class Sim {
     const e = Math.min(1, m / 9);
     const k = early + (1 - early) * e * e * (3 - 2 * e);
     // "late" is whichever comes first: the clock, or how far the beacons have been pushed
-    const prog = Math.max(m - 10, (this.stats.beacons - 3) * 1.5, this.boss || this.stats.bossKilled ? 4.5 : 0);
+    const prog = Math.max(m - 10, (this.stats.beacons - 3) * 1.5, this.boss || this.stats.bossKilled ? 6 : 0);
     return k * (1 + late * Math.max(0, prog));
   }
 
@@ -538,7 +538,7 @@ export class Sim {
     // past the 18 minute mark the night turns lethal, so no vigil can stall forever
     const late = Math.max(0, this.time / 60 - 18);
     const I = this.intensity();
-    const mult = (1 + 0.04 * I) * this.curve(0.6, 0.15) * (1 + late * 0.15) * this.diff.dmg;
+    const mult = (1 + 0.04 * I) * this.curve(0.6, 0.2) * (1 + late * 0.15) * this.diff.dmg;
     const d = Math.max(1, Math.round(dmg * mult - p.st.armor));
     p.hp -= d;
     p.iframe = 0.55;
