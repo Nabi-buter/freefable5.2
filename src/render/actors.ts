@@ -168,6 +168,12 @@ export const KIND_COLOR: Record<EnemyKind, [number, number, number]> = {
   bomber: [1.0, 0.25, 0.4], husk: [1.0, 0.82, 0.3], rime: [0.55, 0.92, 1.0], worm: [1.0, 0.5, 0.18], sporecap: [0.6, 1.0, 0.55], thief: [1.0, 0.75, 0.3], herald: [0.7, 0.3, 1.0], eclipse: [1.0, 0.4, 0.2],
 };
 
+const BOSS_TINT: Record<string, [number, number, number]> = {
+  frostmere: [0.72, 0.9, 1.15],
+  emberwaste: [1.2, 0.82, 0.62],
+  gloommire: [0.82, 1.08, 0.86],
+};
+
 export class EnemyRenderer {
   readonly group = new THREE.Group();
   private kinds = {} as Record<EnemyKind, KindRender>;
@@ -192,7 +198,7 @@ export class EnemyRenderer {
     this.corpses.length = 0;
   }
 
-  constructor(shadows: boolean) {
+  constructor(shadows: boolean, biome = 'ashwood') {
     this.mat = makeWorldMat({ instFx: true });
     const builders: Record<EnemyKind, () => THREE.BufferGeometry> = {
       shade: G.geoShade, skitter: G.geoSkitter, brute: G.geoBrute, spitter: G.geoSpitter, wraith: G.geoWraith,
@@ -216,6 +222,13 @@ export class EnemyRenderer {
       mesh.receiveShadow = false;
       this.group.add(mesh);
       this.kinds[kind] = { mesh, fx, phase, n: 0, cap };
+      // the herald and the Eclipse take on the colour of the island they rule
+      const tint = BOSS_TINT[biome];
+      if (tint && (kind === 'herald' || kind === 'eclipse')) {
+        const col = new THREE.Color(tint[0], tint[1], tint[2]);
+        for (let i = 0; i < cap; i++) mesh.setColorAt(i, col);
+        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      }
     }
   }
 

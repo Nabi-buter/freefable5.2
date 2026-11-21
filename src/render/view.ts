@@ -407,7 +407,7 @@ export class GameView {
     this.props = buildProps(world, this.pal, { shadows: this.q.shadows, decorDensity: this.q.decor });
     this.worldGroup.add(this.env.group, this.terrain, this.props.group);
     this.player = new PlayerModel(char, this.q.shadows);
-    this.enemies = new EnemyRenderer(this.q.shadows);
+    this.enemies = new EnemyRenderer(this.q.shadows, world.biome.id);
     this.worldGroup.add(this.player.root, this.enemies.group);
     // beacon dynamics
     const pillarMat = () => new THREE.ShaderMaterial({
