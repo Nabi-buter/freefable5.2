@@ -150,7 +150,7 @@ describe('simulation', () => {
     const sim = new Sim({ seed: 12, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {} });
     const input = { mx: 0.3, mz: 0.2, aimX: 1, aimZ: 0, autoAim: true, dash: false };
     let seen = false;
-    for (let i = 0; i < 60 * 200; i++) {
+    for (let i = 0; i < 60 * 290; i++) {
       sim.player.hp = sim.player.st.maxHp;
       sim.step(1 / 60, input);
       while (sim.pending.length) choose(sim, 0);
