@@ -155,10 +155,10 @@ export function updateDirector(sim: Sim, dt: number) {
   } else if (!sim.boss && sim.stats.loops === 0) {
     d.omenT -= dt;
     if (d.omenT <= 0) {
-      d.omenT = sim.rng.range(170, 220);
+      d.omenT = sim.rng.range(170, 220) * (sim.hasRelic('omenbell') ? 0.6 : 1);
       const ids: OmenId[] = ['golden', 'deepdark', 'starfall'];
       const id = ids[Math.floor(sim.rng.next() * ids.length)];
-      sim.omen = { id, t: 20, acc: 0 };
+      sim.omen = { id, t: sim.hasRelic('omenbell') ? 32 : 20, acc: 0 };
       sim.events.push({ t: 'announce', key: 'omen.' + id, tone: id === 'deepdark' ? 'warn' : 'good' });
     }
   }
@@ -364,6 +364,10 @@ export function updateEnemies(sim: Sim, dt: number) {
             if (!gem && fear === 0) {
               vx = (pdx / pd) * e.speed * 0.6;
               vz = (pdz / pd) * e.speed * 0.6;
+            }
+            if (sim.hasRelic('snare')) {
+              vx *= 0.6;
+              vz *= 0.6;
             }
             // gone with the loot
             if (e.t > 32) e.alive = false;

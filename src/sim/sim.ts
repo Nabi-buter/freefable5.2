@@ -524,10 +524,10 @@ export class Sim {
     if (e.kind === 'rime') {
       this.zones.push({ id: this.id(), kind: 'frost', x: e.x, z: e.z, r: 3.8, t: 0, dur: 0.75, dmg: 5, tick: 0, hostile: true, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true });
     }
-    if (e.kind === 'thief' && e.c1 > 0) {
+    if (e.kind === 'thief' && (e.c1 > 0 || this.hasRelic('snare'))) {
       // the loot comes back with interest
       this.dropXp(e.x, e.z, e.c1 * 1.5);
-      if (e.c1 > 25 && this.rng.next() < 0.35) this.spawnPickup('chest', e.x, e.z, 1);
+      if ((e.c1 > 25 && this.rng.next() < 0.35) || this.hasRelic('snare')) this.spawnPickup('chest', e.x, e.z, 1);
       else this.spawnPickup('cinder', e.x, e.z, 3);
     }
     if (e.kind === 'husk') {

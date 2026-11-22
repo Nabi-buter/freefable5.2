@@ -51,6 +51,8 @@ const I: Record<string, string> = {
   titanash: `<path ${F} d="M2 20 9 6l3.500 6L15 8.500 22 20z"/><path fill="#0b0f22" fill-opacity=".4" stroke="none" d="M9 6l1.800 3-1.800 2-1.600-1.800z"/>`,
   huntersmark: `<circle ${N} cx="12" cy="12" r="9"/><circle ${N} cx="12" cy="12" r="5"/><circle ${F} cx="12" cy="12" r="1.800"/><path ${N} d="M12 1v4M12 19v4M1 12h4M19 12h4"/>`,
   afterimage: `<circle ${F} cx="15.500" cy="12" r="6" /><circle ${N} cx="10" cy="12" r="6" opacity=".7"/><circle ${N} cx="5.500" cy="12" r="4.500" opacity=".4"/>`,
+  omenbell: `<path ${F} d="M12 3a6 6 0 0 1 6 6v4l2 3H4l2-3V9a6 6 0 0 1 6-6z"/><circle ${F} cx="12" cy="19" r="1.800"/>`,
+  snare: `<circle ${N} cx="12" cy="12" r="8.500"/><path ${N} d="M12 3.500v17M3.500 12h17M6 6l12 12M18 6 6 18" opacity=".7"/>`,
   resonance: `<circle ${N} cx="8" cy="12" r="5"/><circle ${N} cx="16" cy="12" r="5"/><circle ${F} cx="12" cy="12" r="1.800"/>`,
   oathbrand: `<path ${F} d="M12 2 14 8.500h6.500l-5.200 4 2 6.500L12 15l-5.300 4 2-6.500-5.200-4H10z" opacity=".85"/><path ${N} stroke-width="2" d="M5 22h14"/>`,
   riteember: `<circle ${N} cx="12" cy="12" r="9.500" stroke-dasharray="4 3"/><path ${F} d="M12 5c.7 2.700 3.600 4 3.600 7.600a3.600 3.600 0 0 1-7.200 0c0-1.400.6-2.400 1.300-3.600.4 1.300.9 2 1.600 2.100C11.700 9 11.200 7 12 5z"/>`,
