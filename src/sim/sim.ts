@@ -27,6 +27,8 @@ export interface RunConfig {
   skill?: SkillId;
   /** optional burdens taken for a bigger cinder reward */
   pacts?: PactId[];
+  /** lightbearer mastery stars (0-3): +8 health, +4% damage, +1 reroll */
+  mastery?: number;
 }
 
 /** Uniform spatial hash for enemies. Rebuilt every step. */
@@ -170,7 +172,7 @@ export class Sim {
       moving: false, hurtT: 0, revives: m('m_revive'), skillCd: 4, skillT: 0, skillAcc: 0, glowT: 0, skillX: 0, skillZ: 0,
       weapons: [], passives: [], relics: [],
       st: {} as Stats,
-      rerolls: 1 + m('m_reroll'), banishes: m('m_banish'), alive: true,
+      rerolls: 1 + m('m_reroll') + ((cfg.mastery ?? 0) >= 3 ? 1 : 0), banishes: m('m_banish'), alive: true,
     };
     this.player.weapons.push({ id: this.char.weapon, level: 1, t: 0.4, a: 0, b: 0, dealt: 0 });
     this.shrines = this.world.shrines.map((w) => ({ x: w.x, z: w.z, used: false }));
@@ -324,6 +326,9 @@ export class Sim {
     }
     this.refreshSynergies();
     const bn = this.boons;
+    const ms = this.cfg.mastery ?? 0;
+    if (ms >= 1) st.maxHp += 8;
+    if (ms >= 2) st.might *= 1.04;
     st.maxHp += bn.hp;
     st.might *= 1 + bn.might;
     st.dashCd *= 1 - bn.dashCd;

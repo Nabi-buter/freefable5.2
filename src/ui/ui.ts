@@ -2,7 +2,7 @@ import './style.css';
 import '@fontsource/cinzel/latin-700.css';
 import '@fontsource/cinzel/latin-900.css';
 import type { AudioEngine } from '../audio/audio';
-import { ALT_SKINS, PACTS, PACT_IDS, SKILLS, SYNERGIES, SYNERGY_IDS, SYNERGY_LEVEL, type PactId, type SkillId } from '../sim/defs';
+import { ALT_SKINS, MASTERY_WINS, masteryOf, PACTS, PACT_IDS, SKILLS, SYNERGIES, SYNERGY_IDS, SYNERGY_LEVEL, type PactId, type SkillId } from '../sim/defs';
 import { BIND_ACTIONS, DEFAULT_BINDS, DEFAULT_PAD, PAD_ACTIONS, isTouchPrimary, keyLabel, padLabel, type BindAction, type Input, type PadAction } from '../core/input';
 import { evoHint, fmtNum, fmtTime, getLang, passiveText, setLang, t, weaponLevelText, weaponName } from '../core/i18n';
 import { ACHIEVEMENTS, type RunSummary } from '../core/progress';
@@ -591,7 +591,7 @@ export class UI {
     const chars = CHAR_IDS.map((id) => {
       const ok = sv.chars.includes(id);
       return `<button class="pick f ${id === sv.last.char ? 'sel' : ''} ${ok ? '' : 'locked'}" style="--c:${hex(CHARS[id].accent)}" data-act="pick-char" data-arg="${id}">
-        <span class="pic">${icon(ok ? id : 'lock', 26)}</span><span class="nm">${t('c.' + id)}</span></button>`;
+        <span class="pic">${icon(ok ? id : 'lock', 26)}</span><span class="nm">${t('c.' + id)}</span>${ok && masteryOf(sv.stats.winsByChar[id] ?? 0) ? `<span class="mstars">${'★'.repeat(masteryOf(sv.stats.winsByChar[id] ?? 0))}</span>` : ''}</button>`;
     }).join('');
     const biomes = BIOMES.map((id) => {
       const ok = sv.biomes.includes(id);
@@ -620,6 +620,7 @@ export class UI {
                 <span class="k">${t('setup.hp')}</span><span class="v"><span class="meter"><i style="width:${(c.hp / 140) * 100}%"></i></span>${c.hp}</span>
                 <span class="k">${t('setup.speed')}</span><span class="v"><span class="meter"><i style="width:${((c.speed - 5.5) / 2.6) * 100}%"></i></span>${c.speed.toFixed(1)}</span>
                 <span class="k">${t('setup.trait')}</span><span class="v">${t(`c.${sv.last.char}.t`)}</span>
+                <span class="k">${t('setup.mastery')}</span><span class="v mast">${(() => { const w = sv.stats.winsByChar[sv.last.char] ?? 0; const m = masteryOf(w); return `<b>${'★'.repeat(m)}${'☆'.repeat(3 - m)}</b> <small>${m < 3 ? t('setup.mastery.next', MASTERY_WINS[m] - w) : t('setup.mastery.max')}</small>`; })()}</span>
                 <span class="k">${t('setup.skill')}</span><span class="v sk" style="--c:${hex(SKILLS[pick].color)}"><span class="skpick">${[c.skill, c.alt].map((id) => `<button class="f ${id === pick ? 'on' : ''}" style="--c:${hex(SKILLS[id].color)}" data-act="pick-skill" data-arg="${id}">${icon(id, 15)}${t('sk.' + id)}</button>`).join('')}</span>${t('sk.cd', SKILLS[pick].cd)}<small>${t(`sk.${pick}.d`)}</small><small style="color:var(--gold)">${t('sk.awake')}</small></span>
               </div>
             </div>

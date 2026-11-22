@@ -6,7 +6,7 @@ import { dailyInfo } from './core/daily';
 import { SaveStore } from './core/save';
 import { GameView } from './render/view';
 import { banish, choose, reroll, skip } from './sim/choices';
-import { ALT_SKINS, CHARS } from './sim/defs';
+import { ALT_SKINS, CHARS, masteryOf } from './sim/defs';
 import { Sim } from './sim/sim';
 import type { InputState } from './sim/types';
 import { World } from './sim/worldgen';
@@ -166,7 +166,7 @@ class App implements UIHost {
       const d = dailyInfo();
       const cfg = daily
         ? { seed: d.seed, char: d.char, difficulty: 0, biome: d.biome, meta: this.save.data.meta, skill: d.skill, pacts: [d.pact] }
-        : { seed: last.seed ? Number(last.seed) >>> 0 : (Math.random() * 0xffffffff) >>> 0, char: last.char, difficulty: last.difficulty, biome: last.biome, meta: this.save.data.meta, endless: last.endless && this.save.data.stats.wins > 0, skill: last.skills[last.char], pacts: this.save.data.stats.wins > 0 ? last.pacts : [] };
+        : { seed: last.seed ? Number(last.seed) >>> 0 : (Math.random() * 0xffffffff) >>> 0, char: last.char, difficulty: last.difficulty, biome: last.biome, meta: this.save.data.meta, endless: last.endless && this.save.data.stats.wins > 0, skill: last.skills[last.char], pacts: this.save.data.stats.wins > 0 ? last.pacts : [], mastery: masteryOf(this.save.data.stats.winsByChar[last.char] ?? 0) };
       this.sim = new Sim(cfg);
       const base = CHARS[cfg.char];
       const alt = !daily && this.save.data.last.skins[cfg.char] === 1 ? ALT_SKINS[cfg.char] : null;

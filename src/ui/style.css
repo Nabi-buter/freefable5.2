@@ -281,6 +281,9 @@ input[type='range']::-moz-range-thumb { width: 1.2em; height: 1.2em; border-radi
 .seed-in { flex: 1; min-width: 0; padding: 0.45em 0.8em; border-radius: 0.6em; border: 1px solid var(--line); background: rgba(10, 12, 28, 0.7); color: var(--text); font: inherit; font-size: 0.9em; letter-spacing: 0.08em; pointer-events: auto; }
 .seed-in:focus { outline: none; border-color: var(--amber); }
 .seed-tag { margin-top: 0.4em; color: var(--mute); font-size: 0.8em; letter-spacing: 0.08em; user-select: all; }
+.mstars { position: absolute; top: 0.25em; right: 0.35em; font-size: 0.6em; color: var(--gold); letter-spacing: -0.05em; }
+.statline .v.mast b { color: var(--gold); letter-spacing: 0.08em; }
+.statline .v.mast small { color: var(--mute); font-weight: 400; font-size: 0.82em; }
 .skins { margin-left: auto; display: inline-flex; gap: 0.4em; }
 .skin { width: 1.7em; height: 1.7em; border-radius: 50%; border: 2px solid var(--line-strong); background: linear-gradient(135deg, var(--sk1) 50%, var(--sk2) 50%); pointer-events: auto; display: inline-flex; align-items: center; justify-content: center; color: #fff; }
 .skin.on { border-color: var(--gold); box-shadow: 0 0 0.6em rgba(255, 200, 80, 0.5); }

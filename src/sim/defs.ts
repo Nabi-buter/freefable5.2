@@ -383,6 +383,12 @@ export const CHARS: Record<CharId, CharDef> = {
   moonknight: { id: 'moonknight', weapon: 'glaive', hp: 125, speed: 7.2, armor: 2, might: 1.12, haste: 1, area: 1, xp: 1, dashCharges: 1, skill: 'reflect', alt: 'whirl', cloak: 0x34405e, accent: 0xd8e8ff },
 };
 
+/** lightbearer mastery: wins needed for each star (1, 2, 3) */
+export const MASTERY_WINS = [1, 3, 6];
+export function masteryOf(wins: number): number {
+  return MASTERY_WINS.filter((w) => wins >= w).length;
+}
+
 /** alternative cloak / accent colours, unlocked by reaching dawn with that lightbearer */
 export const ALT_SKINS: Record<CharId, [number, number]> = {
   kindler: [0x2a4a7a, 0x7fd4ff],
