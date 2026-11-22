@@ -120,6 +120,19 @@ export function geoShade(): THREE.BufferGeometry {
   ]);
 }
 
+export function geoStormling(): THREE.BufferGeometry {
+  const shell = 0x4a5a7a, core = 0xbfe0ff, spike = 0xe8f4ff;
+  const parts = [
+    part(lumpy(ico(0.45, 1), 0.1, 101), shell, { pos: [0, 1.2, 0], jitter: 0.1 }),
+    part(ico(0.26, 1), core, { pos: [0.12, 1.2, 0], glow: 3 }),
+  ];
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2;
+    parts.push(part(cone(0.08, 0.5, 4), spike, { pos: [Math.cos(a) * 0.5, 1.2 + Math.sin(a * 2) * 0.15, Math.sin(a) * 0.5], rot: [Math.sin(a) * 1.4, 0, -Math.cos(a) * 1.4], glow: 0.8 }));
+  }
+  return merge(parts);
+}
+
 export function geoThief(): THREE.BufferGeometry {
   const cloak = 0x3a2a4a, dark = 0x1c1426, sack = 0x6a4a2a, glow = 0xffc04a;
   return merge([

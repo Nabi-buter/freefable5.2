@@ -86,7 +86,7 @@ export const BIOMES: Record<BiomeId, BiomeDef> = {
     props: [['rock', 7], ['pillar', 2], ['crystal', 2]],
     treeDensity: 0.32,
     hill: 1.55,
-    enemyHp: 1.32, enemySpeed: 1.06, weights: { wraith: 1.6, spitter: 1.4, bomber: 1.2, skitter: 0.8 }, hazard: 'storm',
+    enemyHp: 1.2, enemySpeed: 1.04, weights: { wraith: 1.6, spitter: 1.4, bomber: 1.2, skitter: 0.8 }, hazard: 'storm',
   },
   gloommire: {
     id: 'gloommire',

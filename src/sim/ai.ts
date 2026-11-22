@@ -27,6 +27,7 @@ const UNLOCKS: { kind: EnemyKind; at: number; w: number; only?: string }[] = [
   { kind: 'rime', at: 3.0, w: 2.4, only: 'frostmere' },
   { kind: 'worm', at: 3.6, w: 1.5, only: 'emberwaste' },
   { kind: 'sporecap', at: 3.2, w: 2.3, only: 'gloommire' },
+  { kind: 'stormling', at: 3.0, w: 2.4, only: 'stormcrag' },
 ];
 
 function pickKind(sim: Sim, I: number): EnemyKind {
@@ -228,6 +229,20 @@ export function updateEnemies(sim: Sim, dt: number) {
             const w = Math.sin(e.t * 1.7 + e.seed * 40) * 0.28;
             vx = (nx - nz * w) * e.speed;
             vz = (nz + nx * w) * e.speed;
+            if (e.kind === 'stormling') {
+              // hover in, crackle for a moment, then lash out with a bolt
+              e.c1 -= dt * speedMul;
+              if (dist < 7 && e.c1 < 0.8) {
+                e.tele = 1;
+                vx *= 0.2;
+                vz *= 0.2;
+                if (e.c1 <= 0) {
+                  e.c1 = sim.rng.range(3.5, 4.5);
+                  sim.events.push({ t: 'lightning', pts: [e.x, e.z, p.x, p.z] });
+                  if (dist < 7.5) sim.hurtPlayer(e.dmg, e.x, e.z);
+                }
+              } else if (e.c1 < 0.8) e.c1 = 0.8;
+            }
             if (e.kind === 'sporecap') {
               // swell up near the bearer, then let out a cloud that lingers where it stood
               e.c1 -= dt * speedMul;

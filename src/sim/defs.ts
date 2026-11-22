@@ -1,8 +1,8 @@
 /** Static game data: enemies, weapons, passives, relics, characters, meta upgrades. Pure data, no logic. */
 
 // ---------------------------------------------------------------- enemies
-export type EnemyKind = 'shade' | 'skitter' | 'brute' | 'spitter' | 'wraith' | 'bomber' | 'husk' | 'rime' | 'worm' | 'sporecap' | 'thief' | 'herald' | 'eclipse';
-export const ENEMY_KINDS: EnemyKind[] = ['shade', 'skitter', 'brute', 'spitter', 'wraith', 'bomber', 'husk', 'rime', 'worm', 'sporecap', 'thief', 'herald', 'eclipse'];
+export type EnemyKind = 'shade' | 'skitter' | 'brute' | 'spitter' | 'wraith' | 'bomber' | 'husk' | 'rime' | 'worm' | 'sporecap' | 'thief' | 'stormling' | 'herald' | 'eclipse';
+export const ENEMY_KINDS: EnemyKind[] = ['shade', 'skitter', 'brute', 'spitter', 'wraith', 'bomber', 'husk', 'rime', 'worm', 'sporecap', 'thief', 'stormling', 'herald', 'eclipse'];
 
 export type EnemyAI = 'chase' | 'ranged' | 'charger' | 'bomber' | 'burrow' | 'thief' | 'herald' | 'eclipse';
 
@@ -36,6 +36,8 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
   sporecap: { kind: 'sporecap', hp: 58, speed: 2.5, dmg: 10, radius: 0.8, xp: 5, mass: 2.5, ai: 'chase', cost: 4.5 },
   // everywhere: snatches embers off the ground and runs; catch it to get them back with interest
   thief: { kind: 'thief', hp: 30, speed: 5.4, dmg: 4, radius: 0.55, xp: 2, mass: 0.8, ai: 'thief', cost: 2.5 },
+  // Stormcrag only: a crackling orb that winds up and zaps the bearer from close range
+  stormling: { kind: 'stormling', hp: 40, speed: 3.3, dmg: 10, radius: 0.65, xp: 5, mass: 1.2, ai: 'chase', cost: 4.8 },
   herald: { kind: 'herald', hp: 1100, speed: 2.9, dmg: 18, radius: 1.7, xp: 60, mass: 30, ai: 'herald', cost: 0 },
   eclipse: { kind: 'eclipse', hp: 22000, speed: 3.0, dmg: 24, radius: 2.6, xp: 0, mass: 1000, ai: 'eclipse', cost: 0 },
 };

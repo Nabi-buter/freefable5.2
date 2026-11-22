@@ -161,11 +161,11 @@ interface KindRender {
   cap: number;
 }
 
-const CAPS: Record<EnemyKind, number> = { shade: 460, skitter: 460, brute: 200, spitter: 200, wraith: 220, bomber: 220, husk: 200, rime: 160, worm: 160, sporecap: 180, thief: 40, herald: 4, eclipse: 2 };
+const CAPS: Record<EnemyKind, number> = { shade: 460, skitter: 460, brute: 200, spitter: 200, wraith: 220, bomber: 220, husk: 200, rime: 160, worm: 160, sporecap: 180, thief: 40, stormling: 160, herald: 4, eclipse: 2 };
 /** colour of each kind's glow, used for death sparks */
 export const KIND_COLOR: Record<EnemyKind, [number, number, number]> = {
   shade: [1.0, 0.25, 0.5], skitter: [0.6, 1.0, 0.35], brute: [1.0, 0.55, 0.15], spitter: [0.65, 1.0, 0.25], wraith: [0.4, 0.95, 1.0],
-  bomber: [1.0, 0.25, 0.4], husk: [1.0, 0.82, 0.3], rime: [0.55, 0.92, 1.0], worm: [1.0, 0.5, 0.18], sporecap: [0.6, 1.0, 0.55], thief: [1.0, 0.75, 0.3], herald: [0.7, 0.3, 1.0], eclipse: [1.0, 0.4, 0.2],
+  bomber: [1.0, 0.25, 0.4], husk: [1.0, 0.82, 0.3], rime: [0.55, 0.92, 1.0], worm: [1.0, 0.5, 0.18], sporecap: [0.6, 1.0, 0.55], thief: [1.0, 0.75, 0.3], stormling: [0.75, 0.88, 1.0], herald: [0.7, 0.3, 1.0], eclipse: [1.0, 0.4, 0.2],
 };
 
 const BOSS_TINT: Record<string, [number, number, number]> = {
@@ -203,7 +203,7 @@ export class EnemyRenderer {
     this.mat = makeWorldMat({ instFx: true });
     const builders: Record<EnemyKind, () => THREE.BufferGeometry> = {
       shade: G.geoShade, skitter: G.geoSkitter, brute: G.geoBrute, spitter: G.geoSpitter, wraith: G.geoWraith,
-      bomber: G.geoBomber, husk: G.geoHusk, rime: G.geoRime, worm: G.geoWorm, sporecap: G.geoSporecap, thief: G.geoThief, herald: G.geoHerald, eclipse: G.geoEclipse,
+      bomber: G.geoBomber, husk: G.geoHusk, rime: G.geoRime, worm: G.geoWorm, sporecap: G.geoSporecap, thief: G.geoThief, stormling: G.geoStormling, herald: G.geoHerald, eclipse: G.geoEclipse,
     };
     for (const kind of ENEMY_KINDS) {
       const geo = builders[kind]();
@@ -301,6 +301,13 @@ export class EnemyRenderer {
           }
           case 'husk':
             y += Math.abs(Math.sin(tp * 0.9)) * 0.08;
+            break;
+          case 'stormling':
+            y += 0.3 + Math.sin(tp * 0.7) * 0.2;
+            if (e.tele) {
+              const sw = 1.12 + Math.sin(time * 40) * 0.08;
+              sx *= sw; sy *= sw; sz *= sw;
+            }
             break;
           case 'sporecap': {
             y += Math.abs(Math.sin(tp * 0.9)) * 0.12;

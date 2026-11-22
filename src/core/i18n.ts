@@ -580,6 +580,8 @@ const S: Record<string, Pair> = {
   'e.rime.d': ['서리 호수에만 사는 느린 거인. 쓰러지면 서리 폭발을 일으켜 주변을 얼립니다.', 'A slow giant found only in Frostmere. It bursts into frost when it falls, freezing everything nearby.'],
   'e.worm': ['재벌레', 'Cinderworm'],
   'e.worm.d': ['불씨 황무지의 모래 밑을 파고들어 발밑에서 솟아올라 불덩이를 뱉습니다. 땅속에 있을 때는 공격할 수 없습니다.', 'Tunnels under the Ember Wastes, erupts beneath you and spits fire. It cannot be harmed while underground.'],
+  'e.stormling': ['뇌운 정령', 'Stormling'],
+  'e.stormling.d': ['폭풍 고원에만 사는 떠다니는 구체. 가까이 오면 지지직 충전한 뒤 번개를 쏩니다. 충전하는 동안 거리를 벌리세요.', 'A crackling orb found only on Stormcrag. Up close it winds up and fires a bolt — back away while it charges.'],
   'e.thief': ['불씨 도둑', 'Ember Thief'],
   'e.thief.d': ['바닥의 불씨를 주워 담고 달아납니다. 잡으면 훔친 불씨를 1.5배로 돌려줍니다. 30초가 지나면 사라집니다.', 'Scoops embers off the ground and runs. Catch it to get them back at 1.5x. Vanishes after 30 seconds.'],
   'e.sporecap': ['포자갓', 'Sporecap'],
