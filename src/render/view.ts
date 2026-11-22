@@ -175,7 +175,7 @@ const FinalShader = {
 const AFFIX_COLOR: Record<number, string> = { 1: '#6cf2ff', 2: '#7dff9b', 3: '#ff6a5a', 4: '#ffe36b', 5: '#c8d2e6', 6: '#c6a2ff' };
 
 const WCOL: Record<WeaponId, [number, number, number]> = {
-  ember: [1.0, 0.5, 0.15], wisps: [0.4, 0.9, 1.0], nova: [1.0, 0.6, 0.2], arc: [0.6, 0.8, 1.0], starfall: [1.0, 0.85, 0.45], sigil: [0.78, 0.6, 1.0], sprite: [1.0, 0.9, 0.55], totem: [1.0, 0.7, 0.4],
+  ember: [1.0, 0.5, 0.15], wisps: [0.4, 0.9, 1.0], nova: [1.0, 0.6, 0.2], arc: [0.6, 0.8, 1.0], starfall: [1.0, 0.85, 0.45], sigil: [0.78, 0.6, 1.0], sprite: [1.0, 0.9, 0.55], totem: [1.0, 0.7, 0.4], well: [0.6, 0.48, 1.0],
   lance: [1.0, 0.95, 0.7], frost: [0.55, 0.9, 1.0], darts: [0.75, 0.55, 1.0], trail: [1.0, 0.4, 0.12], aura: [1.0, 0.85, 0.5], glaive: [0.8, 0.88, 1.0],
 };
 
@@ -1248,6 +1248,17 @@ export class GameView {
           const y = H(z.x, z.z) + 0.8 + hgt;
           this.iMeteor.add(mx, y, mz, time * 5, 1.5, 1.5, 1.5, 3.6, 2.4, 0.8);
           for (let q = 0; q < 2; q++) this.sparks.spawn(mx, y, mz, (Math.random() - 0.5) * 2, 2 + Math.random() * 3, (Math.random() - 0.5) * 2, 0.4, 0.85, 3.2, 1.8, 0.4, { size1: 0.1 });
+          break;
+        }
+        case 'well': {
+          const f = Math.min(1, z.t * 4) * Math.min(1, (z.dur - z.t) * 3 + 0.3);
+          const k2 = z.t / z.dur;
+          dec.add(DECAL.ring, z.x, z.z, z.r * (1 - k2 * 0.55), 0.4 * f, 0.3 * f, 0.9 * f, 0.8);
+          dec.add(DECAL.glow, z.x, z.z, z.r * 0.5, 0.25, 0.15, 0.6, 0.5 * f);
+          for (let q = 0; q < 2; q++) if (Math.random() < dt * 40) {
+            const a = Math.random() * TAU, d = z.r * (0.5 + Math.random() * 0.5), x = z.x + Math.cos(a) * d, zz = z.z + Math.sin(a) * d;
+            this.sparks.spawn(x, H(x, zz) + 0.4, zz, -Math.cos(a) * d * 2 - Math.sin(a) * 3, 0.3, -Math.sin(a) * d * 2 + Math.cos(a) * 3, 0.4, 0.35, 1.2, 0.9, 2.6, { drag: 0.5 });
+          }
           break;
         }
         case 'totem': {

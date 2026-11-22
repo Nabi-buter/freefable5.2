@@ -115,6 +115,28 @@ export function updateWeapons(sim: Sim, dt: number, input: InputState) {
         }
         break;
       }
+      case 'well': {
+        w.t -= dt;
+        if (w.t <= 0) {
+          const first = sim.nearest(p.x, p.z, 16);
+          if (!first) {
+            w.t = 0.3;
+            break;
+          }
+          w.t += cd;
+          if (w.t < 0) w.t = 0;
+          const n = s.count + st.amount;
+          const used = new Set<number>();
+          for (let i = 0; i < n; i++) {
+            const e = i === 0 ? first : sim.nearest(p.x, p.z, 16, used);
+            if (!e) break;
+            used.add(e.id);
+            zone(sim, 'well', e.x, e.z, s.area * st.area, s.dur * st.dur, s.dmg, 'well', evo);
+          }
+          sim.events.push({ t: 'shoot', w: 'well', x: p.x, z: p.z });
+        }
+        break;
+      }
       case 'totem': {
         w.t -= dt;
         if (w.t <= 0) {
@@ -558,6 +580,29 @@ export function updateZones(sim: Sim, dt: number) {
           if (z.kind === 'fire' && z.evolved) {
             sim.blasts.push({ x: z.x, z: z.z, r: z.r * 1.4, dmg: z.dmg * 2.5, w: z.weapon, kb: 6, burn: z.dmg * 0.3, c: 0xff6a2a });
           }
+        }
+        break;
+      }
+      case 'well': {
+        // pull everything inward while it lasts, then collapse
+        const list = sim.near(z.x, z.z, z.r);
+        for (let k = 0; k < list.length; k++) {
+          const e = list[k];
+          if (e.boss) continue;
+          const dx = z.x - e.x, dz = z.z - e.z;
+          const d = Math.hypot(dx, dz) || 1;
+          const pull = (11 / e.def.mass) * Math.min(1, d / 1.5);
+          e.kx += (dx / d) * pull * dt * 6;
+          e.kz += (dz / d) * pull * dt * 6;
+        }
+        if (z.t >= z.dur) {
+          z.alive = false;
+          const hit = sim.near(z.x, z.z, z.r * 0.6);
+          for (let k = 0; k < hit.length; k++) {
+            sim.damageEnemy(hit[k], z.dmg, 'well', 2, z.x, z.z);
+            if (z.evolved && hit[k].alive) sim.freeze(hit[k], 1.2);
+          }
+          sim.events.push({ t: 'explode', x: z.x, z: z.z, r: z.r * 0.6, c: 0x9a7aff, hostile: false });
         }
         break;
       }

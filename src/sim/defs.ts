@@ -43,8 +43,8 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
 };
 
 // ---------------------------------------------------------------- weapons
-export type WeaponId = 'ember' | 'wisps' | 'nova' | 'arc' | 'starfall' | 'lance' | 'frost' | 'darts' | 'trail' | 'aura' | 'glaive' | 'sigil' | 'sprite' | 'totem';
-export const WEAPON_IDS: WeaponId[] = ['ember', 'wisps', 'nova', 'arc', 'starfall', 'lance', 'frost', 'darts', 'trail', 'aura', 'glaive', 'sigil', 'sprite', 'totem'];
+export type WeaponId = 'ember' | 'wisps' | 'nova' | 'arc' | 'starfall' | 'lance' | 'frost' | 'darts' | 'trail' | 'aura' | 'glaive' | 'sigil' | 'sprite' | 'totem' | 'well';
+export const WEAPON_IDS: WeaponId[] = ['ember', 'wisps', 'nova', 'arc', 'starfall', 'lance', 'frost', 'darts', 'trail', 'aura', 'glaive', 'sigil', 'sprite', 'totem', 'well'];
 
 export interface WStats {
   /** base damage per hit (or per tick) */
@@ -128,6 +128,19 @@ export const WEAPONS: Record<WeaponId, WeaponDef> = {
       L(34, 1.2, 7, 0, 8.5, 0, 0),
       L(40, 1.05, 9, 0, 9, 0, 0),
       L(52, 0.8, 14, 0, 10, 0, 0), // Tempest: forks from every hit
+    ],
+  },
+  // a knot of gravity that drags foes together and then collapses on them
+  well: {
+    id: 'well', evo: 'magnet', color: 0x9a7aff,
+    levels: [
+      L(40, 4.0, 1, 0, 4.5, 1.6, 0),
+      L(50, 3.8, 1, 0, 4.8, 1.6, 0),
+      L(60, 3.6, 1, 0, 5.2, 1.7, 0),
+      L(72, 3.4, 2, 0, 5.2, 1.7, 0),
+      L(86, 3.2, 2, 0, 5.6, 1.8, 0),
+      L(100, 3.0, 2, 0, 6.0, 1.8, 0),
+      L(130, 2.6, 3, 0, 7.0, 2.0, 0), // Singularity: wider pull, and the collapse leaves foes stunned
     ],
   },
   // planted beacon-totems that fire bolts at whatever comes near (cd = how often one is planted)
@@ -397,7 +410,7 @@ export const DIFFICULTIES: DifficultyDef[] = [
 ];
 
 // ---------------------------------------------------------------- weapon synergies: two weapons at level 3+ work together
-export type SynergyId = 'superconduct' | 'wildfire' | 'vigil' | 'judgement' | 'bladeorbit' | 'shatter';
+export type SynergyId = 'superconduct' | 'wildfire' | 'vigil' | 'judgement' | 'bladeorbit' | 'shatter' | 'implosion';
 export const SYNERGIES: Record<SynergyId, { a: WeaponId; b: WeaponId; color: number }> = {
   superconduct: { a: 'frost', b: 'arc', color: 0x9fd8ff },
   wildfire: { a: 'ember', b: 'trail', color: 0xff7a30 },
@@ -405,6 +418,7 @@ export const SYNERGIES: Record<SynergyId, { a: WeaponId; b: WeaponId; color: num
   judgement: { a: 'starfall', b: 'sigil', color: 0xe0c0ff },
   bladeorbit: { a: 'glaive', b: 'wisps', color: 0x9feaff },
   shatter: { a: 'lance', b: 'darts', color: 0xc8ff9a },
+  implosion: { a: 'well', b: 'nova', color: 0x9a7aff },
 };
 export const SYNERGY_IDS = Object.keys(SYNERGIES) as SynergyId[];
 export const SYNERGY_LEVEL = 3;

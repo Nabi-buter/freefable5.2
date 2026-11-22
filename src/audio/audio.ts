@@ -258,6 +258,9 @@ export class AudioEngine {
                 this.noise(0.38, { freq: 2200, to: 180, vol: 0.12, rev: 0.25 });
               }
               break;
+            case 'well':
+              if (this.ok('s.well', 0.3)) this.tone(90, 0.8, { to: 45, vol: 0.12, type: 'sine', rev: 0.4 });
+              break;
             case 'totem':
               if (this.ok('s.totem', 0.3)) {
                 this.tone(260, 0.2, { type: 'triangle', to: 180, vol: 0.06 });

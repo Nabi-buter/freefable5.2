@@ -218,6 +218,7 @@ export class Sim {
     if (s.has('judgement') && (w === 'starfall' || w === 'sigil')) m *= 1.3;
     if (s.has('bladeorbit') && (w === 'wisps' || w === 'glaive')) m *= 1.3;
     if (s.has('shatter') && (w === 'lance' || w === 'darts') && (e.elite || e.boss)) m *= 1.45;
+    if (s.has('implosion') && (w === 'well' || w === 'nova')) m *= 1.3;
     return m;
   }
 
