@@ -311,6 +311,8 @@ const S: Record<string, Pair> = {
   'set.import.ok': ['세이브를 불러왔습니다', 'Save imported'],
   'set.import.bad': ['올바르지 않은 코드입니다', 'That code is not valid'],
   'set.autoq': ['성능을 위해 그래픽 품질을 낮췄습니다', 'Graphics quality lowered for performance'],
+  'set.sec.about': ['정보', 'About'],
+  'set.about.body': ['모델·지형·효과음·음악까지 모든 에셋을 코드로 생성한 브라우저 게임입니다.', 'A browser game whose every model, landscape, sound and song is generated in code.'],
   'set.uiscale': ['UI 크기', 'Interface size'],
   'set.flash': ['화면 번쩍임 줄이기', 'Reduce screen flashes'],
   'set.assist': ['색각 보조 (적 공격 강조색)', 'Colour assist (high-contrast threats)'],

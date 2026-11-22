@@ -773,6 +773,8 @@ export class UI {
           ${row(t('set.master'), range('master', s.master))}
           ${row(t('set.music'), range('music', s.music))}
           ${row(t('set.sfx'), range('sfx', s.sfx))}
+          <div class="set-sec">${t('set.sec.about')}</div>
+          <div class="about">CINDERWAKE ${this.host.version}<br>${t('set.about.body')}<br><small>three.js (MIT) · Vite (MIT) · Cinzel font © Natanael Gama (SIL Open Font License 1.1)</small></div>
           ${this.settingsFrom === 'title' ? `<div class="set-sec">${t('set.sec.data')}</div>
           ${row(t('set.export'), `<button class="btn small f" data-act="export">${t('set.export')}</button>`)}
           ${row(t('set.import'), `<button class="btn small f" data-act="import">${t('set.import')}</button>`)}
