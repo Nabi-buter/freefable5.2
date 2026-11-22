@@ -92,6 +92,8 @@ export interface SaveData {
   daily: { date: string; done: boolean; best: number; streak: number };
   /** the most recent runs, newest first (at most 12) */
   history: RunRecord[];
+  /** story lines seen at beacons (keys like 'ashwood.3') */
+  lore: string[];
 }
 
 const KEY = 'cinderwake.save.v1';
@@ -121,6 +123,7 @@ export function defaultSave(): SaveData {
     tutorial: false,
     daily: { date: '', done: false, best: 0, streak: 0 },
     history: [],
+    lore: [],
   };
 }
 
@@ -185,6 +188,7 @@ export class SaveStore {
       }
     }
     if (!Array.isArray(d.history)) d.history = [];
+    d.lore = Array.isArray(d.lore) ? d.lore.filter((x) => typeof x === 'string').slice(0, 100) : [];
     d.history = d.history.filter((r) => r && typeof r === 'object' && CHAR_IDS.includes(r.char)).slice(0, 12);
     d.last.skills = picks;
     const skins: Partial<Record<CharId, number>> = {};

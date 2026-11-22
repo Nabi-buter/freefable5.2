@@ -269,6 +269,7 @@ input[type='range']::-moz-range-thumb { width: 1.2em; height: 1.2em; border-radi
 .omen.starfall { color: #ffe08a; border-color: rgba(255, 224, 138, 0.6); }
 .about { padding: 0.9em 1.1em; border-radius: 0.8em; background: rgba(18, 22, 48, 0.55); border: 1px solid var(--line); color: var(--dim); line-height: 1.6; font-size: 0.9em; margin-bottom: 0.45em; }
 .about small { color: var(--mute); font-size: 0.85em; }
+.lore-card .ds { font-style: italic; line-height: 1.55; }
 .hist-empty { color: var(--mute); text-align: center; margin-top: 3em; }
 @media (max-width: 720px) { .hrow { grid-template-columns: 1.6em 1.8em 1fr auto; } .hrow .hw, .hrow .hwhen { display: none; } }
 .pacts { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5em, 1fr)); gap: 0.4em; }
