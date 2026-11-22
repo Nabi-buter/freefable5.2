@@ -308,7 +308,7 @@ export class Sim {
       xp: c.xp * (1 + m('m_xp') / 100 + pl('wisdom') / 100),
       luck: 1 + m('m_luck') / 100 + pl('fortune') / 100,
       cinder: 1 + m('m_cinder') / 100 + pl('fortune') / 200,
-      dashMax: c.dashCharges,
+      dashMax: c.dashCharges + m('m_dash'),
       dashCd: 2.6,
     };
     for (const r of p.relics) {

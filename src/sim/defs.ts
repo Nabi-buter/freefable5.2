@@ -441,7 +441,7 @@ export const PACTS: Record<PactId, { reward: number; color: number }> = {
 };
 
 // ---------------------------------------------------------------- meta upgrades (bought with cinders between runs)
-export type MetaId = 'm_hp' | 'm_might' | 'm_haste' | 'm_speed' | 'm_regen' | 'm_armor' | 'm_magnet' | 'm_xp' | 'm_cinder' | 'm_revive' | 'm_reroll' | 'm_banish' | 'm_luck' | 'm_skill';
+export type MetaId = 'm_hp' | 'm_might' | 'm_haste' | 'm_speed' | 'm_regen' | 'm_armor' | 'm_magnet' | 'm_xp' | 'm_cinder' | 'm_revive' | 'm_reroll' | 'm_banish' | 'm_luck' | 'm_skill' | 'm_dash';
 export interface MetaDef {
   id: MetaId;
   max: number;
@@ -461,6 +461,7 @@ export const META: MetaDef[] = [
   { id: 'm_cinder', max: 5, baseCost: 70, costMul: 1.8, per: 10 },
   { id: 'm_luck', max: 5, baseCost: 50, costMul: 1.7, per: 8 },
   { id: 'm_skill', max: 5, baseCost: 70, costMul: 1.7, per: 6 },
+  { id: 'm_dash', max: 1, baseCost: 600, costMul: 1, per: 1 },
   { id: 'm_reroll', max: 4, baseCost: 80, costMul: 2.0, per: 1 },
   { id: 'm_banish', max: 4, baseCost: 80, costMul: 2.0, per: 1 },
   { id: 'm_revive', max: 1, baseCost: 600, costMul: 1, per: 1 },

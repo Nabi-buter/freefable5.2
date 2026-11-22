@@ -635,6 +635,8 @@ const S: Record<string, Pair> = {
   'm.m_xp.d': ['경험치 +{0}%', 'Experience +{0}%'],
   'm.m_cinder': ['재 주머니', 'Cinder Pouch'],
   'm.m_cinder.d': ['획득하는 재 +{0}%', 'Cinders gained +{0}%'],
+  'm.m_dash': ['바람의 날개', 'Wind Wings'],
+  'm.m_dash.d': ['대시 충전 +{0}', 'Dash charges +{0}'],
   'm.m_skill': ['숙련된 의식', 'Practised Rite'],
   'm.m_skill.d': ['고유 능력 재사용 시간 -{0}%', 'Signature ability cooldown -{0}%'],
   'm.m_luck': ['길한 별자리', 'Kind Stars'],
