@@ -118,6 +118,7 @@ class App implements UIHost {
   toMenu(first = false) {
     const last = this.save.data.last;
     this.sim = null;
+    this.audio.setAmbience(null);
     this.state = 'menu';
     const build = () => {
       if (this.menuBiome !== last.biome + last.char || !this.view.world) {
@@ -180,6 +181,7 @@ class App implements UIHost {
       this.cine = null;
       this.view.focusW = 0;
       if (this.audio.music) this.audio.music.region = cfg.biome;
+      this.audio.setAmbience(cfg.biome);
       this.audio.music?.setMood('run', 0);
       this.audio.setDuck(1);
       this.state = 'playing';

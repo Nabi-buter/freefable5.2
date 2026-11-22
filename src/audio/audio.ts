@@ -114,6 +114,54 @@ export class AudioEngine {
     this.musicBus.gain.setTargetAtTime(this.vol.music * 1.3 * this.duck, t, 0.2);
   }
 
+  private amb: { src: AudioBufferSourceNode; gain: GainNode; lfo: OscillatorNode } | null = null;
+
+  /** a quiet bed of regional sound under the music (wind, hum, crackle); null stops it */
+  setAmbience(region: string | null) {
+    const ctx = this.ctx;
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    if (this.amb) {
+      const old = this.amb;
+      old.gain.gain.setTargetAtTime(0, t, 0.6);
+      setTimeout(() => {
+        try { old.src.stop(); old.lfo.stop(); } catch { /* already stopped */ }
+      }, 3000);
+      this.amb = null;
+    }
+    if (!region) return;
+    const cfg: Record<string, { type: BiquadFilterType; freq: number; q: number; vol: number; lfo: number; depth: number }> = {
+      ashwood: { type: 'bandpass', freq: 500, q: 0.6, vol: 0.018, lfo: 0.08, depth: 180 },
+      frostmere: { type: 'highpass', freq: 1800, q: 0.5, vol: 0.016, lfo: 0.12, depth: 600 },
+      emberwaste: { type: 'bandpass', freq: 2600, q: 2.5, vol: 0.012, lfo: 3.2, depth: 900 },
+      gloommire: { type: 'lowpass', freq: 220, q: 4, vol: 0.05, lfo: 0.2, depth: 60 },
+      stormcrag: { type: 'bandpass', freq: 700, q: 0.8, vol: 0.03, lfo: 0.17, depth: 450 },
+    };
+    const c = cfg[region] ?? cfg.ashwood;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseBuf;
+    src.loop = true;
+    const f = ctx.createBiquadFilter();
+    f.type = c.type;
+    f.frequency.value = c.freq;
+    f.Q.value = c.q;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = c.lfo;
+    const lg = ctx.createGain();
+    lg.gain.value = c.depth;
+    lfo.connect(lg);
+    lg.connect(f.frequency);
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.gain.setTargetAtTime(c.vol, t, 1.5);
+    src.connect(f);
+    f.connect(gain);
+    gain.connect(this.musicBus);
+    src.start();
+    lfo.start();
+    this.amb = { src, gain, lfo };
+  }
+
   /** lower the music briefly (pause menu, big moments) */
   setDuck(v: number) {
     if (this.duck === v) return;
