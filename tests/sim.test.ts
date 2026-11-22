@@ -1,3 +1,5 @@
+import { defaultSave } from '../src/core/save';
+import { finishRun } from '../src/core/progress';
 import { CHARS } from '../src/sim/defs';
 import { describe, expect, it } from 'vitest';
 import { runBot } from './simbot';
@@ -171,6 +173,21 @@ describe('simulation', () => {
     }
     expect(sim.boss?.kind).toBe('eclipse');
   }, 60000);
+  it('a trial win does not unlock regions or count as a dawn', () => {
+    const save = defaultSave();
+    const sim = new Sim({ seed: 15, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {}, trial: true });
+    (sim as unknown as { state: string }).state = 'victory';
+    sim.time = 150;
+    const sum = finishRun(save, sim);
+    expect(sum.win).toBe(true);
+    expect(save.biomes).toEqual(['ashwood']);
+    expect(save.stats.wins).toBe(0);
+    expect(save.stats.bestTrial).toBeGreaterThan(0);
+    const real = new Sim({ seed: 15, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {} });
+    (real as unknown as { state: string }).state = 'victory';
+    finishRun(save, real);
+    expect(save.biomes).toContain('frostmere');
+  });
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);
