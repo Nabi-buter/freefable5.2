@@ -95,6 +95,10 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   }
   let newBest = false;
   let unlockedDiff = -1;
+  if (sim.cfg.trial && win && (!st.bestTrial || sim.time < st.bestTrial)) {
+    st.bestTrial = sim.time;
+    newBest = true;
+  }
   if (win) {
     st.wins++;
     st.winsByChar[char] = (st.winsByChar[char] ?? 0) + 1;

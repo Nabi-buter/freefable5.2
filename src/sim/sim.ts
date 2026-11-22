@@ -1,6 +1,6 @@
 import { RNG, clamp } from '../core/rng';
 import {
-  CHARS, DIFFICULTIES, ENEMIES, META, PASSIVES, SKILLS, WEAPONS,
+  CHARS, DIFFICULTIES, ENEMIES, META, PASSIVES, PASSIVE_IDS, RELIC_IDS, SKILLS, WEAPONS, WEAPON_IDS,
   PACTS, PACT_IDS, SYNERGIES, SYNERGY_IDS, SYNERGY_LEVEL, type SynergyId, type PactId, type SkillId, type CharDef, type CharId, type DifficultyDef, type EnemyKind, type MetaId, type PassiveId, type RelicId, type WeaponId,
 } from './defs';
 import { World, type BiomeId } from './worldgen';
@@ -29,6 +29,8 @@ export interface RunConfig {
   pacts?: PactId[];
   /** lightbearer mastery stars (0-3): +8 health, +4% damage, +1 reroll */
   mastery?: number;
+  /** Trial of the Eclipse: start built up with every beacon lit and race the boss */
+  trial?: boolean;
 }
 
 /** Uniform spatial hash for enemies. Rebuilt every step. */
@@ -180,6 +182,33 @@ export class Sim {
     this.player.hp = this.player.st.maxHp;
     this.player.dashCharges = this.player.st.dashMax;
     this.dir = initDirector();
+    if (cfg.trial) this.setupTrial();
+  }
+
+  /** Trial of the Eclipse: a ready-made build, every beacon already burning, the boss on its way */
+  private setupTrial() {
+    const p = this.player;
+    p.level = 16;
+    p.xpNext = this.xpNeed(p.level);
+    const others = WEAPON_IDS.filter((w) => w !== this.char.weapon);
+    this.rng.shuffle(others);
+    p.weapons[0].level = 5;
+    for (const id of others.slice(0, 3)) p.weapons.push({ id, level: 4, t: 0.5, a: 0, b: 0, dealt: 0 });
+    const ps = PASSIVE_IDS.slice();
+    this.rng.shuffle(ps);
+    for (const id of ps.slice(0, 3)) p.passives.push({ id, level: 3 });
+    const rs = RELIC_IDS.filter((r) => r !== 'phoenix');
+    this.rng.shuffle(rs);
+    p.relics.push(rs[0], rs[1]);
+    for (const b of this.beacons) {
+      b.lit = true;
+      b.progress = 1;
+    }
+    this.stats.beacons = this.beacons.length;
+    this.recalc();
+    p.hp = p.st.maxHp;
+    p.skillCd = 0;
+    this.bossT = 8;
   }
 
   id(): number {
@@ -1044,6 +1073,6 @@ export class Sim {
   /** cinders earned so far (shown on results; banked into the save) */
   cinderTotal(): number {
     const base = this.stats.cinders + this.stats.kills / 30 + (this.stats.bossKilled ? 60 : 0) + this.stats.loops * 60;
-    return Math.round(base * this.diff.cinder * this.player.st.cinder);
+    return Math.round(base * this.diff.cinder * this.player.st.cinder * (this.cfg.trial ? 0.5 : 1));
   }
 }

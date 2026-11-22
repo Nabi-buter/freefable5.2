@@ -405,6 +405,7 @@ export class UI {
         break;
       case 'pick-mode':
         sv.last.endless = arg === 'endless';
+        sv.last.trial = arg === 'trial';
         au.ui('click');
         this.showSetup();
         break;
@@ -587,6 +588,7 @@ export class UI {
     const biomeOk = sv.biomes.includes(sv.last.biome);
     const diffOk = sv.last.difficulty <= sv.stats.cleared;
     const endlessOk = sv.stats.wins > 0;
+    const trial = !!sv.last.trial && !sv.last.endless;
     const endless = sv.last.endless;
     const chars = CHAR_IDS.map((id) => {
       const ok = sv.chars.includes(id);
@@ -630,11 +632,12 @@ export class UI {
             <div class="panel detail slim"><p>${t(`b.${sv.last.biome}.d`)}</p>${biomeOk ? '' : lock(`b.${sv.last.biome}.u`)}</div>
             <div><div class="group-label">${t('setup.diff')}</div><div class="pick-grid three">${diffs}</div></div>
             <div class="panel detail slim"><p>${t(`d.${sv.last.difficulty}.d`)}</p>${diffOk ? (best ? `<p>${icon('clock', 16)} ${t('rec.best', t('d.' + sv.last.difficulty))}: <b style="color:var(--amber-hot)">${fmtTime(best)}</b></p>` : '') : lock(`d.${sv.last.difficulty}.u`)}</div>
-            <div><div class="group-label">${t('setup.mode')}</div><div class="pick-grid two">
-              <button class="pick row f ${endless ? '' : 'sel'}" style="--c:#ffb347" data-act="pick-mode" data-arg="dawn"><span class="pic">${icon('wideglow', 22)}</span><span class="nm">${t('mode.dawn')}</span></button>
+            <div><div class="group-label">${t('setup.mode')}</div><div class="pick-grid three">
+              <button class="pick row f ${endless || trial ? '' : 'sel'}" style="--c:#ffb347" data-act="pick-mode" data-arg="dawn"><span class="pic">${icon('wideglow', 22)}</span><span class="nm">${t('mode.dawn')}</span></button>
               <button class="pick row f ${endless ? 'sel' : ''} ${endlessOk ? '' : 'locked'}" style="--c:#b98cff" data-act="pick-mode" data-arg="endless"><span class="pic">${icon(endlessOk ? 'reroll' : 'lock', 22)}</span><span class="nm">${t('mode.endless')}</span></button>
+              <button class="pick row f ${trial ? 'sel' : ''} ${endlessOk ? '' : 'locked'}" style="--c:#ff7a3c" data-act="pick-mode" data-arg="trial"><span class="pic">${icon(endlessOk ? 'crown' : 'lock', 22)}</span><span class="nm">${t('mode.trial')}</span></button>
             </div></div>
-            <div class="panel detail slim"><p>${t(endless ? 'mode.endless.d' : 'mode.dawn.d')}</p>${endless && !endlessOk ? lock('mode.endless.u') : ''}${endless && endlessOk && sv.stats.bestLoops > 0 ? `<p>${icon('trophy', 16)} ${t('rec.loops')}: <b style="color:var(--amber-hot)">${sv.stats.bestLoops}</b></p>` : ''}</div>
+            <div class="panel detail slim"><p>${t(trial ? 'mode.trial.d' : endless ? 'mode.endless.d' : 'mode.dawn.d')}</p>${(endless || trial) && !endlessOk ? lock('mode.endless.u') : ''}${trial && sv.stats.bestTrial ? `<p>${icon('clock', 16)} ${t('mode.trial.best')}: <b style="color:var(--amber-hot)">${fmtTime(sv.stats.bestTrial)}</b></p>` : ''}${endless && endlessOk && sv.stats.bestLoops > 0 ? `<p>${icon('trophy', 16)} ${t('rec.loops')}: <b style="color:var(--amber-hot)">${sv.stats.bestLoops}</b></p>` : ''}</div>
             <div class="seed-row"><span class="group-label">${t('setup.seed')}</span><input class="seed-in" data-seed inputmode="numeric" maxlength="10" placeholder="${t('setup.seed.random')}" value="${sv.last.seed}"></div>
             <div><div class="group-label">${t('setup.pacts')}${sv.stats.wins > 0 ? ` <span class="pact-mul">${icon('cinder', 12)} ×${(1 + sv.last.pacts.reduce((a, id) => a + PACTS[id].reward, 0)).toFixed(2)}</span>` : ''}</div>
               ${sv.stats.wins > 0 ? `<div class="pacts">${PACT_IDS.map((id) => `<button class="pact f ${sv.last.pacts.includes(id) ? 'on' : ''}" style="--c:${hex(PACTS[id].color)}" data-act="toggle-pact" data-arg="${id}" title="${t(`pact.${id}.d`)}"><b>${t('pact.' + id)}</b><small>${t(`pact.${id}.d`)} · +${Math.round(PACTS[id].reward * 100)}%</small></button>`).join('')}</div>` : `<div class="panel detail slim">${lock('mode.endless.u')}</div>`}
@@ -706,7 +709,7 @@ export class UI {
       body = `<div class="statlist">
         ${row(t('rec.runs'), fmtNum(st.runs))}${row(t('rec.wins'), fmtNum(st.wins))}${row(t('rec.kills'), fmtNum(st.kills))}${row(t('rec.elites'), fmtNum(st.eliteKills))}
         ${row(t('rec.beacons'), fmtNum(st.beacons))}${row(t('rec.time'), fmtTime(st.time))}${row(t('rec.maxlevel'), String(st.maxLevel))}${row(t('rec.maxcombo'), fmtNum(st.maxCombo))}
-        ${row(t('rec.cinders'), fmtNum(st.cindersEarned))}${row(t('rec.loops'), st.bestLoops ? `${st.bestLoops} · ${fmtTime(st.bestEndlessTime)}` : '—')}
+        ${row(t('rec.cinders'), fmtNum(st.cindersEarned))}${row(t('rec.loops'), st.bestLoops ? `${st.bestLoops} · ${fmtTime(st.bestEndlessTime)}` : '—')}${row(t('mode.trial.best'), st.bestTrial ? fmtTime(st.bestTrial) : '—')}
         ${[0, 1, 2].map((d) => row(t('rec.best', t('d.' + d)), st.bestTime[d] ? fmtTime(st.bestTime[d]) : '—')).join('')}
       </div>
       <div class="set-sec">${t('rec.bychar')}</div>

@@ -158,6 +158,19 @@ describe('simulation', () => {
     expect(seen).toBe(true);
     expect(sim.omen).toBeNull();
   }, 60000);
+  it('the trial starts built up and the boss arrives quickly', () => {
+    const sim = new Sim({ seed: 14, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {}, trial: true });
+    expect(sim.player.weapons.length).toBe(4);
+    expect(sim.beacons.every((b) => b.lit)).toBe(true);
+    const input = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
+    for (let i = 0; i < 60 * 20 && !sim.boss; i++) {
+      sim.player.hp = sim.player.st.maxHp;
+      sim.step(1 / 60, input);
+      while (sim.pending.length) choose(sim, 0);
+      sim.events.length = 0;
+    }
+    expect(sim.boss?.kind).toBe('eclipse');
+  }, 60000);
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);

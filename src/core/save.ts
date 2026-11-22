@@ -54,6 +54,8 @@ export interface LifetimeStats {
   /** wins per signature ability */
   winsBySkill?: Partial<Record<SkillId, number>>;
   bestEndlessTime: number;
+  /** fastest Trial of the Eclipse, seconds (0 = none) */
+  bestTrial?: number;
 }
 
 export interface RunRecord {
@@ -84,7 +86,7 @@ export interface SaveData {
   achievements: Record<string, number>;
   stats: LifetimeStats;
   settings: Settings;
-  last: { char: CharId; biome: BiomeId; difficulty: number; endless: boolean; skills: Partial<Record<CharId, SkillId>>; pacts: PactId[]; skins: Partial<Record<CharId, number>>; seed: string };
+  last: { char: CharId; biome: BiomeId; difficulty: number; endless: boolean; skills: Partial<Record<CharId, SkillId>>; pacts: PactId[]; skins: Partial<Record<CharId, number>>; seed: string; trial: boolean };
   tutorial: boolean;
   /** daily vigil record for `date` (UTC) */
   daily: { date: string; done: boolean; best: number; streak: number };
@@ -115,7 +117,7 @@ export function defaultSave(): SaveData {
       bestTime: [0, 0, 0], winsByChar: {}, winsByBiome: {}, cleared: 0, bestLoops: 0, bestEndlessTime: 0,
     },
     settings: { lang: defaultLang(), quality: defaultQuality(), master: 0.8, music: 0.6, sfx: 0.8, shake: 1, damageNumbers: true, autoAim: false, zoom: 1, showFps: false, autoQuality: true, reduceFlash: false, colorAssist: false, rumble: true, keys: { ...DEFAULT_BINDS }, pad: { ...DEFAULT_PAD }, uiScale: 1 },
-    last: { char: 'kindler', biome: 'ashwood', difficulty: 0, endless: false, skills: {}, pacts: [], skins: {}, seed: '' },
+    last: { char: 'kindler', biome: 'ashwood', difficulty: 0, endless: false, skills: {}, pacts: [], skins: {}, seed: '', trial: false },
     tutorial: false,
     daily: { date: '', done: false, best: 0, streak: 0 },
     history: [],
@@ -174,6 +176,7 @@ export class SaveStore {
     if (!d.biomes.includes(d.last.biome)) d.last.biome = 'ashwood';
     d.last.difficulty = Math.max(0, Math.min(d.stats.cleared, 2, Math.floor(d.last.difficulty) || 0));
     d.last.endless = !!d.last.endless && d.stats.wins > 0;
+    d.last.trial = !!d.last.trial && d.stats.wins > 0 && !d.last.endless;
     const picks: Partial<Record<CharId, SkillId>> = {};
     if (d.last.skills && typeof d.last.skills === 'object') {
       for (const c of CHAR_IDS) {

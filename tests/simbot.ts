@@ -25,11 +25,11 @@ export interface BotResult {
 }
 
 /** skill 0..1: how well the bot dodges */
-export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', skill = 0.7, maxTime = 1500, verbose = false, biome: BiomeId = 'ashwood', metaLevel = 0, endless = false, alt = false): BotResult {
+export function runBot(seed: number, difficulty = 0, char: CharId = 'kindler', skill = 0.7, maxTime = 1500, verbose = false, biome: BiomeId = 'ashwood', metaLevel = 0, endless = false, alt = false, trial = false): BotResult {
   // metaLevel: how many ranks of every permanent upgrade the bot has bought
   const meta: Partial<Record<MetaId, number>> = {};
   for (const m of META) meta[m.id] = Math.min(m.max, metaLevel);
-  const sim = new Sim({ seed, char, difficulty, biome, meta, endless, skill: alt ? CHARS[char].alt : undefined });
+  const sim = new Sim({ seed, char, difficulty, biome, meta, endless, skill: alt ? CHARS[char].alt : undefined, trial });
   const input: InputState = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
   const dt = 1 / 60;
   const log: string[] = [];
@@ -176,13 +176,14 @@ if (isMain) {
   const biome = (process.argv[6] ?? 'ashwood') as BiomeId;
   const metaLevel = Number(process.argv[7] ?? 0);
   const endless = process.argv[8] === 'endless';
+  const trial = process.argv[8] === 'trial';
   const alt = process.argv[9] === 'alt';
   let wins = 0;
   let loops = 0;
   let total = 0;
   for (let i = 0; i < runs; i++) {
     const char = (charArg === 'all' ? CHAR_IDS[i % CHAR_IDS.length] : charArg) as CharId;
-    const r = runBot(1000 + i * 7919, diff, char, skill, endless ? 3600 : 1500, runs === 1, biome, metaLevel, endless, alt);
+    const r = runBot(1000 + i * 7919, diff, char, skill, endless ? 3600 : 1500, runs === 1, biome, metaLevel, endless, alt, trial);
     if (r.win) wins++;
     loops += r.loops;
     total += r.time;
