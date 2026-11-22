@@ -556,6 +556,7 @@ export class UI {
         <div class="logo"><div class="logo-main">CINDERWAKE</div><div class="logo-sub">${t('title.sub')}</div></div>
         ${isTouchPrimary() ? `<div class="rotate-hint">${icon('reroll', 16)}${t('title.rotate')}</div>` : ''}
         <nav class="menu">
+          ${sv.stats.runs === 0 ? `<button class="first-hint f" data-act="how">${icon('book', 16)}${t('title.first')}</button>` : ''}
           <button class="btn primary f" data-act="play">${icon('ember', 22)}${t('menu.play')}</button>
           <button class="btn f daily ${dailyDone ? 'done' : ''}" data-act="daily">
             <span class="d-ic" style="color:${hex(CHARS[di.char].accent)}">${icon(di.char, 20)}</span>
