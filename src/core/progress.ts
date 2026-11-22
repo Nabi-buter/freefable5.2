@@ -72,6 +72,8 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   const st = save.stats;
   const p = sim.player;
   const win = sim.state === 'victory';
+  // a Trial win is its own record: it does not unlock regions, lightbearers or count toward mastery
+  const fullWin = win && !sim.cfg.trial;
   const diff = sim.diff.id;
   const char = sim.cfg.char;
   const biome = sim.cfg.biome;
@@ -100,7 +102,7 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
     st.bestTrial = sim.time;
     newBest = true;
   }
-  if (win) {
+  if (fullWin) {
     st.wins++;
     st.winsByChar[char] = (st.winsByChar[char] ?? 0) + 1;
     st.winsByBiome[biome] = (st.winsByBiome[biome] ?? 0) + 1;
@@ -125,8 +127,8 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   };
   giveChar('stormcaller', sim.stats.beacons >= 3);
   giveChar('warden', p.level >= 20);
-  giveChar('frostweaver', win);
-  giveChar('ashwalker', win && diff >= 1);
+  giveChar('frostweaver', fullWin);
+  giveChar('ashwalker', fullWin && diff >= 1);
   giveChar('tinker', p.level >= 30);
   giveChar('moonknight', Object.values(st.winsByChar).filter((n) => (n ?? 0) > 0).length >= 3);
   giveChar('stargazer', p.weapons.filter((w) => w.level >= EVOLVED_LEVEL).length >= 2);
@@ -137,10 +139,10 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
       unlockedBiomes.push(b);
     }
   };
-  giveBiome('frostmere', win && biome === 'ashwood');
-  giveBiome('emberwaste', win && biome === 'frostmere');
-  giveBiome('gloommire', win && biome === 'emberwaste');
-  giveBiome('stormcrag', win && biome === 'gloommire');
+  giveBiome('frostmere', fullWin && biome === 'ashwood');
+  giveBiome('emberwaste', fullWin && biome === 'frostmere');
+  giveBiome('gloommire', fullWin && biome === 'emberwaste');
+  giveBiome('stormcrag', fullWin && biome === 'gloommire');
 
   // ---- achievements
   const got: string[] = [];
@@ -153,9 +155,9 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
     if (def) bonus += def.reward;
   };
   ach('first_light', sim.stats.beacons >= 1);
-  ach('dawn', win);
-  ach('midnight', win && diff >= 1);
-  ach('eclipse', win && diff >= 2);
+  ach('dawn', fullWin);
+  ach('midnight', fullWin && diff >= 1);
+  ach('eclipse', fullWin && diff >= 2);
   ach('kills1', st.kills >= 1000);
   ach('kills2', st.kills >= 10000);
   ach('kills3', st.kills >= 50000);
@@ -163,8 +165,8 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   ach('evolve', evolved >= 1);
   ach('evolve3', evolved >= 3);
   ach('combo', sim.stats.maxCombo >= 1000);
-  ach('swift', win && sim.time < 12 * 60);
-  ach('untouched', win && sim.stats.dmgTaken <= 150);
+  ach('swift', fullWin && sim.time < 12 * 60);
+  ach('untouched', fullWin && sim.stats.dmgTaken <= 150);
   ach('elites', st.eliteKills >= 50);
   ach('beacons25', st.beacons >= 25);
   ach('relics', p.relics.length >= 5);
@@ -172,15 +174,15 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   ach('allchars', CHAR_IDS.every((c) => save.chars.includes(c)));
   ach('winall', CHAR_IDS.every((c) => (st.winsByChar[c] ?? 0) > 0));
   ach('endless2', sim.stats.loops >= 2);
-  ach('pact3', win && sim.pacts.size >= 3);
+  ach('pact3', fullWin && sim.pacts.size >= 3);
   ach('shrines', sim.shrines.length > 0 && sim.shrines.every((s) => s.used));
-  if (win) {
+  if (fullWin) {
     st.winsBySkill = st.winsBySkill ?? {};
     st.winsBySkill[sim.skill] = (st.winsBySkill[sim.skill] ?? 0) + 1;
   }
   ach('skills12', (Object.keys(SKILLS) as SkillId[]).every((k) => (st.winsBySkill?.[k] ?? 0) > 0));
-  ach('gloom', win && biome === 'gloommire');
-  ach('storm', win && biome === 'stormcrag');
+  ach('gloom', fullWin && biome === 'gloommire');
+  ach('storm', fullWin && biome === 'stormcrag');
   ach('trial', win && !!sim.cfg.trial && sim.time < 180);
   ach('evolve5', evolved >= 5);
   ach('relics10', p.relics.length >= 10);
