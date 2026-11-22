@@ -203,7 +203,7 @@ export class EnemyRenderer {
     this.mat = makeWorldMat({ instFx: true });
     const builders: Record<EnemyKind, () => THREE.BufferGeometry> = {
       shade: G.geoShade, skitter: G.geoSkitter, brute: G.geoBrute, spitter: G.geoSpitter, wraith: G.geoWraith,
-      bomber: G.geoBomber, husk: G.geoHusk, rime: G.geoRime, worm: G.geoWorm, sporecap: G.geoSporecap, thief: G.geoThief, stormling: G.geoStormling, shieldbearer: G.geoShieldbearer, herald: G.geoHerald, eclipse: G.geoEclipse,
+      bomber: G.geoBomber, husk: G.geoHusk, rime: G.geoRime, worm: G.geoWorm, sporecap: G.geoSporecap, thief: G.geoThief, stormling: G.geoStormling, shieldbearer: G.geoShieldbearer, herald: () => G.geoHerald(biome), eclipse: G.geoEclipse,
     };
     for (const kind of ENEMY_KINDS) {
       const geo = builders[kind]();

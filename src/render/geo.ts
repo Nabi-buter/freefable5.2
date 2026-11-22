@@ -331,7 +331,7 @@ export function geoWorm(): THREE.BufferGeometry {
   return merge(parts);
 }
 
-export function geoHerald(): THREE.BufferGeometry {
+export function geoHerald(biome = 'ashwood'): THREE.BufferGeometry {
   const armor = 0x2a2238, dark = 0x120e1c, glow = 0xb04aff, bone = 0x8a7f9a;
   const cape = (x: number, y: number) => (x < -0.2 ? Math.max(0, 2.6 - y) * 0.5 : 0);
   const parts = [
@@ -351,6 +351,26 @@ export function geoHerald(): THREE.BufferGeometry {
   for (let i = 0; i < 5; i++) {
     const a = (i / 5 - 0.5) * 2.4;
     parts.push(part(cone(0.1, 0.6, 4), bone, { pos: [0.25 + Math.cos(a) * 0.3, 4.3, Math.sin(a) * 0.36], rot: [Math.sin(a) * 0.4, 0, -Math.cos(a) * 0.2] }));
+  }
+  // each region's herald wears that land
+  if (biome === 'frostmere') {
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      parts.push(part(cone(0.16, 0.9 + (i % 2) * 0.4, 4), 0xc8eaff, { pos: [Math.cos(a) * 0.5 - 0.1, 3.35 + (i % 2) * 0.1, Math.sin(a) * 0.9], rot: [Math.sin(a) * 0.5, 0, -Math.cos(a) * 0.5], glow: 0.5 }));
+    }
+  } else if (biome === 'emberwaste') {
+    parts.push(part(box(0.06, 1.6, 0.5), 0xff6a2a, { pos: [0.72, 2.0, 0], glow: 2.6 }));
+    parts.push(part(box(0.06, 0.9, 0.3), 0xff6a2a, { pos: [0.7, 2.9, 0.5], rot: [0.4, 0, 0], glow: 2.6 }));
+    parts.push(part(box(0.06, 0.9, 0.3), 0xff6a2a, { pos: [0.7, 2.9, -0.5], rot: [-0.4, 0, 0], glow: 2.6 }));
+  } else if (biome === 'gloommire') {
+    for (const [z, h] of [[1.15, 3.85], [-1.15, 3.85], [0.4, 0.9], [-0.5, 0.7]] as [number, number][]) {
+      parts.push(part(cyl(0.06, 0.08, 0.3, 5), 0xd8cfe8, { pos: [0, h, z] }));
+      parts.push(part(sph(0.22, 6, 4), 0x7a4ac0, { pos: [0, h + 0.18, z], scl: [1, 0.55, 1] }));
+      parts.push(part(sph(0.06, 4, 3), 0x9cff9a, { pos: [0.1, h + 0.28, z], glow: 2 }));
+    }
+  } else if (biome === 'stormcrag') {
+    for (let i = 0; i < 3; i++) parts.push(part(oct(0.22), 0xbfe0ff, { pos: [-0.2 + i * 0.25, 4.55 + (i === 1 ? 0.25 : 0), (i - 1) * 0.35], scl: [0.6, 1.6, 0.6], glow: 2.4 }));
+    parts.push(part(box(0.05, 2.2, 0.05), 0xbfe0ff, { pos: [0.75, 2.2, 1.45], glow: 2 }));
   }
   return merge(parts);
 }
