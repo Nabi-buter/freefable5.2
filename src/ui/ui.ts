@@ -1322,6 +1322,10 @@ export class UI {
   private buildHtml(sim: Sim): string {
     const p = sim.player;
     const rows: string[] = [];
+    if (sim.pacts.size) {
+      rows.push(`<h4>${t('setup.pacts')}</h4>`);
+      for (const id of sim.pacts) rows.push(`<div class="row"><span class="slot" style="--c:${hex(PACTS[id].color)}">${icon('oathbrand', 18)}</span><div style="min-width:0"><div class="nm">${t('pact.' + id)}</div><div class="ds">${t(`pact.${id}.d`)}</div></div></div>`);
+    }
     if (sim.synergies.size) {
       rows.push(`<h4>${t('syn.title')}</h4>`);
       for (const id of sim.synergies) rows.push(`<div class="row"><span class="slot" style="--c:${hex(SYNERGIES[id].color)}">${icon(SYNERGIES[id].a, 14)}${icon(SYNERGIES[id].b, 14)}</span><div style="min-width:0"><div class="nm">${t('syn.' + id)}</div><div class="ds">${t(`syn.${id}.d`)}</div></div></div>`);
