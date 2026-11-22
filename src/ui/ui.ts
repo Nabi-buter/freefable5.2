@@ -707,7 +707,11 @@ export class UI {
         ${row(t('rec.beacons'), fmtNum(st.beacons))}${row(t('rec.time'), fmtTime(st.time))}${row(t('rec.maxlevel'), String(st.maxLevel))}${row(t('rec.maxcombo'), fmtNum(st.maxCombo))}
         ${row(t('rec.cinders'), fmtNum(st.cindersEarned))}${row(t('rec.loops'), st.bestLoops ? `${st.bestLoops} · ${fmtTime(st.bestEndlessTime)}` : '—')}
         ${[0, 1, 2].map((d) => row(t('rec.best', t('d.' + d)), st.bestTime[d] ? fmtTime(st.bestTime[d]) : '—')).join('')}
-      </div>`;
+      </div>
+      <div class="set-sec">${t('rec.bychar')}</div>
+      <div class="statlist">${CHAR_IDS.map((c) => row(`${icon(c, 14)} ${t('c.' + c)}`, sv.chars.includes(c) ? fmtNum(st.winsByChar[c] ?? 0) : '🔒')).join('')}</div>
+      <div class="set-sec">${t('rec.bybiome')}</div>
+      <div class="statlist">${BIOMES.map((b) => row(`${icon(BIOME_ICON[b], 14)} ${t('b.' + b)}`, sv.biomes.includes(b) ? fmtNum(st.winsByBiome[b] ?? 0) : '🔒')).join('')}</div>`;
     } else {
       const item = (ic: string, color: string, name: string, desc: string, extra = '') => `<div class="mcard" style="--c:${color}"><span class="pic">${icon(ic, 22)}</span><div class="body"><div class="nm">${name}</div><div class="ds">${desc}</div>${extra}</div></div>`;
       const sec = (label: string) => `<div class="set-sec" style="grid-column:1/-1">${label}</div>`;

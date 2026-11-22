@@ -216,6 +216,8 @@ const S: Record<string, Pair> = {
   'omen.golden': ['징조 — 황금의 시간: 20초간 불씨 2배', 'Omen — Golden Hour: double embers for 20s'],
   'omen.deepdark': ['징조 — 깊어지는 어둠: 20초간 적이 몰려오지만 불씨 1.5배', 'Omen — Deepening Dark: a rush of foes for 20s, embers x1.5'],
   'omen.starfall': ['징조 — 별똥비: 20초간 하늘이 적을 내리칩니다', 'Omen — Starfall: for 20s the sky strikes your foes'],
+  'rec.bychar': ['등불지기별 승리', 'Wins by lightbearer'],
+  'rec.bybiome': ['지역별 승리', 'Wins by region'],
   'setup.pacts': ['서약', 'Pacts'],
   'pact.bloodmoon': ['핏빛 달', 'Blood Moon'],
   'pact.bloodmoon.d': ['적 체력 +35%', 'Enemy health +35%'],
