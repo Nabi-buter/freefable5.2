@@ -207,6 +207,19 @@ describe('simulation', () => {
     choose(sim, 0);
     expect(sim.stats.cinders).toBe(before - (c.type === 'buy' ? c.cost : 0));
   });
+  it('the bounty appears once and pays out when slain', () => {
+    const sim = new Sim({ seed: 17, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {} });
+    const input = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
+    sim.time = 485;
+    sim.step(1 / 60, input);
+    expect(sim.bounty).not.toBeNull();
+    const e = sim.enemies.find((x) => x.id === sim.bounty!.id)!;
+    const chests = sim.pickups.filter((k) => k.kind === 'chest').length;
+    sim.kill(e);
+    expect(sim.bounty).toBeNull();
+    // the usual elite chest plus two for the bounty
+    expect(sim.pickups.filter((k) => k.kind === 'chest').length).toBe(chests + 3);
+  });
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);

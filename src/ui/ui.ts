@@ -846,6 +846,7 @@ export class UI {
         <div class="beacons" data-h="beacons"></div>
         <div class="objective" data-h="obj"></div>
         <div class="omen" data-h="omen"></div>
+        <div class="omen bounty" data-h="bounty"></div>
         <div class="bossbar hidden" data-h="boss"><div class="nm" data-h="bossname"></div><div class="bar"><i data-h="bossfill"></i><em style="left:62%"></em><em style="left:30%"></em></div></div>
       </div>
       <div class="tr">
@@ -991,6 +992,11 @@ export class UI {
         el.className = 'omen on ' + om.id;
         el.textContent = `${t('omen.' + om.id + '.short')} · ${Math.ceil(om.t)}s`;
       }
+    });
+    const bt = sim.bounty;
+    this.set('bounty', bt ? Math.ceil(bt.until - sim.time) : -1, (el, v) => {
+      el.classList.toggle('on', Number(v) >= 0);
+      if (Number(v) >= 0) el.textContent = `☠ ${t('hud.bounty')} · ${v}s`;
     });
     // signature ability
     const sk = SKILLS[sim.skill];

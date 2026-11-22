@@ -108,6 +108,9 @@ export class Sim {
   synergies = new Set<SynergyId>();
   /** the wandering merchant: where it waits and until when (seconds of sim time) */
   merchant: { x: number; z: number; until: number; visited: boolean } | null = null;
+  /** the bounty: a named elite to hunt before time runs out */
+  bounty: { id: number; until: number } | null = null;
+  private bountyDone = false;
   private merchantDone = false;
   /** lasting gifts from shrine bargains */
   boons = { hp: 0, might: 0, dashCd: 0, speed: 0 };
@@ -585,6 +588,13 @@ export class Sim {
     if (e.kind === 'rime') {
       this.zones.push({ id: this.id(), kind: 'frost', x: e.x, z: e.z, r: 3.8, t: 0, dur: 0.75, dmg: 5, tick: 0, hostile: true, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true });
     }
+    if (this.bounty && e.id === this.bounty.id) {
+      this.bounty = null;
+      this.events.push({ t: 'announce', key: 'ann.bounty.won', tone: 'good' });
+      this.spawnPickup('chest', e.x, e.z, 1);
+      this.spawnPickup('chest', e.x + 1, e.z, 1);
+      for (let i = 0; i < 8; i++) this.spawnPickup('cinder', e.x + this.rng.range(-2, 2), e.z + this.rng.range(-2, 2), 5);
+    }
     if (e.kind === 'thief' && (e.c1 > 0 || this.hasRelic('snare'))) {
       // the loot comes back with interest
       this.dropXp(e.x, e.z, e.c1 * 1.5);
@@ -915,6 +925,29 @@ export class Sim {
       const pt = this.ringPoint(12, 18, 1.5);
       this.merchant = { x: pt.x, z: pt.z, until: this.time + 90, visited: false };
       this.events.push({ t: 'announce', key: 'ann.merchant', tone: 'good' });
+    }
+    // the bounty: once, around minute eight, a named elite with a price on its head
+    if (!this.bountyDone && !this.cfg.trial && this.time > 480 && !this.boss && this.stats.loops === 0) {
+      this.bountyDone = true;
+      const kinds: EnemyKind[] = ['brute', 'wraith', 'husk', 'shieldbearer'];
+      const pt = this.ringPoint(20, 26, 1.5);
+      const e = this.spawnEnemy(kinds[Math.floor(this.rng.next() * kinds.length)], pt.x, pt.z, true);
+      e.hp *= 2.2;
+      e.maxHp = e.hp;
+      e.affix = 1 + Math.floor(this.rng.next() * 6);
+      this.bounty = { id: e.id, until: this.time + 60 };
+      this.events.push({ t: 'announce', key: 'ann.bounty', tone: 'warn' });
+    }
+    if (this.bounty) {
+      const b = this.bounty;
+      const e = this.enemies.find((x) => x.id === b.id);
+      if (!e || !e.alive) this.bounty = null;
+      else if (this.time > b.until) {
+        // it slips away into the dark
+        e.alive = false;
+        this.bounty = null;
+        this.events.push({ t: 'announce', key: 'ann.bounty.lost', tone: 'warn' });
+      }
     }
     const m = this.merchant;
     if (m) {

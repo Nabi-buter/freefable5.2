@@ -1649,7 +1649,8 @@ export class GameView {
         const f = clamp(e.hp / e.maxHp, 0, 1);
         ctx.fillStyle = 'rgba(8,6,16,0.75)';
         ctx.fillRect(o.x - w / 2 - 1, o.y - 1, w + 2, h + 2);
-        const col = e.kind === 'herald' ? '#b86bff' : AFFIX_COLOR[e.affix] ?? '#ffc23a';
+        const isBounty = sim.bounty?.id === e.id;
+        const col = isBounty ? '#ff4d3a' : e.kind === 'herald' ? '#b86bff' : AFFIX_COLOR[e.affix] ?? '#ffc23a';
         ctx.fillStyle = col;
         ctx.fillRect(o.x - w / 2, o.y, w * f, h);
         if (e.affix > 0 && this.affixLabel) {
@@ -1715,6 +1716,11 @@ export class GameView {
       if (sim.boss) arrow(sim.boss.x, sim.boss.z, '#ff5a3c', '', false);
       for (const g of sim.bigs) if (g.alive && g.kind === 'herald') arrow(g.x, g.z, '#b86bff', '', false);
       for (const k of sim.pickups) if (k.alive && k.kind === 'chest') arrow(k.x, k.z, '#ffd24a', '', false);
+      if (sim.bounty) {
+        const be = sim.enemies.find((x) => x.id === sim.bounty!.id);
+        if (be) arrow(be.x, be.z, '#ff4d3a', '☠', false);
+      }
+      if (sim.merchant && !sim.merchant.visited) arrow(sim.merchant.x, sim.merchant.z, '#ffd24a', '$', false);
     }
     ov.drawTexts(cam, dt);
   }
