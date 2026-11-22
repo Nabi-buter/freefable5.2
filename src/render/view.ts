@@ -1262,6 +1262,12 @@ export class GameView {
           if (Math.random() < dt * 14 * life) this.sparks.spawn(z.x, fy + 0.1, z.z, 0, 1.2 + Math.random(), 0, 0.5, 0.3, 3, 1.4, 0.4, { drag: 0.8 });
           break;
         }
+        case 'storm': {
+          if (this.assist) dec.add(DECAL.telegraph, z.x, z.z, z.r, 1.0, 0.3, 1.0, 1.0, k);
+          else dec.add(DECAL.telegraph, z.x, z.z, z.r, 0.75, 0.9, 1.0, 1.0, k);
+          if (k > 0.6 && Math.random() < dt * 30) this.sparks.spawn(z.x + (Math.random() - 0.5) * z.r, H(z.x, z.z) + 6 + Math.random() * 4, z.z + (Math.random() - 0.5) * z.r, 0, -8, 0, 0.3, 0.3, 2, 2.4, 3, { drag: 0.2 });
+          break;
+        }
         case 'spore': {
           if (z.len > 0) {
             const fade = Math.min(1, z.len * 1.5) * (0.8 + Math.sin(time * 3 + z.id) * 0.2);
@@ -1499,7 +1505,7 @@ export class GameView {
   private ambient(dt: number) {
     const biome = this.world!.biome.id;
     const c = new THREE.Color(this.pal.firefly);
-    this.ambientT += dt * (biome === 'frostmere' ? 60 : 16);
+    this.ambientT += dt * (biome === 'frostmere' ? 60 : biome === 'stormcrag' ? 80 : 16);
     const tx = this.camTarget.x, tz = this.camTarget.z;
     while (this.ambientT >= 1) {
       this.ambientT -= 1;
@@ -1508,6 +1514,7 @@ export class GameView {
       const y = this.height(x, z);
       if (y < SEA_LEVEL) continue;
       if (biome === 'frostmere') this.sparks.spawn(x, y + 9 + Math.random() * 6, z, 0.6, -2.2 - Math.random(), 0.3, 5, 0.22, 0.8, 0.9, 1.1, {});
+      else if (biome === 'stormcrag') this.sparks.spawn(x, y + 10 + Math.random() * 5, z, 1.2, -9 - Math.random() * 3, 0.6, 1.4, 0.12, 0.6, 0.7, 0.9, {});
       else if (biome === 'emberwaste') this.sparks.spawn(x, y + 0.2, z, 0.5, 0.8 + Math.random() * 1.2, 0.2, 4, 0.24, 2.2, 0.8, 0.2, {});
       else this.sparks.spawn(x, y + 0.6 + Math.random() * 2.2, z, (Math.random() - 0.5) * 0.7, (Math.random() - 0.3) * 0.3, (Math.random() - 0.5) * 0.7, 3 + Math.random() * 3, 0.26, c.r * 2.2, c.g * 2.2, c.b * 2.2, {});
     }

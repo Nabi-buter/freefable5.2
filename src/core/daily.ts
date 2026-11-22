@@ -13,7 +13,7 @@ export interface DailyInfo {
   pact: PactId;
 }
 
-const BIOMES: BiomeId[] = ['ashwood', 'frostmere', 'emberwaste', 'gloommire'];
+const BIOMES: BiomeId[] = ['ashwood', 'frostmere', 'emberwaste', 'gloommire', 'stormcrag'];
 
 /** Everyone gets the same island, lightbearer and region on a given UTC day. */
 export function dailyInfo(now = new Date()): DailyInfo {

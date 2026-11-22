@@ -1,6 +1,6 @@
 import { Noise2D, RNG, clamp, smoothstep, lerp } from '../core/rng';
 
-export type BiomeId = 'ashwood' | 'frostmere' | 'emberwaste' | 'gloommire';
+export type BiomeId = 'ashwood' | 'frostmere' | 'emberwaste' | 'gloommire' | 'stormcrag';
 
 export type ObstacleKind = 'pine' | 'oak' | 'dead' | 'rock' | 'pillar' | 'wall' | 'crystal' | 'stump' | 'shroom' | 'ice' | 'cactus' | 'bone';
 
@@ -50,7 +50,7 @@ export interface BiomeDef {
   /** spawn weight multipliers by enemy kind (missing = 1) */
   weights: Record<string, number>;
   /** environmental hazard that erupts near the player */
-  hazard: 'none' | 'vent' | 'frost' | 'spore';
+  hazard: 'none' | 'vent' | 'frost' | 'spore' | 'storm';
 }
 
 export const BIOMES: Record<BiomeId, BiomeDef> = {
@@ -79,6 +79,15 @@ export const BIOMES: Record<BiomeId, BiomeDef> = {
     enemyHp: 0.95, enemySpeed: 1.06, weights: { bomber: 1.5, spitter: 1.2, husk: 1.2, skitter: 0.8 }, hazard: 'vent',
   },
   // a low, glowing fungal marsh: swarms and spitters, and spore blooms that linger
+  // a wind-scoured highland under a permanent thunderhead
+  stormcrag: {
+    id: 'stormcrag',
+    trees: [['pine', 3], ['dead', 3]],
+    props: [['rock', 7], ['pillar', 2], ['crystal', 2]],
+    treeDensity: 0.32,
+    hill: 1.55,
+    enemyHp: 1.32, enemySpeed: 1.06, weights: { wraith: 1.6, spitter: 1.4, bomber: 1.2, skitter: 0.8 }, hazard: 'storm',
+  },
   gloommire: {
     id: 'gloommire',
     trees: [['dead', 3], ['oak', 3], ['pine', 1]],

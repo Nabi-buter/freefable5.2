@@ -46,9 +46,9 @@ const BOON_LOOK: Record<string, [string, string]> = {
   forge: ['sword', '#ffb070'], oath: ['oathbrand', '#ff4d5e'], insight: ['banish', '#7fd4ff'],
 };
 const hex = (n: number) => '#' + n.toString(16).padStart(6, '0');
-const BIOMES: BiomeId[] = ['ashwood', 'frostmere', 'emberwaste', 'gloommire'];
-const BIOME_COLOR: Record<BiomeId, string> = { ashwood: '#5fd39a', frostmere: '#9ad8ff', emberwaste: '#ff7a4a', gloommire: '#b98cff' };
-const BIOME_ICON: Record<BiomeId, string> = { ashwood: 'starmoss', frostmere: 'frost', emberwaste: 'ember', gloommire: 'mire' };
+const BIOMES: BiomeId[] = ['ashwood', 'frostmere', 'emberwaste', 'gloommire', 'stormcrag'];
+const BIOME_COLOR: Record<BiomeId, string> = { ashwood: '#5fd39a', frostmere: '#9ad8ff', emberwaste: '#ff7a4a', gloommire: '#b98cff', stormcrag: '#bfe0ff' };
+const BIOME_ICON: Record<BiomeId, string> = { ashwood: 'starmoss', frostmere: 'frost', emberwaste: 'ember', gloommire: 'mire', stormcrag: 'arc' };
 const DIFF_COLOR = ['#ffb347', '#8fa8ff', '#ff5a5a'];
 const META_ICON: Record<MetaId, string> = {
   m_hp: 'vigor', m_might: 'might', m_haste: 'haste', m_speed: 'swift', m_regen: 'mending', m_armor: 'plating', m_magnet: 'magnet', m_xp: 'wisdom',
@@ -625,7 +625,7 @@ export class UI {
             </div>
           </div>
           <div class="setup-col">
-            <div><div class="group-label">${t('setup.stage')}</div><div class="pick-grid four">${biomes}</div></div>
+            <div><div class="group-label">${t('setup.stage')}</div><div class="pick-grid five">${biomes}</div></div>
             <div class="panel detail slim"><p>${t(`b.${sv.last.biome}.d`)}</p>${biomeOk ? '' : lock(`b.${sv.last.biome}.u`)}</div>
             <div><div class="group-label">${t('setup.diff')}</div><div class="pick-grid three">${diffs}</div></div>
             <div class="panel detail slim"><p>${t(`d.${sv.last.difficulty}.d`)}</p>${diffOk ? (best ? `<p>${icon('clock', 16)} ${t('rec.best', t('d.' + sv.last.difficulty))}: <b style="color:var(--amber-hot)">${fmtTime(best)}</b></p>` : '') : lock(`d.${sv.last.difficulty}.u`)}</div>

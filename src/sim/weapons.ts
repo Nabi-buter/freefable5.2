@@ -647,6 +647,24 @@ export function updateZones(sim: Sim, dt: number) {
         }
         break;
       }
+      case 'storm': {
+        // lightning strike: a blinding bolt that hits everything under it
+        if (z.t >= z.dur) {
+          z.alive = false;
+          sim.events.push({ t: 'lightning', pts: [z.x + 3, z.z - 6, z.x, z.z] });
+          sim.events.push({ t: 'explode', x: z.x, z: z.z, r: z.r, c: 0xbfe0ff, hostile: true });
+          const I = sim.intensity();
+          const list = sim.near(z.x, z.z, z.r);
+          for (let k = 0; k < list.length; k++) {
+            const e = list[k];
+            sim.applyDamage(e, (70 + 16 * I) * (e.boss ? 0.5 : 1), null, false, 5, z.x, z.z);
+            if (e.alive) sim.chill(e, 1.5);
+          }
+          const dx = p.x - z.x, dz = p.z - z.z;
+          if (dx * dx + dz * dz < (z.r + 0.3) * (z.r + 0.3)) sim.hurtPlayer(z.dmg, z.x, z.z);
+        }
+        break;
+      }
       case 'spore': {
         // spore bloom: bursts into a cloud that lingers and eats at everything inside it
         if (z.len > 0) {

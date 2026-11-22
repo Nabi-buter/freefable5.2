@@ -92,7 +92,7 @@ export function updateDirector(sim: Sim, dt: number) {
         const dd = i === 0 ? sim.rng.range(0, 3.5) : sim.rng.range(4, 11);
         const x = p.x + p.vx * 0.9 + Math.cos(a) * dd, z = p.z + p.vz * 0.9 + Math.sin(a) * dd;
         sim.zones.push({
-          id: sim.id(), kind: hz, x, z, r: hz === 'vent' ? 3.6 : hz === 'spore' ? 4.0 : 4.4, t: 0, dur: 1.5 + i * 0.25, dmg: hz === 'vent' ? 16 : hz === 'spore' ? 8 : 7,
+          id: sim.id(), kind: hz, x, z, r: hz === 'vent' ? 3.6 : hz === 'spore' ? 4.0 : hz === 'storm' ? 3.2 : 4.4, t: 0, dur: (hz === 'storm' ? 1.2 : 1.5) + i * 0.25, dmg: hz === 'vent' ? 16 : hz === 'spore' ? 8 : hz === 'storm' ? 18 : 7,
           tick: 0, hostile: true, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true,
         });
       }
@@ -424,14 +424,14 @@ export function updateEnemies(sim: Sim, dt: number) {
                   const a = a0 + (k / count) * Math.PI * 2;
                   const dd = sim.rng.range(3, 6.5);
                   sim.zones.push({
-                    id: sim.id(), kind: hz, x: p.x + Math.cos(a) * dd, z: p.z + Math.sin(a) * dd, r: hz === 'vent' ? 3.6 : hz === 'spore' ? 4.0 : 4.4,
-                    t: 0, dur: 1.2 + k * 0.3, dmg: hz === 'vent' ? 16 : hz === 'spore' ? 8 : 7,
+                    id: sim.id(), kind: hz, x: p.x + Math.cos(a) * dd, z: p.z + Math.sin(a) * dd, r: hz === 'vent' ? 3.6 : hz === 'spore' ? 4.0 : hz === 'storm' ? 3.2 : 4.4,
+                    t: 0, dur: 1.2 + k * 0.3, dmg: hz === 'vent' ? 16 : hz === 'spore' ? 8 : hz === 'storm' ? 18 : 7,
                     tick: 0, hostile: true, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true,
                   });
                 }
               }
               if (e.n % 4 === 0) {
-                const brood: EnemyKind = hz === 'frost' ? 'wraith' : hz === 'vent' ? 'bomber' : hz === 'spore' ? 'sporecap' : 'shade';
+                const brood: EnemyKind = hz === 'frost' || hz === 'storm' ? 'wraith' : hz === 'vent' ? 'bomber' : hz === 'spore' ? 'sporecap' : 'shade';
                 const count = brood === 'shade' ? 5 : 3;
                 for (let k = 0; k < count; k++) {
                   const a = sim.rng.angle();
@@ -672,6 +672,15 @@ function updateEclipse(sim: Sim, e: Enemy, dt: number, dist: number, nx: number,
             const a = base + (k - (n - 1) / 2) * 0.16;
             sim.eprojs.push({ id: sim.id(), x: e.x + Math.cos(a) * e.r, z: e.z + Math.sin(a) * e.r, vx: Math.cos(a) * 12, vz: Math.sin(a) * 12, life: 4, r: 0.42, dmg: e.dmg * 0.55, kind: 1, alive: true });
           }
+        } else if (hz === 'storm') {
+          // a ring of lightning closing on the bearer, then a strike on the spot
+          const n = phase === 3 ? 6 : 5;
+          const a0 = sim.rng.angle();
+          for (let k = 0; k < n; k++) {
+            const a = a0 + (k / n) * Math.PI * 2;
+            bossHazard(sim, 'storm', p.x + Math.cos(a) * 5.5, p.z + Math.sin(a) * 5.5, 0.9 + k * 0.06, e.dmg * 0.7);
+          }
+          if (idx === waves) bossHazard(sim, 'storm', p.x + p.vx * 0.5, p.z + p.vz * 0.5, 1.3, e.dmg * 0.8);
         } else if (hz === 'vent') {
           // magma line from the boss to where the bearer is heading
           const tx = p.x + p.vx * 0.6, tz = p.z + p.vz * 0.6;
@@ -699,9 +708,9 @@ function updateEclipse(sim: Sim, e: Enemy, dt: number, dist: number, nx: number,
   }
 }
 
-function bossHazard(sim: Sim, kind: 'vent' | 'frost' | 'spore', x: number, z: number, delay: number, dmg: number) {
+function bossHazard(sim: Sim, kind: 'vent' | 'frost' | 'spore' | 'storm', x: number, z: number, delay: number, dmg: number) {
   sim.zones.push({
-    id: sim.id(), kind, x, z, r: kind === 'vent' ? 3.2 : kind === 'spore' ? 3.4 : 3.8, t: 0, dur: delay, dmg,
+    id: sim.id(), kind, x, z, r: kind === 'vent' || kind === 'storm' ? 3.2 : kind === 'spore' ? 3.4 : 3.8, t: 0, dur: delay, dmg,
     tick: 0, hostile: true, weapon: null, evolved: false, dx: kind === 'spore' ? 3 : 0, dz: 0, len: 0, alive: true,
   });
 }

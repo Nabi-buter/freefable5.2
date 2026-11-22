@@ -138,6 +138,8 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .pick-grid.seven .pick { padding-left: 0.2em; padding-right: 0.2em; }
 .pick-grid.seven .pick .nm { font-size: 0.74em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .pick-grid.four .pick .nm { font-size: 0.86em; }
+.pick-grid.five { grid-template-columns: repeat(5, 1fr); gap: 0.45em; }
+.pick-grid.five .pick .nm { font-size: 0.78em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .pick.row { flex-direction: row; justify-content: center; gap: 0.7em; padding: 0.55em 0.8em; }
 .pick.row .pic { width: 2.3em; height: 2.3em; }
 .pick {

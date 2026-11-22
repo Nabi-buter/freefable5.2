@@ -172,6 +172,7 @@ const BOSS_TINT: Record<string, [number, number, number]> = {
   frostmere: [0.5, 0.85, 1.45],
   emberwaste: [1.5, 0.7, 0.4],
   gloommire: [0.65, 1.35, 0.7],
+  stormcrag: [0.8, 0.95, 1.4],
 };
 
 export class EnemyRenderer {
