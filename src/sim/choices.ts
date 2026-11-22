@@ -1,5 +1,5 @@
 import type { Sim } from './sim';
-import type { BoonId, Choice, Pending } from './types';
+import type { BoonId, Choice, Pending, WareId } from './types';
 import {
   PACT_IDS, EVOLVED_LEVEL, MAX_PASSIVES, MAX_WEAPONS, MAX_WEAPON_LEVEL, PASSIVES, PASSIVE_IDS, RELIC_IDS, WEAPONS, WEAPON_IDS,
 } from './defs';
@@ -126,9 +126,49 @@ export function applyChoice(sim: Sim, c: Choice) {
     case 'awaken':
       sim.awakening = c.id;
       break;
+    case 'buy':
+      if (sim.stats.cinders >= c.cost) {
+        sim.stats.cinders -= c.cost;
+        applyWare(sim, c.id);
+      }
+      break;
   }
   sim.recalc();
   if (c.type === 'relic' && c.id === 'secondwind') p.dashCharges = p.st.dashMax;
+}
+
+/** the merchant sells for embers gathered this vigil (spent embers are not banked) */
+export function makeMerchantPending(sim: Sim): Pending {
+  const I = Math.max(1, sim.time / 60);
+  const price = (base: number) => Math.round(base * (1 + I * 0.05));
+  const wares: Choice[] = [
+    { type: 'buy', id: 'salve', cost: price(25) },
+    { type: 'buy', id: 'whetstone', cost: price(60) },
+    { type: 'buy', id: 'curio', cost: price(110) },
+    { type: 'buy', id: 'map', cost: price(30) },
+    { type: 'buy', id: 'tonic', cost: price(45) },
+  ];
+  sim.rng.shuffle(wares);
+  return { type: 'merchant', choices: wares.slice(0, 4) };
+}
+
+function applyWare(sim: Sim, id: WareId) {
+  const p = sim.player;
+  switch (id) {
+    case 'salve': p.hp = p.st.maxHp; break;
+    case 'whetstone': {
+      const ups = p.weapons.filter((w) => w.level < MAX_WEAPON_LEVEL);
+      if (ups.length) ups[Math.floor(sim.rng.next() * ups.length)].level++;
+      break;
+    }
+    case 'curio': {
+      const avail = RELIC_IDS.filter((r) => !sim.hasRelic(r));
+      if (avail.length) applyChoice(sim, { type: 'relic', id: avail[Math.floor(sim.rng.next() * avail.length)] });
+      break;
+    }
+    case 'map': p.rerolls += 2; break;
+    case 'tonic': sim.boons.hp += 15; p.hp += 15; break;
+  }
 }
 
 const BOONS: BoonId[] = ['blood', 'ward', 'fury', 'swift', 'tithe', 'renew', 'gamble', 'forge', 'oath', 'insight'];

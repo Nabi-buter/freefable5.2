@@ -530,6 +530,9 @@ export class AudioEngine {
               break;
           }
           break;
+        case 'merchant':
+          this.chord([67, 71, 74], 0.8, { type: 'triangle', vol: 0.06, strum: 0.06, rev: 0.6 });
+          break;
         case 'shrine':
           this.chord([62, 69, 74, 78], 1.6, { type: 'triangle', vol: 0.07, strum: 0.09, rev: 0.9 });
           break;

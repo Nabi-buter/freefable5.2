@@ -257,7 +257,11 @@ export type Choice =
   | { type: 'heal' }
   | { type: 'cinder' }
   | { type: 'boon'; id: BoonId }
-  | { type: 'awaken'; id: AwakenId };
+  | { type: 'awaken'; id: AwakenId }
+  | { type: 'buy'; id: WareId; cost: number };
+
+/** wares sold by the wandering merchant */
+export type WareId = 'salve' | 'whetstone' | 'curio' | 'map' | 'tonic';
 
 /** how the signature ability awakens after the third beacon */
 export type AwakenId = 'potency' | 'swiftness' | 'reach';
@@ -266,7 +270,7 @@ export type AwakenId = 'potency' | 'swiftness' | 'reach';
 export type BoonId = 'blood' | 'ward' | 'fury' | 'swift' | 'tithe' | 'renew' | 'gamble' | 'forge' | 'oath' | 'insight';
 
 export interface Pending {
-  type: 'levelup' | 'relic' | 'chest' | 'shrine' | 'awaken';
+  type: 'levelup' | 'relic' | 'chest' | 'shrine' | 'awaken' | 'merchant';
   choices: Choice[];
   /** chest: rewards are applied automatically, list is for presentation */
   cinders?: number;
@@ -301,6 +305,7 @@ export type SimEvent =
   | { t: 'skill'; id: SkillId; x: number; z: number; r: number }
   | { t: 'skillReady' }
   | { t: 'shrine'; x: number; z: number }
+  | { t: 'merchant'; x: number; z: number }
   | { t: 'spawnElite'; x: number; z: number }
   | { t: 'freeze'; x: number; z: number };
 

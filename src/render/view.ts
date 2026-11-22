@@ -1433,6 +1433,16 @@ export class GameView {
     }
     sites.push({ x: 0, y: hy + 1.6, z: 0, d: hd, r: 1, g: 0.6, b: 0.28, power: 36 + Math.sin(time * 11) * 3 });
 
+    // the wandering merchant: a warm lantern-lit stall
+    const mc = sim?.merchant;
+    if (mc && !mc.visited) {
+      const my = this.height(mc.x, mc.z);
+      const fade = Math.min(1, (mc.until - sim!.time) / 3);
+      dec.add(DECAL.glow, mc.x, mc.z, 3.4, 1.0, 0.7, 0.25, 0.45 * fade);
+      dec.add(DECAL.ring, mc.x, mc.z, 2.4, 1.6, 1.1, 0.4, (0.55 + Math.sin(time * 4) * 0.15) * fade);
+      if (Math.random() < dt * 14) this.sparks.spawn(mc.x + (Math.random() - 0.5) * 0.8, my + 1.6 + Math.random() * 0.6, mc.z + (Math.random() - 0.5) * 0.8, 0, 0.8 + Math.random(), 0, 1.0, 0.3, 2.6, 1.8, 0.6, { drag: 0.6, grav: -0.3 });
+      sites.push({ x: mc.x, y: my + 2, z: mc.z, d: Math.hypot(cam.x - mc.x, cam.z - mc.z), r: 1, g: 0.75, b: 0.35, power: 14 });
+    }
     for (let i = 0; i < this.shrineDyn.length; i++) {
       const sd = this.shrineDyn[i];
       const ss = sim ? sim.shrines[i] : null;

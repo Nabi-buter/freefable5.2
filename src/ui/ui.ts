@@ -72,6 +72,8 @@ export class UI {
   screen: Screen = 'none';
   modal: Modal = null;
   private settingsFrom: 'title' | 'pause' = 'title';
+  /** embers available when the current choice screen opened (merchant prices) */
+  private purse = 0;
   private rebinding: BindAction | null = null;
   private padRebinding: PadAction | null = null;
   private recTab: 'ach' | 'stats' | 'history' | 'codex' = 'ach';
@@ -510,6 +512,12 @@ export class UI {
         break;
       case 'choose': {
         const i = Number(arg);
+        const ch = this.pendingRef?.choices[i];
+        if (ch && ch.type === 'buy' && ch.cost > this.purse) {
+          au.ui('deny');
+          this.toast(t('merchant.poor'));
+          break;
+        }
         if (this.banishMode) {
           if (this.host.banish(i)) au.ui('back');
           else au.ui('deny');
@@ -1164,6 +1172,17 @@ export class UI {
       const e = sim.enemies[i];
       c.fillRect(e.x * k - 1, e.z * k - 1, 2, 2);
     }
+    // the merchant: a gold coin with a dark ring
+    const mc = sim.merchant;
+    if (mc && !mc.visited) {
+      c.fillStyle = '#ffd24a';
+      c.beginPath();
+      c.arc(mc.x * k, mc.z * k, 4.5, 0, Math.PI * 2);
+      c.fill();
+      c.strokeStyle = 'rgba(0,0,0,0.6)';
+      c.lineWidth = 1.5;
+      c.stroke();
+    }
     // unused shrines: small violet diamonds
     c.fillStyle = '#c6a2ff';
     for (const s of sim.shrines) {
@@ -1286,6 +1305,13 @@ export class UI {
       case 'cinder':
         color = '#ffb347'; ic = 'cinder'; name = t('choice.cinder'); ds = t('choice.cinder.d'); tag = `<span class="tag">${t('tag.bonus')}</span>`;
         break;
+      case 'buy': {
+        const look: Record<string, [string, string]> = { salve: ['heart', '#7dff9b'], whetstone: ['sword', '#ffb070'], curio: ['star', '#ffd24a'], map: ['reroll', '#7fd4ff'], tonic: ['vigor', '#ff8aa0'] };
+        color = look[c.id][1]; ic = look[c.id][0]; name = t('ware.' + c.id); ds = t(`ware.${c.id}.d`);
+        tag = `<span class="tag" style="color:var(--amber-hot)">${icon('cinder', 11)} ${c.cost}</span>`;
+        cls = sim.stats.cinders >= c.cost ? 'sheen' : 'poor';
+        break;
+      }
       case 'awaken':
         color = hex(SKILLS[sim.skill].color); ic = c.id === 'potency' ? 'might' : c.id === 'swiftness' ? 'rite' : 'reach'; name = t('aw.' + c.id); ds = t(`aw.${c.id}.d`); tag = `<span class="tag">${t('setup.skill')}</span>`; cls = 'sheen';
         break;
@@ -1300,6 +1326,7 @@ export class UI {
   showPending(sim: Sim) {
     const pend = sim.pending[0];
     if (!pend) return;
+    this.purse = sim.stats.cinders;
     this.pendingRef = pend;
     this.banishMode = false;
     const p = sim.player;
@@ -1317,8 +1344,9 @@ export class UI {
         <div class="m-actions"><button class="btn primary f" data-act="chest-ok">${t('common.continue')}</button></div></div>`, 'clear');
       return;
     }
-    const relic = pend.type === 'relic' || pend.type === 'shrine' || pend.type === 'awaken';
-    const shrine = pend.type === 'shrine';
+    const relic = pend.type === 'relic' || pend.type === 'shrine' || pend.type === 'awaken' || pend.type === 'merchant';
+    const shrine = pend.type === 'shrine' || pend.type === 'merchant';
+    const merchant = pend.type === 'merchant';
     const awaken = pend.type === 'awaken';
     const cards = pend.choices.map((c, i) => this.choiceCard(c, i, sim)).join('');
     const actions = awaken
@@ -1329,8 +1357,8 @@ export class UI {
          <button class="btn small f" data-act="banish" ${p.banishes > 0 ? '' : 'disabled'}>${icon('banish', 15)}${t('levelup.banish')} <span class="n">${p.banishes}</span></button>
          <button class="btn ghost small f" data-act="skip">${icon('skip', 14)}${t('levelup.skip')}</button>`;
     this.setModal('pending', `
-      <div class="m-title ${shrine ? 'shrine' : relic ? 'gold' : 'lv'}">${t(awaken ? 'aw.title' : shrine ? 'shrine.title' : relic ? 'relic.title' : 'levelup.title')}</div>
-      <div class="m-sub">${awaken ? t('aw.sub', t('sk.' + sim.skill)) : t(shrine ? 'shrine.sub' : relic ? 'relic.sub' : 'levelup.sub')}</div>
+      <div class="m-title ${shrine ? 'shrine' : relic ? 'gold' : 'lv'}">${t(awaken ? 'aw.title' : merchant ? 'merchant.title' : shrine ? 'shrine.title' : relic ? 'relic.title' : 'levelup.title')}</div>
+      <div class="m-sub">${awaken ? t('aw.sub', t('sk.' + sim.skill)) : merchant ? t('merchant.sub', fmtNum(sim.stats.cinders)) : t(shrine ? 'shrine.sub' : relic ? 'relic.sub' : 'levelup.sub')}</div>
       <div class="choices">${cards}</div>
       <div class="m-actions">${actions}</div>`, 'clear');
   }

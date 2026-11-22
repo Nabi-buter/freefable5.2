@@ -9,7 +9,7 @@ import type {
 } from './types';
 import { updateEnemies, updateDirector, initDirector, type DirectorState } from './ai';
 import { updateWeapons, updateProjs, updateZones, updateEProjs } from './weapons';
-import { makeChestPending, makeLevelPending, makeRelicPending, makeShrinePending } from './choices';
+import { makeChestPending, makeLevelPending, makeMerchantPending, makeRelicPending, makeShrinePending } from './choices';
 import { castSkill, updateSkill } from './skills';
 
 /** timed events during a run */
@@ -106,6 +106,9 @@ export class Sim {
   private blockNext = false;
   /** active weapon synergies */
   synergies = new Set<SynergyId>();
+  /** the wandering merchant: where it waits and until when (seconds of sim time) */
+  merchant: { x: number; z: number; until: number; visited: boolean } | null = null;
+  private merchantDone = false;
   /** lasting gifts from shrine bargains */
   boons = { hp: 0, might: 0, dashCd: 0, speed: 0 };
   /** the omen currently in effect, if any */
@@ -906,6 +909,24 @@ export class Sim {
   private updateShrines() {
     const p = this.player;
     if (!p.alive || this.endT >= 0 || this.pending.length > 0) return;
+    // the wandering merchant turns up once, somewhere near, for a minute and a half
+    if (!this.merchantDone && !this.cfg.trial && this.time > 330 && !this.boss && this.stats.loops === 0) {
+      this.merchantDone = true;
+      const pt = this.ringPoint(12, 18, 1.5);
+      this.merchant = { x: pt.x, z: pt.z, until: this.time + 90, visited: false };
+      this.events.push({ t: 'announce', key: 'ann.merchant', tone: 'good' });
+    }
+    const m = this.merchant;
+    if (m) {
+      if (this.time > m.until) this.merchant = null;
+      else if (!m.visited && (p.x - m.x) ** 2 + (p.z - m.z) ** 2 < 2.6 * 2.6) {
+        m.visited = true;
+        m.until = Math.min(m.until, this.time + 2);
+        this.pending.push(makeMerchantPending(this));
+        this.events.push({ t: 'merchant', x: m.x, z: m.z });
+        return;
+      }
+    }
     for (const s of this.shrines) {
       if (s.used) continue;
       if ((p.x - s.x) ** 2 + (p.z - s.z) ** 2 > 2.4 * 2.4) continue;

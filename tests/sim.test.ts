@@ -188,6 +188,25 @@ describe('simulation', () => {
     finishRun(save, real);
     expect(save.biomes).toContain('frostmere');
   });
+  it('the merchant appears once and sells for this run\'s cinders', () => {
+    const sim = new Sim({ seed: 16, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {} });
+    const input = { mx: 0, mz: 0, aimX: 1, aimZ: 0, autoAim: true, dash: false };
+    sim.time = 335;
+    sim.step(1 / 60, input);
+    expect(sim.merchant).not.toBeNull();
+    sim.player.x = sim.merchant!.x;
+    sim.player.z = sim.merchant!.z;
+    sim.stats.cinders = 500;
+    while (sim.pending.length) sim.pending.shift();
+    sim.step(1 / 60, input);
+    const pend = sim.pending.find((p) => p.type === 'merchant');
+    expect(pend).toBeTruthy();
+    while (sim.pending[0] !== pend) sim.pending.shift();
+    const before = sim.stats.cinders;
+    const c = pend!.choices[0];
+    choose(sim, 0);
+    expect(sim.stats.cinders).toBe(before - (c.type === 'buy' ? c.cost : 0));
+  });
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);
