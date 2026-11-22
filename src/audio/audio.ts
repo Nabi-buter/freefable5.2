@@ -315,6 +315,10 @@ export class AudioEngine {
           }
           break;
         case 'lightning':
+          if (this.ok('zap', 0.12)) {
+            this.noise(0.22, { type: 'bandpass', freq: 4200, to: 900, q: 1.4, vol: 0.09 });
+            this.tone(1600, 0.12, { type: 'sawtooth', to: 200, vol: 0.035 });
+          }
           break;
         case 'beam':
           break;
