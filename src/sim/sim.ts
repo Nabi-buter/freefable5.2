@@ -184,6 +184,13 @@ export class Sim {
     this.player.hp = this.player.st.maxHp;
     this.player.dashCharges = this.player.st.dashMax;
     this.dir = initDirector();
+    if ((cfg.meta.m_kit ?? 0) > 0 && !cfg.trial) {
+      // a ready kit: one random passive to start with
+      const ps = PASSIVE_IDS.filter((x) => x !== 'multishot');
+      this.player.passives.push({ id: ps[Math.floor(this.rng.next() * ps.length)], level: 1 });
+      this.recalc();
+      this.player.hp = this.player.st.maxHp;
+    }
     if (cfg.trial) this.setupTrial();
   }
 

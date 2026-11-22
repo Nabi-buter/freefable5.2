@@ -135,7 +135,8 @@ const BOONS: BoonId[] = ['blood', 'ward', 'fury', 'swift', 'tithe', 'renew', 'ga
 export function makeShrinePending(sim: Sim): Pending {
   const list = BOONS.filter((b) => (b !== 'blood' || RELIC_IDS.some((r) => !sim.hasRelic(r))) && (b !== 'forge' || sim.player.weapons.some((w) => w.level < MAX_WEAPON_LEVEL)) && (b !== 'oath' || sim.pacts.size < PACT_IDS.length));
   sim.rng.shuffle(list);
-  return { type: 'shrine', choices: list.slice(0, 3).map((id) => ({ type: 'boon', id }) as Choice) };
+  const n = 3 + ((sim.cfg.meta.m_shrine ?? 0) > 0 ? 1 : 0);
+  return { type: 'shrine', choices: list.slice(0, n).map((id) => ({ type: 'boon', id }) as Choice) };
 }
 
 function applyBoon(sim: Sim, id: BoonId) {

@@ -52,11 +52,11 @@ const BIOME_ICON: Record<BiomeId, string> = { ashwood: 'starmoss', frostmere: 'f
 const DIFF_COLOR = ['#ffb347', '#8fa8ff', '#ff5a5a'];
 const META_ICON: Record<MetaId, string> = {
   m_hp: 'vigor', m_might: 'might', m_haste: 'haste', m_speed: 'swift', m_regen: 'mending', m_armor: 'plating', m_magnet: 'magnet', m_xp: 'wisdom',
-  m_cinder: 'cinder', m_luck: 'fortune', m_skill: 'flare', m_dash: 'dash', m_reroll: 'reroll', m_banish: 'banish', m_revive: 'phoenix',
+  m_cinder: 'cinder', m_luck: 'fortune', m_skill: 'flare', m_dash: 'dash', m_shrine: 'sanctuary', m_kit: 'chest', m_reroll: 'reroll', m_banish: 'banish', m_revive: 'phoenix',
 };
 const META_COLOR: Record<MetaId, string> = {
   m_hp: '#ff5d6c', m_might: '#ff9a4a', m_haste: '#ffe36b', m_speed: '#8affea', m_regen: '#7dff9b', m_armor: '#b9c4d6', m_magnet: '#6bd1ff', m_xp: '#c7a2ff',
-  m_cinder: '#ffb347', m_luck: '#ffd24a', m_skill: '#ffa040', m_dash: '#7fd4ff', m_reroll: '#7fd4ff', m_banish: '#ff8a80', m_revive: '#ff7a3c',
+  m_cinder: '#ffb347', m_luck: '#ffd24a', m_skill: '#ffa040', m_dash: '#7fd4ff', m_shrine: '#c6a2ff', m_kit: '#ffd24a', m_reroll: '#7fd4ff', m_banish: '#ff8a80', m_revive: '#ff7a3c',
 };
 const ENEMY_COLOR: Record<string, string> = {
   shade: '#ff4d86', skitter: '#9dff5a', brute: '#ff8a2a', spitter: '#a6ff3a', wraith: '#6cf2ff', bomber: '#ff3a6a', husk: '#ffd24a', rime: '#8fe0ff', worm: '#ff7a2a', sporecap: '#9cff8a', thief: '#ffc04a', stormling: '#bfe0ff', shieldbearer: '#c8a060', herald: '#b04aff', eclipse: '#ff5a3c',
