@@ -12,7 +12,7 @@ import { zone } from './weapons';
 function strike(sim: Sim, e: Enemy, flat: number, frac: number, kb: number) {
   const p = sim.player;
   const share = e.boss ? 0.012 : e.elite ? frac * 0.3 : frac;
-  const aw = sim.awakened() ? 1.3 : 1;
+  const aw = sim.awDamage();
   sim.applyDamage(e, (flat * p.st.might + e.maxHp * share) * aw, null, false, kb, p.x, p.z);
 }
 
@@ -25,7 +25,7 @@ export function castSkill(sim: Sim): boolean {
   if (!skillReady(sim)) return false;
   const id: SkillId = sim.skill;
   const L = p.level;
-  const area = p.st.area * (sim.awakened() ? 1.2 : 1);
+  const area = p.st.area * sim.awArea();
   p.skillCd = sim.skillCooldown();
   let radius = 0;
   switch (id) {
@@ -243,7 +243,7 @@ export function updateSkill(sim: Sim, dt: number) {
   if (p.glowT > 0) p.glowT -= dt;
   if (p.skillT > 0) {
     p.skillT -= dt;
-    const L = p.level, area = p.st.area * (sim.awakened() ? 1.2 : 1);
+    const L = p.level, area = p.st.area * sim.awArea();
     const id = sim.skill;
     if (id === 'pyre') {
       p.skillAcc -= dt;
@@ -301,7 +301,7 @@ export function updateSkill(sim: Sim, dt: number) {
         const e = sim.nearest(b.x, b.z, 16);
         const dx = e ? e.x - b.x : -b.vx, dz = e ? e.z - b.z : -b.vz;
         const d = Math.hypot(dx, dz) || 1;
-        const dmg = (30 + 6 * L) * (sim.awakened() ? 1.3 : 1);
+        const dmg = (30 + 6 * L) * sim.awDamage();
         sim.projs.push({ id: sim.id(), kind: 'ember', weapon: 'glaive', x: b.x, z: b.z, vx: (dx / d) * 20, vz: (dz / d) * 20, life: 1.2, maxLife: 1.2, r: 0.5, dmg, pierce: 1, hits: [], target: null, evolved: false, phase: 0, spin: 0, alive: true });
       }
     } else if (id === 'whirl') {
@@ -318,7 +318,7 @@ export function updateSkill(sim: Sim, dt: number) {
         p.skillX += 1;
         const a = p.skillX * 0.7;
         const sp = 18;
-        const dmg = (24 + 5 * L) * (sim.awakened() ? 1.3 : 1);
+        const dmg = (24 + 5 * L) * sim.awDamage();
         sim.projs.push({ id: sim.id(), kind: 'ember', weapon: 'totem', x: p.x, z: p.z, vx: Math.cos(a) * sp, vz: Math.sin(a) * sp, life: 0.9, maxLife: 0.9, r: 0.45 * area, dmg, pierce: 2, hits: [], target: null, evolved: false, phase: 0, spin: 0, alive: true });
       }
     } else if (id === 'effigy') {

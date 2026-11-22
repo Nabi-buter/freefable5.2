@@ -256,13 +256,17 @@ export type Choice =
   | { type: 'relic'; id: RelicId }
   | { type: 'heal' }
   | { type: 'cinder' }
-  | { type: 'boon'; id: BoonId };
+  | { type: 'boon'; id: BoonId }
+  | { type: 'awaken'; id: AwakenId };
+
+/** how the signature ability awakens after the third beacon */
+export type AwakenId = 'potency' | 'swiftness' | 'reach';
 
 /** shrine bargains */
 export type BoonId = 'blood' | 'ward' | 'fury' | 'swift' | 'tithe' | 'renew' | 'gamble' | 'forge' | 'oath' | 'insight';
 
 export interface Pending {
-  type: 'levelup' | 'relic' | 'chest' | 'shrine';
+  type: 'levelup' | 'relic' | 'chest' | 'shrine' | 'awaken';
   choices: Choice[];
   /** chest: rewards are applied automatically, list is for presentation */
   cinders?: number;

@@ -121,6 +121,9 @@ export function applyChoice(sim: Sim, c: Choice) {
     case 'boon':
       applyBoon(sim, c.id);
       break;
+    case 'awaken':
+      sim.awakening = c.id;
+      break;
   }
   sim.recalc();
   if (c.type === 'relic' && c.id === 'secondwind') p.dashCharges = p.st.dashMax;
@@ -242,7 +245,7 @@ export function banish(sim: Sim, index: number): boolean {
 
 export function skip(sim: Sim) {
   const pend = sim.pending[0];
-  if (!pend || pend.type === 'chest') return;
+  if (!pend || pend.type === 'chest' || pend.type === 'awaken') return;
   sim.pending.shift();
   refreshQueued(sim);
 }

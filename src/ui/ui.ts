@@ -1283,6 +1283,9 @@ export class UI {
       case 'cinder':
         color = '#ffb347'; ic = 'cinder'; name = t('choice.cinder'); ds = t('choice.cinder.d'); tag = `<span class="tag">${t('tag.bonus')}</span>`;
         break;
+      case 'awaken':
+        color = hex(SKILLS[sim.skill].color); ic = c.id === 'potency' ? 'might' : c.id === 'swiftness' ? 'rite' : 'reach'; name = t('aw.' + c.id); ds = t(`aw.${c.id}.d`); tag = `<span class="tag">${t('setup.skill')}</span>`; cls = 'sheen';
+        break;
       case 'boon':
         color = BOON_LOOK[c.id][1]; ic = BOON_LOOK[c.id][0]; name = t('boon.' + c.id); ds = t(`boon.${c.id}.d`); tag = `<span class="tag">${t('tag.shrine')}</span>`; cls = 'sheen';
         break;
@@ -1311,17 +1314,20 @@ export class UI {
         <div class="m-actions"><button class="btn primary f" data-act="chest-ok">${t('common.continue')}</button></div></div>`, 'clear');
       return;
     }
-    const relic = pend.type === 'relic' || pend.type === 'shrine';
+    const relic = pend.type === 'relic' || pend.type === 'shrine' || pend.type === 'awaken';
     const shrine = pend.type === 'shrine';
+    const awaken = pend.type === 'awaken';
     const cards = pend.choices.map((c, i) => this.choiceCard(c, i, sim)).join('');
-    const actions = relic
+    const actions = awaken
+      ? ''
+      : relic
       ? `<button class="btn ghost small f" data-act="skip">${icon('skip', 14)}${t('levelup.skip')}</button>`
       : `<button class="btn small f" data-act="reroll" ${p.rerolls > 0 ? '' : 'disabled'}>${icon('reroll', 15)}${t('levelup.reroll')} <span class="n">${p.rerolls}</span></button>
          <button class="btn small f" data-act="banish" ${p.banishes > 0 ? '' : 'disabled'}>${icon('banish', 15)}${t('levelup.banish')} <span class="n">${p.banishes}</span></button>
          <button class="btn ghost small f" data-act="skip">${icon('skip', 14)}${t('levelup.skip')}</button>`;
     this.setModal('pending', `
-      <div class="m-title ${shrine ? 'shrine' : relic ? 'gold' : 'lv'}">${t(shrine ? 'shrine.title' : relic ? 'relic.title' : 'levelup.title')}</div>
-      <div class="m-sub">${t(shrine ? 'shrine.sub' : relic ? 'relic.sub' : 'levelup.sub')}</div>
+      <div class="m-title ${shrine ? 'shrine' : relic ? 'gold' : 'lv'}">${t(awaken ? 'aw.title' : shrine ? 'shrine.title' : relic ? 'relic.title' : 'levelup.title')}</div>
+      <div class="m-sub">${awaken ? t('aw.sub', t('sk.' + sim.skill)) : t(shrine ? 'shrine.sub' : relic ? 'relic.sub' : 'levelup.sub')}</div>
       <div class="choices">${cards}</div>
       <div class="m-actions">${actions}</div>`, 'clear');
   }

@@ -5,7 +5,7 @@ import {
 } from './defs';
 import { World, type BiomeId } from './worldgen';
 import type {
-  Beacon, EProj, Enemy, InputState, Pending, Pickup, PickupKind, Player, Proj, RunStats, SimEvent, Sprite, Stats, WeaponInst, Zone,
+  AwakenId, Beacon, EProj, Enemy, InputState, Pending, Pickup, PickupKind, Player, Proj, RunStats, SimEvent, Sprite, Stats, WeaponInst, Zone,
 } from './types';
 import { updateEnemies, updateDirector, initDirector, type DirectorState } from './ai';
 import { updateWeapons, updateProjs, updateZones, updateEProjs } from './weapons';
@@ -209,6 +209,7 @@ export class Sim {
     p.hp = p.st.maxHp;
     p.skillCd = 0;
     this.bossT = 8;
+    this.pending.push({ type: 'awaken', choices: [{ type: 'awaken', id: 'potency' }, { type: 'awaken', id: 'swiftness' }, { type: 'awaken', id: 'reach' }] });
   }
 
   id(): number {
@@ -223,7 +224,7 @@ export class Sim {
   skillCooldown(): number {
     const cut = (this.cfg.meta.m_skill ?? 0) * (META.find((d) => d.id === 'm_skill')?.per ?? 0);
     const rite = this.passiveLevel('rite') * PASSIVES.rite.per;
-    return SKILLS[this.skill].cd * (1 - cut / 100) * (1 - rite / 100);
+    return SKILLS[this.skill].cd * (1 - cut / 100) * (1 - rite / 100) * (this.awakening === 'swiftness' ? 0.65 : 1);
   }
 
   /**
@@ -282,9 +283,17 @@ export class Sim {
     return this.skill === 'overclock' && this.player.skillT > 0 ? (this.awakened() ? 1.9 : 1.7) : 1;
   }
 
-  /** after the third beacon the signature ability awakens: more damage and reach */
+  /** the chosen awakening of the signature ability (picked at the third beacon) */
+  awakening: AwakenId | null = null;
   awakened(): boolean {
-    return this.stats.beacons >= 3 || this.stats.loops > 0;
+    return this.awakening !== null;
+  }
+  /** ability damage / area / cooldown multipliers from the awakening */
+  awDamage(): number {
+    return this.awakening === 'potency' ? 1.5 : this.awakening ? 1.1 : 1;
+  }
+  awArea(): number {
+    return this.awakening === 'reach' ? 1.4 : this.awakening ? 1.1 : 1;
   }
 
   /** where the horde is drawn to: the player, or a burning effigy while one stands */
@@ -1066,7 +1075,10 @@ export class Sim {
     for (const bp of this.eprojs) bp.alive = false;
     const pend = makeRelicPending(this);
     if (pend) this.pending.push(pend);
-    if (this.stats.beacons === 3 && this.stats.loops === 0) this.events.push({ t: 'announce', key: 'ann.awaken', tone: 'good' });
+    if (this.stats.beacons === 3 && this.stats.loops === 0 && !this.awakening) {
+      this.events.push({ t: 'announce', key: 'ann.awaken', tone: 'good' });
+      this.pending.push({ type: 'awaken', choices: [{ type: 'awaken', id: 'potency' }, { type: 'awaken', id: 'swiftness' }, { type: 'awaken', id: 'reach' }] });
+    }
     else if (this.stats.beacons < this.beacons.length) this.events.push({ t: 'announce', key: 'ann.lit', tone: 'good' });
   }
 
