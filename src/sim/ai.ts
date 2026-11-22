@@ -14,7 +14,7 @@ export interface DirectorState {
 }
 
 export function initDirector(): DirectorState {
-  return { budget: 3, next: 'shade', eliteT: 55, swarmT: 95, graceT: 1.5, hazardT: 22, omenT: 150 };
+  return { budget: 3, next: 'shade', eliteT: 55, swarmT: 95, graceT: 1.5, hazardT: 22, omenT: 240 };
 }
 
 const UNLOCKS: { kind: EnemyKind; at: number; w: number; only?: string }[] = [
@@ -156,7 +156,8 @@ export function updateDirector(sim: Sim, dt: number) {
     d.omenT -= dt;
     if (d.omenT <= 0) {
       d.omenT = sim.rng.range(170, 220) * (sim.hasRelic('omenbell') ? 0.6 : 1);
-      const ids: OmenId[] = ['golden', 'deepdark', 'starfall'];
+      // the Deepening Dark only once a build has had time to come together
+      const ids: OmenId[] = sim.time > 360 ? ['golden', 'deepdark', 'starfall'] : ['golden', 'starfall'];
       const id = ids[Math.floor(sim.rng.next() * ids.length)];
       sim.omen = { id, t: sim.hasRelic('omenbell') ? 32 : 20, acc: 0 };
       sim.events.push({ t: 'announce', key: 'omen.' + id, tone: id === 'deepdark' ? 'warn' : 'good' });
