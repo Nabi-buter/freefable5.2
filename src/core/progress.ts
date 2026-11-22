@@ -63,6 +63,9 @@ export interface RunSummary {
   daily: boolean;
   biome: BiomeId;
   seed: number;
+  skill: SkillId;
+  awakening: string | null;
+  synergies: string[];
   /** cinders for the first daily clear of the day (0 otherwise) */
   dailyBonus: number;
 }
@@ -221,6 +224,6 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
     win, time: sim.time, level: p.level, kills: sim.stats.kills, beacons: sim.stats.beacons, maxCombo: sim.stats.maxCombo,
     dmgDealt: sim.stats.dmgDealt, cinders, bonus,
     weapons: p.weapons.map((w) => ({ id: w.id, level: w.level, dealt: w.dealt })).sort((a, b) => b.dealt - a.dealt),
-    unlockedChars, unlockedBiomes, unlockedDiff, achievements: got, newBest, endless, loops: sim.stats.loops, daily, dailyBonus, biome, seed: sim.cfg.seed,
+    unlockedChars, unlockedBiomes, unlockedDiff, achievements: got, newBest, endless, loops: sim.stats.loops, daily, dailyBonus, biome, seed: sim.cfg.seed, skill: sim.skill, awakening: sim.awakening, synergies: [...sim.synergies],
   };
 }

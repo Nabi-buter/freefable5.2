@@ -1398,7 +1398,9 @@ export class UI {
         <div class="res-grid">${cell(fmtTime(sum.time), t('result.time'))}${cell(String(sum.level), t('result.level'))}${cell(fmtNum(sum.kills), t('result.kills'))}${sum.endless ? cell(String(sum.loops), t('result.loops')) : cell(`${sum.beacons}/${BEACON_COUNT}`, t('result.beacons'))}</div>
         <div class="res-cols scroll">
           <div><div class="group-label">${t('result.weapons')}</div><div class="wbars">${bars}</div>
-            <div class="statline" style="margin-top:0.9em"><span class="k">${t('result.dmg')}</span><span class="v">${fmtNum(sum.dmgDealt)}</span><span class="k">${t('result.combo')}</span><span class="v">×${fmtNum(sum.maxCombo)}</span></div></div>
+            <div class="statline" style="margin-top:0.9em"><span class="k">${t('result.dmg')}</span><span class="v">${fmtNum(sum.dmgDealt)}</span><span class="k">${t('result.combo')}</span><span class="v">×${fmtNum(sum.maxCombo)}</span>
+              <span class="k">${t('setup.skill')}</span><span class="v">${icon(sum.skill, 15)} ${t('sk.' + sum.skill)}${sum.awakening ? ` · ${t('aw.' + sum.awakening)}` : ''}</span>
+              ${sum.synergies.length ? `<span class="k">${t('syn.title')}</span><span class="v">${sum.synergies.map((id) => t('syn.' + id)).join(', ')}</span>` : ''}</div></div>
           <div class="rewards"><div class="reward-big"><span>${t('result.cinders')}</span><b>${icon('cinder', 22)}<span data-count="${sum.cinders + sum.bonus + sum.dailyBonus}">0</span></b></div>${unlocks.join('')}</div>
         </div>
         <div class="pause-actions"><button class="btn primary f" data-act="retry">${icon('reroll', 18)}${t('result.retry')}</button><button class="btn f" data-act="menu">${t('result.menu')}</button></div>
