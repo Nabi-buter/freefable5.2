@@ -102,6 +102,8 @@ export class Sim {
   readonly pacts: Set<PactId>;
   /** shrine state for this run (parallel to world.shrines) */
   shrines: { x: number; z: number; used: boolean }[] = [];
+  /** the next hit event was turned aside by a shield */
+  private blockNext = false;
   /** active weapon synergies */
   synergies = new Set<SynergyId>();
   /** lasting gifts from shrine bargains */
@@ -460,7 +462,10 @@ export class Sim {
       const fx = Math.cos(e.face), fz = Math.sin(e.face);
       const dx = sx - e.x, dz = sz - e.z;
       const dl = Math.hypot(dx, dz) || 1;
-      if ((dx * fx + dz * fz) / dl > 0.45) d *= 0.3;
+      if ((dx * fx + dz * fz) / dl > 0.45) {
+        d *= 0.3;
+        this.blockNext = true;
+      }
     }
     if (w && this.synergies.size) d *= this.synergyMul(w, e);
     // Resonance: every active synergy sharpens everything; Oathbrand: every pact sworn
@@ -491,7 +496,8 @@ export class Sim {
       e.kz += dz * k;
     }
     const kill = e.hp <= 0;
-    if (!silent) this.events.push({ t: 'hit', x: e.x, z: e.z, dmg: d, crit, w, kill, big: e.boss || e.elite });
+    if (!silent) this.events.push({ t: 'hit', x: e.x, z: e.z, dmg: d, crit, w, kill, big: e.boss || e.elite, blk: this.blockNext || undefined });
+    this.blockNext = false;
     if (kill) this.kill(e);
     else if (w && this.hasRelic('stormheart')) {
       if (++this.hitCounter >= 14) {

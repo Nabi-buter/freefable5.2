@@ -583,7 +583,8 @@ export class GameView {
             hitFx++;
             this.burst(ev.x, y, ev.z, ev.crit ? 6 : 3, ev.crit ? 9 : 6, 0.28, ev.crit ? 0.55 : 0.4, c[0] * 2, c[1] * 2, c[2] * 2, 0.5, 10, 3);
           }
-          if (this.showDamage && ev.dmg >= 1 && (hitFx < 30 || ev.crit || ev.big)) this.overlay.damage(ev.x, y + 0.6, ev.z, ev.dmg, ev.crit);
+          if (this.showDamage && ev.blk && hitFx < 30) this.overlay.text(ev.x, y + 0.6, ev.z, String(Math.round(ev.dmg)), '#8a90a8', 12, 0.45);
+          else if (this.showDamage && ev.dmg >= 1 && (hitFx < 30 || ev.crit || ev.big)) this.overlay.damage(ev.x, y + 0.6, ev.z, ev.dmg, ev.crit);
           break;
         }
         case 'kill': {
