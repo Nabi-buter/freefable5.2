@@ -21,7 +21,8 @@ GitHub Pages: **https://nabi-buter.github.io/freefable5.2/**
 | --- | --- |
 | ![Title](docs/screenshots/title.jpg) | ![Combat](docs/screenshots/combat.jpg) |
 | ![Level up](docs/screenshots/levelup.jpg) | ![Lighting a beacon](docs/screenshots/beacon.jpg) |
-| ![The Eclipse](docs/screenshots/boss.jpg) | ![Gloommire](docs/screenshots/gloommire.jpg) |
+| ![The Eclipse](docs/screenshots/boss.jpg) | ![Dawn](docs/screenshots/dawn.jpg) |
+| ![Gloommire](docs/screenshots/gloommire.jpg) | ![Stormcrag](docs/screenshots/stormcrag.jpg) |
 
 ## 특징 / Features
 
