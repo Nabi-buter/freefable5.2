@@ -1,4 +1,4 @@
-import type { Sim } from './sim';
+import type { OmenId, Sim } from './sim';
 import type { Enemy } from './types';
 import { ENEMIES, type EnemyKind } from './defs';
 
@@ -9,10 +9,12 @@ export interface DirectorState {
   swarmT: number;
   graceT: number;
   hazardT: number;
+  /** countdown to the next omen (timed run event) */
+  omenT: number;
 }
 
 export function initDirector(): DirectorState {
-  return { budget: 3, next: 'shade', eliteT: 55, swarmT: 95, graceT: 1.5, hazardT: 22 };
+  return { budget: 3, next: 'shade', eliteT: 55, swarmT: 95, graceT: 1.5, hazardT: 22, omenT: 150 };
 }
 
 const UNLOCKS: { kind: EnemyKind; at: number; w: number; only?: string }[] = [
@@ -58,7 +60,7 @@ export function updateDirector(sim: Sim, dt: number) {
   let channeling = false;
   for (const b of sim.beacons) if (b.channeling) channeling = true;
   // gentle opening, steep late game: fewer foes in the first minutes, a real horde once the build is online
-  let rate = (1.1 + 0.6 * I + 0.09 * I * I) * sim.curve(0.65, 0.08) * sim.diff.spawn * sim.spawnBoost;
+  let rate = (1.1 + 0.6 * I + 0.09 * I * I) * sim.curve(0.65, 0.08) * sim.diff.spawn * sim.spawnBoost * (sim.omen?.id === 'deepdark' ? 1.6 : 1);
   if (channeling) rate *= 1.6;
   if (sim.boss) rate *= 0.4;
   const maxAlive = Math.min(440, 50 + 30 * I);
@@ -135,6 +137,30 @@ export function updateDirector(sim: Sim, dt: number) {
       sim.spawnEnemy(kind, x, z);
     }
     sim.events.push({ t: 'announce', key: 'ann.swarm', tone: 'warn' });
+  }
+  // omens: short events that change the rhythm of the night
+  if (sim.omen) {
+    sim.omen.t -= dt;
+    if (sim.omen.id === 'starfall') {
+      sim.omen.acc -= dt;
+      if (sim.omen.acc <= 0) {
+        sim.omen.acc = 0.35;
+        const tgt = sim.nearest(p.x, p.z, 18);
+        const a = sim.rng.angle(), dd = sim.rng.range(3, 12);
+        const x = tgt ? tgt.x : p.x + Math.cos(a) * dd, z = tgt ? tgt.z : p.z + Math.sin(a) * dd;
+        sim.zones.push({ id: sim.id(), kind: 'meteor', x, z, r: 3, t: 0, dur: 0.7, dmg: 40 + I * 9, tick: 0, hostile: false, weapon: null, evolved: false, dx: 0, dz: 0, len: 0, alive: true });
+      }
+    }
+    if (sim.omen.t <= 0) sim.omen = null;
+  } else if (!sim.boss && sim.stats.loops === 0) {
+    d.omenT -= dt;
+    if (d.omenT <= 0) {
+      d.omenT = sim.rng.range(170, 220);
+      const ids: OmenId[] = ['golden', 'deepdark', 'starfall'];
+      const id = ids[Math.floor(sim.rng.next() * ids.length)];
+      sim.omen = { id, t: 20, acc: 0 };
+      sim.events.push({ t: 'announce', key: 'omen.' + id, tone: id === 'deepdark' ? 'warn' : 'good' });
+    }
   }
 }
 

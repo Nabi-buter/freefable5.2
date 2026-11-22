@@ -822,6 +822,7 @@ export class UI {
         <div class="timer" data-h="timer">00:00</div>
         <div class="beacons" data-h="beacons"></div>
         <div class="objective" data-h="obj"></div>
+        <div class="omen" data-h="omen"></div>
         <div class="bossbar hidden" data-h="boss"><div class="nm" data-h="bossname"></div><div class="bar"><i data-h="bossfill"></i><em style="left:62%"></em><em style="left:30%"></em></div></div>
       </div>
       <div class="tr">
@@ -958,6 +959,15 @@ export class UI {
       }
       el.innerHTML = html;
       this.h.dashbtn.classList.toggle('empty', p.dashCharges === 0);
+    });
+    // omen chip
+    const om = sim.omen;
+    this.set('omen', om ? om.id + ':' + Math.ceil(om.t) : '', (el, v) => {
+      el.classList.toggle('on', v !== '');
+      if (om) {
+        el.className = 'omen on ' + om.id;
+        el.textContent = `${t('omen.' + om.id + '.short')} · ${Math.ceil(om.t)}s`;
+      }
     });
     // signature ability
     const sk = SKILLS[sim.skill];

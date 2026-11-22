@@ -144,6 +144,20 @@ describe('simulation', () => {
     sim.chill(e, 2);
     expect(sim.synergyMul('arc', e)).toBeCloseTo(1.4);
   });
+  it('omens come and go', () => {
+    const sim = new Sim({ seed: 12, char: 'kindler', difficulty: 0, biome: 'ashwood', meta: {} });
+    const input = { mx: 0.3, mz: 0.2, aimX: 1, aimZ: 0, autoAim: true, dash: false };
+    let seen = false;
+    for (let i = 0; i < 60 * 200; i++) {
+      sim.player.hp = sim.player.st.maxHp;
+      sim.step(1 / 60, input);
+      while (sim.pending.length) choose(sim, 0);
+      sim.events.length = 0;
+      if (sim.omen) seen = true;
+    }
+    expect(seen).toBe(true);
+    expect(sim.omen).toBeNull();
+  }, 60000);
   it('runs every character', () => {
     for (const c of ['stormcaller', 'warden', 'frostweaver', 'ashwalker', 'stargazer'] as const) {
       const r = runBot(77, 1, c, 0.6, 90);

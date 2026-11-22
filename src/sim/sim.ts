@@ -12,6 +12,9 @@ import { updateWeapons, updateProjs, updateZones, updateEProjs } from './weapons
 import { makeChestPending, makeLevelPending, makeRelicPending, makeShrinePending } from './choices';
 import { castSkill, updateSkill } from './skills';
 
+/** timed events during a run */
+export type OmenId = 'golden' | 'deepdark' | 'starfall';
+
 export interface RunConfig {
   seed: number;
   char: CharId;
@@ -99,6 +102,8 @@ export class Sim {
   synergies = new Set<SynergyId>();
   /** lasting gifts from shrine bargains */
   boons = { hp: 0, might: 0, dashCd: 0, speed: 0 };
+  /** the omen currently in effect, if any */
+  omen: { id: OmenId; t: number; acc: number } | null = null;
   /** extra spawn pressure accepted at a shrine (Fury) */
   spawnBoost = 1;
   /** the signature ability chosen for this run */
@@ -563,6 +568,7 @@ export class Sim {
   }
 
   dropXp(x: number, z: number, v: number) {
+    if (this.omen && (this.omen.id === 'golden' || this.omen.id === 'deepdark')) v *= this.omen.id === 'golden' ? 2 : 1.5;
     if (this.xpCount > 420) {
       // merge into an existing gem to bound entity count
       for (let tries = 0; tries < 6; tries++) {
