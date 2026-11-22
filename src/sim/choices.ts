@@ -97,6 +97,8 @@ export function applyChoice(sim: Sim, c: Choice) {
     case 'evolve': {
       const w = sim.weapon(c.id);
       if (w) w.level = EVOLVED_LEVEL;
+      sim.events.push({ t: 'announce', key: 'ann.evolve', tone: 'good' });
+      sim.events.push({ t: 'nova', x: p.x, z: p.z, r: 7, c: 0xffd24a });
       break;
     }
     case 'passive': {
