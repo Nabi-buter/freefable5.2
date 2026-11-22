@@ -33,6 +33,7 @@ export const ACHIEVEMENTS: AchDef[] = [
   { id: 'endless2', reward: 250 },
   { id: 'pact3', reward: 300 },
   { id: 'shrines', reward: 120 },
+  { id: 'storm', reward: 250 },
   { id: 'skills12', reward: 250 },
   { id: 'gloom', reward: 200 },
   { id: 'evolve5', reward: 300 },
@@ -174,6 +175,7 @@ export function finishRun(save: SaveData, sim: Sim, daily = false): RunSummary {
   }
   ach('skills12', (Object.keys(SKILLS) as SkillId[]).every((k) => (st.winsBySkill?.[k] ?? 0) > 0));
   ach('gloom', win && biome === 'gloommire');
+  ach('storm', win && biome === 'stormcrag');
   ach('evolve5', evolved >= 5);
   ach('relics10', p.relics.length >= 10);
   ach('allbiomes', (['ashwood', 'frostmere', 'emberwaste', 'gloommire', 'stormcrag'] as BiomeId[]).every((b) => (st.winsByBiome[b] ?? 0) > 0));
