@@ -21,6 +21,7 @@ const UNLOCKS: { kind: EnemyKind; at: number; w: number; only?: string }[] = [
   { kind: 'shade', at: 0, w: 10 },
   { kind: 'skitter', at: 0.75, w: 6 },
   { kind: 'thief', at: 2.0, w: 0.9 },
+  { kind: 'shieldbearer', at: 6.5, w: 1.8 },
   { kind: 'bomber', at: 2.4, w: 2.6 },
   { kind: 'spitter', at: 3.4, w: 2.8 },
   { kind: 'brute', at: 4.6, w: 2.2 },
@@ -523,7 +524,8 @@ export function updateEnemies(sim: Sim, dt: number) {
         let da = target - e.face;
         while (da > Math.PI) da -= Math.PI * 2;
         while (da < -Math.PI) da += Math.PI * 2;
-        e.face += da * Math.min(1, dt * 10);
+        // the shieldbearer turns its heavy shield slowly, so it can be flanked
+        e.face += da * Math.min(1, dt * (e.kind === 'shieldbearer' ? 2.2 : 10));
       } else if (e.tele) {
         e.face = Math.atan2(nz, nx);
       }

@@ -165,6 +165,23 @@ export function geoSkitter(): THREE.BufferGeometry {
   return merge(parts);
 }
 
+export function geoShieldbearer(): THREE.BufferGeometry {
+  const body = 0x2a2230, dark = 0x16121c, shield = 0x5a5468, rim = 0xc8a060, eye = 0xffc04a;
+  return merge([
+    part(box(0.8, 1.0, 0.9), body, { pos: [-0.1, 1.05, 0], jitter: 0.12 }),
+    part(box(0.6, 0.55, 0.7), dark, { pos: [-0.12, 0.5, 0], jitter: 0.1 }),
+    part(sph(0.3, 7, 5), body, { pos: [0.05, 1.75, 0] }),
+    part(sph(0.07, 5, 3), eye, { pos: [0.32, 1.78, 0.1], glow: 3 }),
+    part(sph(0.07, 5, 3), eye, { pos: [0.32, 1.78, -0.1], glow: 3 }),
+    part(box(0.18, 1.7, 1.25), shield, { pos: [0.55, 1.05, 0], jitter: 0.06 }),
+    part(box(0.2, 1.75, 0.1), rim, { pos: [0.56, 1.05, 0.62], glow: 0.4 }),
+    part(box(0.2, 1.75, 0.1), rim, { pos: [0.56, 1.05, -0.62], glow: 0.4 }),
+    part(box(0.22, 0.12, 0.6), rim, { pos: [0.66, 1.3, 0], glow: 0.8 }),
+    part(box(0.34, 0.34, 0.32), dark, { pos: [-0.1, 0.17, 0.25], sway: -0.6 }),
+    part(box(0.34, 0.34, 0.32), dark, { pos: [-0.1, 0.17, -0.25], sway: -0.6 }),
+  ]);
+}
+
 export function geoBrute(): THREE.BufferGeometry {
   const body = 0x2e1218, dark = 0x1a0a0e, eye = 0xff8a2a, horn = 0x6b5a4a;
   const arm = (x: number, y: number) => (y < 1.2 ? 0.6 : 0);

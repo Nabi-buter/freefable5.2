@@ -455,6 +455,13 @@ export class Sim {
     if ((e.chillT > 0 || e.freezeT > 0) && this.hasRelic('frozencore')) d *= 1.3;
     if ((e.elite || e.boss) && this.hasRelic('huntersmark')) d *= 1.35;
     if (p.glowT > 0) d *= 1.3;
+    // a shieldbearer turns aside what hits it from the front
+    if (e.kind === 'shieldbearer' && (sx !== 0 || sz !== 0)) {
+      const fx = Math.cos(e.face), fz = Math.sin(e.face);
+      const dx = sx - e.x, dz = sz - e.z;
+      const dl = Math.hypot(dx, dz) || 1;
+      if ((dx * fx + dz * fz) / dl > 0.45) d *= 0.3;
+    }
     if (w && this.synergies.size) d *= this.synergyMul(w, e);
     // Resonance: every active synergy sharpens everything; Oathbrand: every pact sworn
     if (this.synergies.size && this.hasRelic('resonance')) d *= 1 + 0.1 * this.synergies.size;
