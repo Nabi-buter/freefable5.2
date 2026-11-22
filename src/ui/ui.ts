@@ -724,6 +724,9 @@ export class UI {
         ${sec(t('tag.weapon'))}${WEAPON_IDS.map((id) => item(id, hex(WEAPONS[id].color), t('w.' + id), t(`w.${id}.d`), `<div class="reward">${icon('up', 12)}${t(`w.${id}.e`)} — ${t('p.' + WEAPONS[id].evo)}</div>`)).join('')}
         ${sec(t('tag.passive'))}${PASSIVE_IDS.map((id) => item(id, hex(PASSIVES[id].color), t('p.' + id), passiveText(id, 1))).join('')}
         ${sec(t('tag.relic'))}${(Object.keys(RELIC_COLORS) as (keyof typeof RELIC_COLORS)[]).map((id) => item(id, hex(RELIC_COLORS[id]), t('r.' + id), t(`r.${id}.d`))).join('')}
+        ${sec(t('setup.stage'))}${BIOMES.map((b) => item(BIOME_ICON[b], BIOME_COLOR[b], t('b.' + b), sv.biomes.includes(b) ? t(`b.${b}.d`) : t(`b.${b}.u`))).join('')}
+        ${sec(t('shrine.title'))}${Object.keys(BOON_LOOK).map((id) => item(BOON_LOOK[id][0], BOON_LOOK[id][1], t('boon.' + id), t(`boon.${id}.d`))).join('')}
+        ${sec(t('codex.omens'))}${(['golden', 'deepdark', 'starfall'] as const).map((id) => item(id === 'golden' ? 'cinder' : id === 'deepdark' ? 'skull' : 'starfall', id === 'golden' ? '#ffd24a' : id === 'deepdark' ? '#ff8aa0' : '#ffe08a', t(`omen.${id}.short`), t('omen.' + id))).join('')}
         ${sec(t('syn.title'))}${SYNERGY_IDS.map((id) => item(SYNERGIES[id].a, hex(SYNERGIES[id].color), t('syn.' + id), t(`syn.${id}.d`))).join('')}
         ${sec(t('setup.skill'))}${CHAR_IDS.flatMap((id) => [CHARS[id].skill, CHARS[id].alt].map((sid) => { const sk = SKILLS[sid]; return item(sk.id, hex(sk.color), t('sk.' + sk.id), t(`sk.${sk.id}.d`), `<div class="reward" style="color:var(--mute)">${icon(id, 12)}${t('c.' + id)} · ${t('sk.cd', sk.cd)}</div>`); })).join('')}
         ${sec(t('hud.kills'))}${ENEMY_KINDS.map((id) => item('skull', ENEMY_COLOR[id], t('e.' + id), t(`e.${id}.d`), `<div class="reward" style="color:var(--mute)">${icon('heart', 12)}${ENEMIES[id].hp}</div>`)).join('')}

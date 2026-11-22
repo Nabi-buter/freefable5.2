@@ -236,6 +236,7 @@ const S: Record<string, Pair> = {
   'aw.swiftness.d': ['고유 능력 재사용 시간 -35%, 피해·범위 +10%', 'Signature cooldown -35%, damage and area +10%'],
   'aw.reach': ['확장', 'Reach'],
   'aw.reach.d': ['고유 능력 범위 +40%, 피해 +10%', 'Signature area +40%, damage +10%'],
+  'codex.omens': ['징조', 'Omens'],
   'setup.pacts': ['서약', 'Pacts'],
   'pact.bloodmoon': ['핏빛 달', 'Blood Moon'],
   'pact.bloodmoon.d': ['적 체력 +35%', 'Enemy health +35%'],
