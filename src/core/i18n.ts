@@ -238,6 +238,8 @@ const S: Record<string, Pair> = {
   'pact.famine.d': ['회복 구슬 없음·재생 ½', 'No heal orbs, ½ regen'],
   'pact.haste': ['서두르는 그림자', 'Hasty Shadows'],
   'pact.haste.d': ['적 속도 +15%', 'Enemy speed +15%'],
+  'a.trial': ['번개 같은 시련', 'Swift Trial'],
+  'a.trial.d': ['일식의 시련을 3분 안에 끝내기', 'Finish the Trial of the Eclipse in under 3 minutes'],
   'a.storm': ['뇌운을 가르다', 'Through the Thunderhead'],
   'a.storm.d': ['폭풍 고원에서 새벽 맞이하기', 'Reach dawn on Stormcrag'],
   'a.shrines': ['순례자', 'Pilgrim'],
